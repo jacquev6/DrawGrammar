@@ -1,20 +1,66 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <title>DrawSyntax</title>
+  <meta charset="utf-8">
+  <title>DrawSyntax</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      border: 0;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      position: absolute;
+    }
+    #form {
+      float: left;
+      width: 33%;
+      height: 100%;
+    }
+    #grammar {
+      width: 100%;
+    }
+    #output {
+      float: right;
+    }
+  </style>
 </head>
 <body>
-<canvas id="canvas"></canvas>
-<script src="src/_build/draw_syntax.js"></script>
-<script
-  src="https://code.jquery.com/jquery-3.2.1.min.js"
-  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
-  crossorigin="anonymous"></script>
-<script>
-  $(document).ready(function() {
-    draw_syntax_on_canvas("foobar", "canvas");
-  })
-</script>
+  <div id="form">
+    <p>Grammar:</p>
+    <textarea id="grammar" rows="20">FooBar</textarea>
+    <p>Syntax:
+      <br><input id="ebnf_syntax" type="radio" name="syntax" value="EBNF" checked>
+      <label for="ebnf_syntax">EBNF</label>
+      <br><input id="python_syntax" type="radio" name="syntax" value="Python">
+      <label for="python_syntax">Python</label>
+    </p>
+  </div>
+  <canvas id="output"></canvas>
+
+  <script src="src/_build/draw_syntax.js"></script>
+  <script
+    src="https://code.jquery.com/jquery-3.2.1.min.js"
+    integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+    crossorigin="anonymous"></script>
+  <script>
+    function update() {
+      var output = $("#output");
+      output.attr("width", $(window).attr("innerWidth") * 0.67);
+      output.attr("height", $(window).attr("innerHeight"));
+
+      draw_syntax_on_canvas($("input[name='syntax']:checked").val(), $("#grammar").val(), "output");
+    }
+
+    $(document).ready(function() {
+      update();
+      $("#grammar").keyup(update);
+      $("input").change(update);
+      $(window).resize(update)
+    })
+  </script>
 </body>
 </html>
