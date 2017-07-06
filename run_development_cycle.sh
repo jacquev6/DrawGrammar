@@ -3,7 +3,7 @@
 set -o errexit
 
 cd src
-ocamlbuild -use-ocamlfind -no-links -plugin-tag "package(js_of_ocaml.ocamlbuild)" -syntax camlp4o -pkgs General,js_of_ocaml,js_of_ocaml.syntax draw_syntax.js unit_tests.js
+ocamlbuild -use-ocamlfind -no-links -plugin-tag "package(js_of_ocaml.ocamlbuild)" -syntax camlp4o -pkgs General,js_of_ocaml,js_of_ocaml.syntax draw_grammar.js unit_tests.js
 cd ..
 
 src/_build/unit_tests.byte

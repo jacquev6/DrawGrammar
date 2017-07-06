@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>DrawSyntax</title>
+  <title>DrawGrammar</title>
   <style>
     * {
       margin: 0;
@@ -41,7 +41,7 @@
   </div>
   <canvas id="output"></canvas>
 
-  <script src="src/_build/draw_syntax.js"></script>
+  <script src="src/_build/draw_grammar.js"></script>
   <script
     src="https://code.jquery.com/jquery-3.2.1.min.js"
     integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
@@ -52,7 +52,7 @@
       output.attr("width", $(window).attr("innerWidth") * 0.67);
       output.attr("height", $(window).attr("innerHeight"));
 
-      draw_syntax_on_canvas($("input[name='syntax']:checked").val(), $("#grammar").val(), "output");
+      draw_grammar_on_canvas($("input[name='syntax']:checked").val(), $("#grammar").val(), "output");
     }
 
     $(document).ready(function() {
