@@ -30,14 +30,14 @@
 </head>
 <body>
   <div id="form">
-    <p>Grammar:</p>
-    <textarea id="grammar" rows="20">FooBar</textarea>
     <p>Syntax:
       <br><input id="ebnf_syntax" type="radio" name="syntax" value="EBNF" checked>
       <label for="ebnf_syntax">EBNF</label>
       <br><input id="python_syntax" type="radio" name="syntax" value="Python">
       <label for="python_syntax">Python</label>
     </p>
+    <p>Grammar:</p>
+    <textarea id="grammar" rows="50">FooBar</textarea>
   </div>
   <canvas id="output"></canvas>
 
@@ -52,7 +52,11 @@
       output.attr("width", $(window).attr("innerWidth") * 0.67);
       output.attr("height", $(window).attr("innerHeight"));
 
-      draw_grammar_on_canvas($("input[name='syntax']:checked").val(), $("#grammar").val(), "output");
+      draw_grammar_on_canvas(
+        $("input[name='syntax']:checked").val(),
+        $("#grammar").val(),
+        output.get(0)
+      );
     }
 
     $(document).ready(function() {
