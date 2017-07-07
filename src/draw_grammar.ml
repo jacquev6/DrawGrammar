@@ -1,17 +1,27 @@
 open General.Abbr
 
-let draw_grammar_on_canvas syntax grammar canvas =
-  let canvas = Js.Opt.get (Dom_html.CoerceTo.canvas canvas) (fun _ -> failwith "Not a canvas") in
-  let context = canvas##getContext (Dom_html._2d_) in
-  let width = (context##measureText (grammar))##width in
-  canvas##width <- Int.of_float (20. +. width);
-  canvas##height <- 200
-  begin
-    context##moveTo (0., 0.);
-    context##lineTo (100., 100.);
-    context##stroke ();
-    context##fillText (syntax, 10., 10.);
-    context##fillText (grammar, 20., 20.);
-  end;
+module Drawing = Grammar.Drawing(CairoContext)
 
-let () = Js.Unsafe.global##draw_grammar_on_canvas_ (* why do I need a last undesrcore? *) <- Js.wrap_callback draw_grammar_on_canvas
+let () =
+  OCamlStandard.Sys.argv
+  |> Ar.to_list
+  |> Li.tail
+  |> Li.iter ~f:(fun input_name ->
+    let parts = Str.split input_name ~sep:"." in
+    match parts with
+      | [name; syntax] ->
+        let output_name = OCamlStandard.Printf.sprintf "%s.png" name in
+        OCamlStandard.Printf.printf "Drawing %s to %s\n" input_name output_name;
+        let grammar = Grammar.create ~syntax ~grammar:name in
+        let context = Cairo.create (Cairo.Image.create Cairo.Image.RGB24 ~width:1 ~height:1) in
+        let (width, height) = Drawing.measure grammar ~context in
+        let image = Cairo.Image.create Cairo.Image.RGB24 ~width ~height in
+        let context = Cairo.create image in
+        Cairo.set_source_rgb context ~r:1. ~g:1. ~b:1.;
+        Cairo.paint context;
+        Cairo.set_source_rgb context ~r:0. ~g:0. ~b:0.;
+        Drawing.draw grammar ~context;
+        Cairo.PNG.write image output_name
+      | _ ->
+        failwith "File name doesn't have exaclty one dot"
+  )
