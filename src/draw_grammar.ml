@@ -2,6 +2,9 @@ open General.Abbr
 
 let draw_grammar_on_canvas syntax grammar canvas =
   let canvas = Js.Opt.get (Dom_html.CoerceTo.canvas canvas) (fun _ -> failwith "Not a canvas") in
+  canvas##width <- 200;
+  canvas##height <- 200;
+
   let context = canvas##getContext (Dom_html._2d_) in
   begin
     context##moveTo (0., 0.);
