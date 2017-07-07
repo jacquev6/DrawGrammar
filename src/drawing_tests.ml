@@ -1,6 +1,6 @@
 open General.Abbr
 
-module Drawer = Drawer.Make(CairoContext)
+module Drawer = Drawer.Make(Cairo)
 
 let single_rule_grammars =
     Grammar.[

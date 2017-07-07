@@ -1,6 +1,6 @@
 open General.Abbr
 
-module Make(C: Context.S) = struct
+module Make(C: module type of Cairo) = struct
   module Terminal = struct
     let draw {Grammar.Terminal.value=_} ~context:_ =
       ()
