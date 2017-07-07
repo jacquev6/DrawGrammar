@@ -4,7 +4,7 @@ let sprintf = OCamlStandard.Printf.sprintf
 
 (* @todo Make all lengths, font sizes, line widths, etc. parameters.
 This will help validate the drawing algorithm (because it will need to be more robust) *)
-module Make(C: module type of Cairo) = struct
+module Make(C: Context.S) = struct
   module Bricks = struct
     module Text = struct
       let measure t ~font_size ~context =
