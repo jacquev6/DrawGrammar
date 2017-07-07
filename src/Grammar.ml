@@ -1,19 +1,34 @@
 open General.Abbr
 
-type t = string * string
-
-let create ~syntax ~grammar =
-  (syntax, grammar)
-
-module Drawing(C: Context.S) = struct
-  let measure (_syntax, grammar) ~context =
-    let {C.TextExtents.advance} = C.measure_text context ~t:grammar in
-    (Int.of_float (20. +. advance), 200)
-
-  let draw (syntax, grammar) ~context =
-    C.move_to context ~x:0. ~y:0.;
-    C.line_to context ~x:100. ~y:100.;
-    C.stroke context;
-    C.show_text context ~x:10. ~y:10. ~t:syntax;
-    C.show_text context ~x:20. ~y:20. ~t:grammar;
+module Terminal = struct
+  type t = {
+    value: string;
+  }
 end
+
+module Definition = struct
+  type t =
+    | Terminal of Terminal.t
+end
+
+module Rule = struct
+  type t = {
+    name: string;
+    definition: Definition.t;
+  }
+end
+
+type t = {
+  name: string option;
+  rules: Rule.t list;
+}
+
+let parse ?name ~syntax:_ _ =
+  (* @todo Implement *)
+  {
+    name;
+    rules=[
+      {Rule.name="terminal"; definition=Definition.Terminal {Terminal.value="value"}};
+      {Rule.name="other terminal"; definition=Definition.Terminal {Terminal.value="other value"}};
+    ];
+  }
