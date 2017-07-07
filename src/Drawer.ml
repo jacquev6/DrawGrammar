@@ -2,8 +2,8 @@ open General.Abbr
 
 module Make(C: Context.S) = struct
   module Terminal = struct
-    let draw {Grammar.Terminal.value} ~context =
-      C.show_text context ~x:20. ~y:20. ~t:value
+    let draw {Grammar.Terminal.value=_} ~context:_ =
+      ()
   end
 
   module Definition = struct
@@ -14,8 +14,7 @@ module Make(C: Context.S) = struct
   end
 
   module Rule = struct
-    let draw {Grammar.Rule.name; definition} ~context =
-      C.show_text context ~x:10. ~y:10. ~t:name;
+    let draw {Grammar.Rule.name=_; definition} ~context =
       Definition.draw definition ~context
   end
 
