@@ -104,6 +104,22 @@ module Make(C: JsOfOCairo.S) = struct
         Text.draw value ~x:base ~font_size:10. ~context;
         C.translate context ~x:r ~y:0.
     end
+
+    module RectangleText = struct
+      let base = 10.
+
+      let measure value ~context =
+        let (r, _) = Text.measure value ~font_size:10. ~context
+        and h = base +. (C.get_line_width context) /. 2. in
+        (r +. 2. *. base, h, h)
+
+      let draw value ~context =
+        let (r, _, _) = measure value ~context in
+        C.rectangle context ~x:0. ~y:(-.base) ~w:r ~h:(2. *. base);
+        C.stroke context;
+        Text.draw value ~x:base ~font_size:10. ~context;
+        C.translate context ~x:r ~y:0.
+    end
   end
 
   module Terminal = struct
@@ -119,16 +135,33 @@ module Make(C: JsOfOCairo.S) = struct
       Bricks.Segment.draw ~context
   end
 
+  module NonTerminal = struct
+    let measure {Grammar.NonTerminal.name} ~context =
+      let arrow_width = Bricks.Arrow.measure ~context
+      and (name_width, name_up, name_down) = Bricks.RectangleText.measure name ~context
+      and segment_width = Bricks.Segment.measure ~context in
+      (arrow_width +. name_width +. segment_width, name_up, name_down)
+
+    let draw {Grammar.NonTerminal.name} ~context =
+      Bricks.Arrow.draw ~context;
+      Bricks.RectangleText.draw name ~context;
+      Bricks.Segment.draw ~context
+  end
+
   module Definition = struct
     let measure definition ~context =
       match definition with
-        | Grammar.Definition.Terminal terminal ->
-          Terminal.measure terminal ~context
+        | Grammar.Definition.Terminal x ->
+          Terminal.measure x ~context
+        | Grammar.Definition.NonTerminal x ->
+          NonTerminal.measure x ~context
 
     let draw definition ~context =
       match definition with
-        | Grammar.Definition.Terminal terminal ->
-          Terminal.draw terminal ~context
+        | Grammar.Definition.Terminal x ->
+          Terminal.draw x ~context
+        | Grammar.Definition.NonTerminal x ->
+          NonTerminal.draw x ~context
   end
 
   module Rule = struct

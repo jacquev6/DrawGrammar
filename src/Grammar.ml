@@ -6,9 +6,16 @@ module Terminal = struct
   }
 end
 
+module NonTerminal = struct
+  type t = {
+    name: string;
+  }
+end
+
 module Definition = struct
   type t =
     | Terminal of Terminal.t
+    | NonTerminal of NonTerminal.t
 end
 
 module Rule = struct
@@ -27,6 +34,6 @@ let parse ~syntax:_ _ =
   {
     rules=[
       {Rule.name="terminal"; definition=Definition.Terminal {Terminal.value="value"}};
-      {Rule.name="other terminal"; definition=Definition.Terminal {Terminal.value="other value"}};
+      {Rule.name="non-terminal"; definition=Definition.NonTerminal {NonTerminal.name="name"}};
     ];
   }
