@@ -12,10 +12,26 @@ module NonTerminal = struct
   }
 end
 
-module Definition = struct
+module rec Sequence: sig
+  type t = {
+    elements: Definition.t list;
+  }
+end = struct
+  type t = {
+    elements: Definition.t list;
+  }
+end
+
+and Definition: sig
   type t =
     | Terminal of Terminal.t
     | NonTerminal of NonTerminal.t
+    | Sequence of Sequence.t
+end = struct
+  type t =
+    | Terminal of Terminal.t
+    | NonTerminal of NonTerminal.t
+    | Sequence of Sequence.t
 end
 
 module Rule = struct

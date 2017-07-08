@@ -148,20 +148,37 @@ module Make(C: JsOfOCairo.S) = struct
       Bricks.Segment.draw ~context
   end
 
-  module Definition = struct
+  module rec Sequence: sig
+    val measure: Grammar.Sequence.t -> context:C.context -> float * float * float
+    val draw: Grammar.Sequence.t -> context:C.context -> unit
+  end = struct
+    let measure {Grammar.Sequence.elements} ~context =
+      elements
+      |> Li.map ~f:(Definition.measure ~context)
+      |> Li.fold ~init:(0., 0., 0.) ~f:(fun (r, u, d) (r', u', d') ->
+        (r +. r', Fl.max u u', Fl.max d d')
+      )
+
+    let draw {Grammar.Sequence.elements} ~context =
+      elements
+      |> Li.iter ~f:(Definition.draw ~context)
+  end
+
+  and Definition: sig
+    val measure: Grammar.Definition.t -> context:C.context -> float * float * float
+    val draw: Grammar.Definition.t -> context:C.context -> unit
+  end = struct
     let measure definition ~context =
       match definition with
-        | Grammar.Definition.Terminal x ->
-          Terminal.measure x ~context
-        | Grammar.Definition.NonTerminal x ->
-          NonTerminal.measure x ~context
+        | Grammar.Definition.Terminal x -> Terminal.measure x ~context
+        | Grammar.Definition.NonTerminal x -> NonTerminal.measure x ~context
+        | Grammar.Definition.Sequence x -> Sequence.measure x ~context
 
     let draw definition ~context =
       match definition with
-        | Grammar.Definition.Terminal x ->
-          Terminal.draw x ~context
-        | Grammar.Definition.NonTerminal x ->
-          NonTerminal.draw x ~context
+        | Grammar.Definition.Terminal x -> Terminal.draw x ~context
+        | Grammar.Definition.NonTerminal x -> NonTerminal.draw x ~context
+        | Grammar.Definition.Sequence x -> Sequence.draw x ~context
   end
 
   module Rule = struct
