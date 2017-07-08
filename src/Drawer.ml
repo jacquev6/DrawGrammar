@@ -164,6 +164,67 @@ module Make(C: JsOfOCairo.S) = struct
       |> Li.iter ~f:(Definition.draw ~context)
   end
 
+  and Alternative: sig
+    val measure: Grammar.Alternative.t -> context:C.context -> float * float * float
+    val draw: Grammar.Alternative.t -> context:C.context -> unit
+  end = struct
+    let measure {Grammar.Alternative.elements} ~context =
+      let measures =
+        elements
+        |> Li.map ~f:(Definition.measure ~context)
+      in
+      let (r, h) =
+        measures
+        |> Li.fold ~init:(0., -5.) ~f:(fun (r, h) (r', u', d') ->
+          (Fl.max r r', h +. 5. +. u' +. d')
+        )
+      and (_, u, _) = Li.head measures in
+      (r +. 20., u, h -. u)
+
+    let draw ({Grammar.Alternative.elements} as alternative) ~context =
+      let (width, _, _) = measure alternative ~context in
+      C.save context;
+      elements
+      |> Li.iter_i ~f:(fun i element ->
+        let (w, u, d) = Definition.measure element ~context in
+        if i <> 0 then C.translate context ~x:0. ~y:(u +. 5.);
+        C.save context;
+        C.translate context ~x:((width -. w) /. 2.) ~y:0.;
+        Definition.draw element ~context;
+        C.restore context;
+        C.translate context ~x:0. ~y:d;
+      );
+      C.restore context;
+      C.translate context ~x:width ~y:0.
+  end
+
+  and Repetition: sig
+    val measure: Grammar.Repetition.t -> context:C.context -> float * float * float
+    val draw: Grammar.Repetition.t -> context:C.context -> unit
+  end = struct
+    let measure {Grammar.Repetition.forward; backward} ~context =
+      let (fr, fu, fd) = Definition.measure forward ~context
+      and (br, bu, bd) = Definition.measure backward ~context in
+      (20. +. Fl.max fr br, fu, fd +. 5. +. bu +. bd)
+
+    let draw {Grammar.Repetition.forward; backward} ~context =
+      let (fr, _fu, fd) = Definition.measure forward ~context
+      and (br, bu, _bd) = Definition.measure backward ~context in
+      C.save context;
+      C.translate context ~x:(10. +. (Fl.max fr br -. fr) /. 2.) ~y:0.;
+      Definition.draw forward ~context;
+      C.translate context ~x:(10. +. (Fl.max fr br -. fr) /. 2.) ~y:0.;
+
+      C.rotate context ~angle:(Math.pi /. 2.);
+      C.translate context ~x:(fd +. bu +. 5.) ~y:0.;
+      C.rotate context ~angle:(Math.pi /. 2.);
+
+      C.translate context ~x:(10. +. (Fl.max fr br -. br) /. 2.) ~y:0.;
+      Definition.draw backward ~context;
+      C.restore context;
+      C.translate context ~x:(20. +. Fl.max fr br) ~y:0.
+  end
+
   and Definition: sig
     val measure: Grammar.Definition.t -> context:C.context -> float * float * float
     val draw: Grammar.Definition.t -> context:C.context -> unit
@@ -173,12 +234,16 @@ module Make(C: JsOfOCairo.S) = struct
         | Grammar.Definition.Terminal x -> Terminal.measure x ~context
         | Grammar.Definition.NonTerminal x -> NonTerminal.measure x ~context
         | Grammar.Definition.Sequence x -> Sequence.measure x ~context
+        | Grammar.Definition.Alternative x -> Alternative.measure x ~context
+        | Grammar.Definition.Repetition x -> Repetition.measure x ~context
 
     let draw definition ~context =
       match definition with
         | Grammar.Definition.Terminal x -> Terminal.draw x ~context
         | Grammar.Definition.NonTerminal x -> NonTerminal.draw x ~context
         | Grammar.Definition.Sequence x -> Sequence.draw x ~context
+        | Grammar.Definition.Alternative x -> Alternative.draw x ~context
+        | Grammar.Definition.Repetition x -> Repetition.draw x ~context
   end
 
   module Rule = struct

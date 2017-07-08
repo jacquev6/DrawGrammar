@@ -22,16 +22,42 @@ end = struct
   }
 end
 
+and Alternative: sig
+  type t = {
+    elements: Definition.t list;
+  }
+end = struct
+  type t = {
+    elements: Definition.t list;
+  }
+end
+
+and Repetition: sig
+  type t = {
+    forward: Definition.t;
+    backward: Definition.t;
+  }
+end = struct
+  type t = {
+    forward: Definition.t;
+    backward: Definition.t;
+  }
+end
+
 and Definition: sig
   type t =
     | Terminal of Terminal.t
     | NonTerminal of NonTerminal.t
     | Sequence of Sequence.t
+    | Alternative of Alternative.t
+    | Repetition of Repetition.t
 end = struct
   type t =
     | Terminal of Terminal.t
     | NonTerminal of NonTerminal.t
     | Sequence of Sequence.t
+    | Alternative of Alternative.t
+    | Repetition of Repetition.t
 end
 
 module Rule = struct
