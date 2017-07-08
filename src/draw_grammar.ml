@@ -1,6 +1,6 @@
 open General.Abbr
 
-module Drawer = Drawer.Make(CairoContext)
+module Drawer = Drawer.Make(Cairo)
 
 let () =
   OCamlStandard.Sys.argv
@@ -12,10 +12,10 @@ let () =
       | [name; syntax] ->
         let output_name = OCamlStandard.Printf.sprintf "%s.png" name in
         OCamlStandard.Printf.printf "Drawing %s to %s\n" input_name output_name;
-        let grammar = Grammar.parse ~name ~syntax "@todo Read input file" in
+        let grammar = Grammar.parse ~syntax "@todo Read input file" in
         let context = Cairo.create (Cairo.Image.create Cairo.Image.RGB24 ~width:1 ~height:1) in
-        let (width, height) = Drawer.measure grammar ~context in
-        let image = Cairo.Image.create Cairo.Image.RGB24 ~width ~height in
+        let (w, h) = Drawer.measure grammar ~context in
+        let image = Cairo.Image.create Cairo.Image.RGB24 ~width:(Int.of_float w) ~height:(Int.of_float h) in
         let context = Cairo.create image in
         Cairo.set_source_rgb context ~r:1. ~g:1. ~b:1.;
         Cairo.paint context;

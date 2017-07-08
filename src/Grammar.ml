@@ -19,14 +19,12 @@ module Rule = struct
 end
 
 type t = {
-  name: string option;
   rules: Rule.t list;
 }
 
-let parse ?name ~syntax:_ _ =
+let parse ~syntax:_ _ =
   (* @todo Implement *)
   {
-    name;
     rules=[
       {Rule.name="terminal"; definition=Definition.Terminal {Terminal.value="value"}};
       {Rule.name="other terminal"; definition=Definition.Terminal {Terminal.value="other value"}};

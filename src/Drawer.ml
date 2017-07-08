@@ -4,7 +4,7 @@ let sprintf = OCamlStandard.Printf.sprintf
 
 (* @todo Make all lengths, font sizes, line widths, etc. parameters.
 This will help validate the drawing algorithm (because it will need to be more robust) *)
-module Make(C: Context.S) = struct
+module Make(C: JsOfOCairo.S) = struct
   module Bricks = struct
     module Text = struct
       let measure t ~font_size ~context =
@@ -167,7 +167,7 @@ module Make(C: Context.S) = struct
       C.restore context;
   end
 
-  let measure {Grammar.name=_; rules} ~context =
+  let measure {Grammar.rules} ~context =
     (* @todo (in General) PairList.unzip, FloatList.sum, FloatList.max *)
     rules
     |> Li.map ~f:(Rule.measure ~context)
@@ -175,7 +175,7 @@ module Make(C: Context.S) = struct
       (Fl.max w w', h +. 10. +. h')
     )
 
-  let draw {Grammar.name=_; rules} ~context =
+  let draw {Grammar.rules} ~context =
     (* @todo assert our assumptions about the transform matrix:
       - scale is same for x and y
       - angle is 0. *)

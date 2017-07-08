@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<!-- Copyright 2017 Vincent Jacques <vincent@vincent-jacques.net> -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+  <title>Drawing tests for DrawGrammar</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+  <style type="text/css">
+    canvas {
+      border: 1px solid black;
+      background-color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="drawing_tests">
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha256-k2WSCIexGzOj3Euiig+TlR8gA0EmPjuc79OEeY5L45g=" crossorigin="anonymous"></script>
+  <script src="src/_build/draw_grammar_js.js"></script>
+  <script src="src/_build/drawing_tests_js.js"></script>
+  <script>
+    // https://stackoverflow.com/a/5077091/905845
+    String.prototype.format = function () {
+      var args = arguments;
+      return this.replace(/\{\{|\}\}|\{(\d+)\}/g, function (m, n) {
+        if (m == "{{") { return "{"; }
+        if (m == "}}") { return "}"; }
+        return args[n];
+      });
+    };
+
+    $(document).ready(function() {
+      for (var i = 1; i < drawing_tests.length; i++) {
+        var test = drawing_tests[i];
+        var html_template =
+            '<div id="{0}">'
+          + '<p>{0}</p>'
+          + '<canvas class="img-fluid" />'
+          + '</div>'
+          + '</div>';
+        $("#drawing_tests").append(html_template.format(test.name));
+
+        test.draw_on_canvas($(document.getElementById(test.name)).find("canvas").get(0));
+      }
+    })
+  </script>
+</body>
+</html>
