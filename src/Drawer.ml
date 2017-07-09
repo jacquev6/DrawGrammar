@@ -315,6 +315,8 @@ module Make(C: JsOfOCairo.S) = struct
         | Grammar.Definition.Sequence x -> Sequence.measure x ~context
         | Grammar.Definition.Alternative x -> Alternative.measure x ~context
         | Grammar.Definition.Repetition x -> Repetition.measure x ~context
+        | Grammar.Definition.Special _ -> failwith "@todo Draw Specials"
+        | Grammar.Definition.Except _ -> failwith "@todo Draw Excepts"
 
     let draw definition ~context =
       match definition with
@@ -324,6 +326,8 @@ module Make(C: JsOfOCairo.S) = struct
         | Grammar.Definition.Sequence x -> Sequence.draw x ~context
         | Grammar.Definition.Alternative x -> Alternative.draw x ~context
         | Grammar.Definition.Repetition x -> Repetition.draw x ~context
+        | Grammar.Definition.Special _ -> failwith "@todo Draw Specials"
+        | Grammar.Definition.Except _ -> failwith "@todo Draw Excepts"
   end
 
   module Rule = struct

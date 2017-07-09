@@ -1,0 +1,10 @@
+true: strict_sequence
+true: strict_formats
+true: safe_string
+true: use_menhir
+true: warn(@A-4-44)
+true: package(General)
+true: package(JsOfOCairo)
+true: package(js_of_ocaml)
+true: package(js_of_ocaml.ppx)
+true: package(cairo2)
