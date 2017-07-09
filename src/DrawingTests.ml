@@ -17,6 +17,10 @@ let single_rule_grammars =
       Definition.NonTerminal {NonTerminal.name="longestttttt"};
       Definition.Terminal {Terminal.value="medium"};
     ]});
+    ("alternative with null branch", Definition.Alternative {Alternative.elements=[
+      Definition.Null;
+      Definition.Terminal {Terminal.value="t"};
+    ]});
     ("nested alternatives", Definition.Alternative {Alternative.elements=[
       Definition.Alternative {Alternative.elements=[
         Definition.Terminal {Terminal.value="t1"};
@@ -35,14 +39,22 @@ let single_rule_grammars =
       Repetition.forward = Definition.Terminal {Terminal.value="short"};
       backward = Definition.Terminal {Terminal.value="long branch"};
     });
+    ("repetition with null forward branch", Definition.Repetition {
+      Repetition.forward = Definition.Null;
+      backward = Definition.Terminal {Terminal.value="t"};
+    });
+    ("repetition with null backward branch", Definition.Repetition {
+      Repetition.forward = Definition.Terminal {Terminal.value="t"};
+      backward = Definition.Null;
+    });
     ("nested repetitions", Definition.Repetition {
       Repetition.forward = Definition.Repetition {
         Repetition.forward = Definition.Terminal {Terminal.value="forward 1"};
-        backward = Definition.Terminal {Terminal.value="backward 1"}
+        backward = Definition.Terminal {Terminal.value="backward 1"};
       };
       backward = Definition.Repetition {
         Repetition.forward = Definition.Terminal {Terminal.value="forward 2"};
-        backward = Definition.Terminal {Terminal.value="backward 2"}
+        backward = Definition.Terminal {Terminal.value="backward 2"};
       };
     });
     ("alternatives in repetition", Definition.Repetition {
@@ -58,11 +70,11 @@ let single_rule_grammars =
     ("repetitions in alternative", Definition.Alternative {Alternative.elements=[
       Definition.Repetition {
         Repetition.forward = Definition.Terminal {Terminal.value="forward 1"};
-        backward = Definition.Terminal {Terminal.value="backward 1"}
+        backward = Definition.Terminal {Terminal.value="backward 1"};
       };
       Definition.Repetition {
         Repetition.forward = Definition.Terminal {Terminal.value="forward 2"};
-        backward = Definition.Terminal {Terminal.value="backward 2"}
+        backward = Definition.Terminal {Terminal.value="backward 2"};
       };
     ]});
   ]

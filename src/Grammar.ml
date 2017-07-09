@@ -46,6 +46,7 @@ end
 
 and Definition: sig
   type t =
+    | Null
     | Terminal of Terminal.t
     | NonTerminal of NonTerminal.t
     | Sequence of Sequence.t
@@ -53,6 +54,7 @@ and Definition: sig
     | Repetition of Repetition.t
 end = struct
   type t =
+    | Null
     | Terminal of Terminal.t
     | NonTerminal of NonTerminal.t
     | Sequence of Sequence.t

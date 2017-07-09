@@ -309,6 +309,7 @@ module Make(C: JsOfOCairo.S) = struct
   end = struct
     let measure definition ~context =
       match definition with
+        | Grammar.Definition.Null -> let h = (C.get_line_width context) /. 2. in (0., h, h)
         | Grammar.Definition.Terminal x -> Terminal.measure x ~context
         | Grammar.Definition.NonTerminal x -> NonTerminal.measure x ~context
         | Grammar.Definition.Sequence x -> Sequence.measure x ~context
@@ -317,6 +318,7 @@ module Make(C: JsOfOCairo.S) = struct
 
     let draw definition ~context =
       match definition with
+        | Grammar.Definition.Null -> ()
         | Grammar.Definition.Terminal x -> Terminal.draw x ~context
         | Grammar.Definition.NonTerminal x -> NonTerminal.draw x ~context
         | Grammar.Definition.Sequence x -> Sequence.draw x ~context
@@ -335,8 +337,9 @@ module Make(C: JsOfOCairo.S) = struct
       let {C.x_advance=label_width; _} = C.text_extents context (sprintf "%s:" name) in
       C.restore context;
       let (definition_width, definition_up, definition_down) = Definition.measure definition ~context in
+      let end_u_d = 0.5 *. Bricks.Stop.measure ~context in
       let rule_width = Bricks.Start.measure ~context +. definition_width +. Bricks.Stop.measure ~context in
-      let rule_height = definition_up +. definition_down in
+      let rule_height = (Fl.max end_u_d definition_up) +. (Fl.max end_u_d definition_down) in
       (Fl.max label_width rule_width, label_height +. rule_height)
 
     let draw {Grammar.Rule.name; definition} ~context =
@@ -352,7 +355,8 @@ module Make(C: JsOfOCairo.S) = struct
       C.translate context ~x:0. ~y:(ascent +. descent);
 
       let (_, up, _) = Definition.measure definition ~context in
-      C.translate context ~x:0. ~y:up;
+      let end_u_d = 0.5 *. Bricks.Stop.measure ~context in
+      C.translate context ~x:0. ~y:(Fl.max end_u_d up);
       Bricks.Start.draw ~context;
       Definition.draw definition ~context;
       Bricks.Stop.draw ~context;
