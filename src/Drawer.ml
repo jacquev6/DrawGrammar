@@ -6,13 +6,15 @@ let sprintf = OCamlStandard.Printf.sprintf
 This will help validate the drawing algorithm (because it will need to be more robust) *)
 module Make(C: JsOfOCairo.S) = struct
   module Bricks = struct
-    let is_backward context =
+    let is_forward context =
+      (* @todo Remove this: we would fail drawing on an already rotated or scaled context.
+      Pass is_forward as a parameter when recursing in the definitions. *)
       let {C.xx; xy; yx; yy; _} = C.get_matrix context in
       assert (Fl.abs xy < 1e-6);
       assert (Fl.abs yx < 1e-6);
       assert (Fl.abs (xx -. yy) < 1e-6);
       assert (Fl.abs (xx -. 1.) < 1e-6 || Fl.abs (xx +. 1.) < 1e-6);
-      Fl.abs (xx +. 1.) < 1e-6
+      Fl.abs (xx -. 1.) < 1e-6
 
     module Text = struct
       let measure t ~font_size ~context =
@@ -27,11 +29,11 @@ module Make(C: JsOfOCairo.S) = struct
       let draw t ~x ~font_size ~context =
         let (w, _) = measure t ~font_size ~context in
         C.save context;
-        if is_backward context then begin
+        if is_forward context then begin
+          C.translate context ~x ~y:0.;
+        end else begin
           C.rotate context ~angle:Math.pi;
           C.translate context ~x:(-.w -. x) ~y:0.;
-        end else begin
-          C.translate context ~x ~y:0.;
         end;
         C.set_font_size context font_size;
         let {C.ascent; descent; _} = C.font_extents context in
@@ -87,6 +89,14 @@ module Make(C: JsOfOCairo.S) = struct
         C.translate context ~x:length ~y:0.
     end
 
+    module Advance = struct
+      let draw length ~context =
+        C.move_to context ~x:0. ~y:0.;
+        C.rel_line_to context ~x:length ~y:0.;
+        C.stroke context;
+        C.translate context ~x:length ~y:0.
+    end
+
     module Segment = struct
       let length = 10.
 
@@ -94,10 +104,31 @@ module Make(C: JsOfOCairo.S) = struct
         length
 
       let draw ~context =
-        C.move_to context ~x:0. ~y:0.;
-        C.rel_line_to context ~x:length ~y:0.;
+        Advance.draw length ~context
+    end
+
+    module Turns = struct
+      let base = 5.
+
+      let left ~context =
+        C.translate context ~x:base ~y:0.;
+        C.arc_negative context ~x:(-.base) ~y:(-.base) ~r:base ~a1:(Math.pi /. 2.) ~a2:0.;
+        C.rotate context ~angle:(-.Math.pi /. 2.);
         C.stroke context;
-        C.translate context ~x:length ~y:0.
+        C.translate context ~x:base ~y:0.
+
+      let right ~context =
+        C.translate context ~x:base ~y:0.;
+        C.arc context ~x:(-.base) ~y:base ~r:base ~a1:(3. *. Math.pi /. 2.) ~a2:0.;
+        C.rotate context ~angle:(Math.pi /. 2.);
+        C.stroke context;
+        C.translate context ~x:base ~y:0.
+
+      let get ~context =
+        if is_forward context then
+          (left, right)
+        else
+          (right, left)
     end
 
     module RoundedRectangleText = struct
@@ -196,19 +227,39 @@ module Make(C: JsOfOCairo.S) = struct
       (r +. 20., u, h -. u)
 
     let draw ({Grammar.Alternative.elements} as alternative) ~context =
-      let (width, _, _) = measure alternative ~context in
       C.save context;
-      elements
-      |> Li.iter_i ~f:(fun i element ->
-        let (w, u, d) = Definition.measure element ~context in
-        if i <> 0 then C.translate context ~x:0. ~y:(u +. 5.);
-        C.save context;
-        C.translate context ~x:((width -. w) /. 2.) ~y:0.;
-        Definition.draw element ~context;
-        C.restore context;
-        C.translate context ~x:0. ~y:d;
-      );
+
+      let (width, _, _) = measure alternative ~context
+      and (turn_left, turn_right) = Bricks.Turns.get ~context
+      and element = Li.head elements
+      and elements = Li.tail elements in
+      let (w, _, d) = Definition.measure element ~context in
+      C.save context;
+      Bricks.Segment.draw ~context;
+      Bricks.Advance.draw ((width -. 20. -. w) /. 2.) ~context;
+      Definition.draw element ~context;
+      Bricks.Advance.draw ((width -. 20. -. w) /. 2.) ~context;
+      Bricks.Segment.draw ~context;
       C.restore context;
+      turn_right ~context;
+      elements
+      |> Li.fold_i ~init:(d -. 10.) ~f:(fun i prev_d element ->
+        let (w, u, d) = Definition.measure element ~context in
+        Bricks.Advance.draw (prev_d +. 5. +. u) ~context;
+        C.save context;
+        turn_left ~context;
+        Bricks.Advance.draw ((width -. 20. -. w) /. 2.) ~context;
+        Definition.draw element ~context;
+        Bricks.Advance.draw ((width -. 20. -. w) /. 2.) ~context;
+        turn_left ~context;
+        Bricks.Advance.draw (prev_d +. 5. +. u) ~context;
+        if i = 0 then turn_right ~context;
+        C.restore context;
+        d
+      )
+      |> ignore;
+      C.restore context;
+
       C.translate context ~x:width ~y:0.
   end
 
@@ -222,21 +273,34 @@ module Make(C: JsOfOCairo.S) = struct
       (20. +. Fl.max fr br, fu, fd +. 5. +. bu +. bd)
 
     let draw {Grammar.Repetition.forward; backward} ~context =
-      let (fr, _, fd) = Definition.measure forward ~context
+      let (_, turn_right) = Bricks.Turns.get ~context
+      and (fr, _, fd) = Definition.measure forward ~context
       and (br, bu, _) = Definition.measure backward ~context in
       C.save context;
-      C.translate context ~x:(10. +. (Fl.max fr br -. fr) /. 2.) ~y:0.;
+
+      Bricks.Segment.draw ~context;
+
+      Bricks.Advance.draw ((Fl.max fr br -. fr) /. 2.) ~context;
       Definition.draw forward ~context;
-      C.translate context ~x:(10. +. (Fl.max fr br -. fr) /. 2.) ~y:0.;
+      Bricks.Advance.draw ((Fl.max fr br -. fr) /. 2.) ~context;
 
-      C.rotate context ~angle:(Math.pi /. 2.);
-      C.translate context ~x:(fd +. bu +. 5.) ~y:0.;
-      C.rotate context ~angle:(Math.pi /. 2.);
+      turn_right ~context;
+      Bricks.Advance.draw (fd +. bu -. 5.) ~context;
+      turn_right ~context;
 
-      C.translate context ~x:(10. +. (Fl.max fr br -. br) /. 2.) ~y:0.;
+      Bricks.Advance.draw ((Fl.max fr br -. br) /. 2.) ~context;
       Definition.draw backward ~context;
+      Bricks.Advance.draw ((Fl.max fr br -. br) /. 2.) ~context;
+
+      turn_right ~context;
+      Bricks.Advance.draw (fd +. bu -. 5.) ~context;
+      turn_right ~context;
+
       C.restore context;
-      C.translate context ~x:(20. +. Fl.max fr br) ~y:0.
+
+      C.translate context ~x:(10. +. Fl.max fr br) ~y:0.;
+
+      Bricks.Segment.draw ~context
   end
 
   and Definition: sig
@@ -273,7 +337,7 @@ module Make(C: JsOfOCairo.S) = struct
       let (definition_width, definition_up, definition_down) = Definition.measure definition ~context in
       let rule_width = Bricks.Start.measure ~context +. definition_width +. Bricks.Stop.measure ~context in
       let rule_height = definition_up +. definition_down in
-      (Fl.max label_width rule_width, label_height +. 5. +. rule_height)
+      (Fl.max label_width rule_width, label_height +. rule_height)
 
     let draw {Grammar.Rule.name; definition} ~context =
       C.save context;
@@ -285,7 +349,7 @@ module Make(C: JsOfOCairo.S) = struct
       C.show_text context (sprintf "%s:" name);
       C.restore context;
 
-      C.translate context ~x:0. ~y:(ascent +. descent +. 5.);
+      C.translate context ~x:0. ~y:(ascent +. descent);
 
       let (_, up, _) = Definition.measure definition ~context in
       C.translate context ~x:0. ~y:up;
