@@ -6,6 +6,14 @@ let sprintf = OCamlStandard.Printf.sprintf
 This will help validate the drawing algorithm (because it will need to be more robust) *)
 module Make(C: JsOfOCairo.S) = struct
   module Bricks = struct
+    let is_backward context =
+      let {C.xx; xy; yx; yy; _} = C.get_matrix context in
+      assert (Fl.abs xy < 1e-6);
+      assert (Fl.abs yx < 1e-6);
+      assert (Fl.abs (xx -. yy) < 1e-6);
+      assert (Fl.abs (xx -. 1.) < 1e-6 || Fl.abs (xx +. 1.) < 1e-6);
+      Fl.abs (xx +. 1.) < 1e-6
+
     module Text = struct
       let measure t ~font_size ~context =
         C.save context;
@@ -17,9 +25,15 @@ module Make(C: JsOfOCairo.S) = struct
         (width, height)
 
       let draw t ~x ~font_size ~context =
+        let (w, _) = measure t ~font_size ~context in
         C.save context;
+        if is_backward context then begin
+          C.rotate context ~angle:Math.pi;
+          C.translate context ~x:(-.w -. x) ~y:0.;
+        end else begin
+          C.translate context ~x ~y:0.;
+        end;
         C.set_font_size context font_size;
-        C.translate context ~x ~y:0.;
         let {C.ascent; descent; _} = C.font_extents context in
         C.move_to context ~x:0. ~y:((ascent -. descent) /. 2.);
         C.show_text context t;
@@ -208,8 +222,8 @@ module Make(C: JsOfOCairo.S) = struct
       (20. +. Fl.max fr br, fu, fd +. 5. +. bu +. bd)
 
     let draw {Grammar.Repetition.forward; backward} ~context =
-      let (fr, _fu, fd) = Definition.measure forward ~context
-      and (br, bu, _bd) = Definition.measure backward ~context in
+      let (fr, _, fd) = Definition.measure forward ~context
+      and (br, bu, _) = Definition.measure backward ~context in
       C.save context;
       C.translate context ~x:(10. +. (Fl.max fr br -. fr) /. 2.) ~y:0.;
       Definition.draw forward ~context;
