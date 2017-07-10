@@ -124,7 +124,7 @@ end = struct
     | Except of Except.t
 
   let to_string = function
-    | Null -> "ø"
+    | Null -> "ε"
     | Terminal x -> Terminal.to_string x
     | NonTerminal x -> NonTerminal.to_string x
     | Sequence x -> Sequence.to_string x
@@ -178,6 +178,8 @@ let simplify =
   let rec simplify_def = Definition.(function
     | (Null | Terminal _ | NonTerminal _ | Special _) as x -> x
     | Sequence {Sequence.elements} ->
+      (* @todo Remove Null *)
+      (* @todo Merge "a, {a}" and "{a}, a" into Repetition(forward=a, backward=Null) *)
       let elements =
         elements
         |> Li.concat_map ~f:(fun element ->
@@ -193,6 +195,8 @@ let simplify =
           | _ -> Sequence {Sequence.elements}
       end
     | Alternative {Alternative.elements} ->
+      (* @todo Deduplicate elements *)
+      (* @todo Put Null in front if present *)
       let elements =
         elements
         |> Li.concat_map ~f:(fun element ->
@@ -201,9 +205,9 @@ let simplify =
               elements
             | element -> [element]
         )
-      in begin
+      in
+      begin
         match elements with
-          | [] -> Null (* @todo This is wrong: an alternative with no element is a a dead-end, not a Null *)
           | [element] -> element
           | _ -> Alternative {Alternative.elements}
       end

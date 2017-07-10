@@ -21,6 +21,12 @@ let single_rule_grammars =
       Definition.Null;
       Definition.Terminal {Terminal.value="t"};
     ]});
+    ("sequence with null", Definition.Sequence {Sequence.elements=[
+      Definition.Terminal {Terminal.value="space here ->"};
+      Definition.Null;
+      Definition.Terminal {Terminal.value="should be like here ->"};
+      Definition.Terminal {Terminal.value="t"};
+    ]});
     ("nested alternatives", Definition.Alternative {Alternative.elements=[
       Definition.Alternative {Alternative.elements=[
         Definition.Terminal {Terminal.value="t1"};
