@@ -72,6 +72,23 @@ module Make(C: JsOfOCairo.S) = struct
         C.translate context ~x:base ~y:0.
     end
 
+    module DeadEnd = struct
+      let base = 10.
+
+      let measure ~context =
+        base +. (C.get_line_width context) /. 2.
+
+      let draw ~context =
+        C.move_to context ~x:0. ~y:0.;
+        C.line_to context ~x:(base /. 2.) ~y:0.;
+        C.move_to context ~x:0. ~y:(base /. 2.);
+        C.line_to context ~x:base ~y:(-.base /. 2.);
+        C.move_to context ~x:0. ~y:(-.base /. 2.);
+        C.line_to context ~x:base ~y:(base /. 2.);
+        C.stroke context;
+        C.translate context ~x:base ~y:0.
+    end
+
     module Arrow = struct
       let length = 10.
 
@@ -165,6 +182,28 @@ module Make(C: JsOfOCairo.S) = struct
         Text.draw value ~x:base ~font_size:10. ~context;
         C.translate context ~x:r ~y:0.
     end
+
+    module PointyRectangleText = struct
+      let base = 10.
+
+      let measure value ~context =
+        let (r, _) = Text.measure value ~font_size:10. ~context
+        and h = base +. (C.get_line_width context) /. 2. in
+        (r +. 2. *. base, h, h)
+
+      let draw value ~context =
+        let (r, _, _) = measure value ~context in
+        C.move_to context ~x:base ~y:base;
+        C.line_to context ~x:0. ~y:0.;
+        C.line_to context ~x:base ~y:(-.base);
+        C.line_to context ~x:(r -. base) ~y:(-.base);
+        C.line_to context ~x:r ~y:0.;
+        C.line_to context ~x:(r -. base) ~y:base;
+        C.Path.close context;
+        C.stroke context;
+        Text.draw value ~x:base ~font_size:10. ~context;
+        C.translate context ~x:r ~y:0.
+    end
   end
 
   module Terminal = struct
@@ -190,6 +229,19 @@ module Make(C: JsOfOCairo.S) = struct
     let draw {Grammar.NonTerminal.name} ~context =
       Bricks.Arrow.draw ~context;
       Bricks.RectangleText.draw name ~context;
+      Bricks.Segment.draw ~context
+  end
+
+  module Special = struct
+    let measure {Grammar.Special.value} ~context =
+      let arrow_width = Bricks.Arrow.measure ~context
+      and (value_width, value_up, value_down) = Bricks.PointyRectangleText.measure value ~context
+      and segment_width = Bricks.Segment.measure ~context in
+      (arrow_width +. value_width +. segment_width, value_up, value_down)
+
+    let draw {Grammar.Special.value} ~context =
+      Bricks.Arrow.draw ~context;
+      Bricks.PointyRectangleText.draw value ~context;
       Bricks.Segment.draw ~context
   end
 
@@ -303,6 +355,38 @@ module Make(C: JsOfOCairo.S) = struct
       Bricks.Segment.draw ~context
   end
 
+  and Except: sig
+    val measure: Grammar.Except.t -> context:C.context -> float * float * float
+    val draw: Grammar.Except.t -> context:C.context -> unit
+  end = struct
+    let measure {Grammar.Except.base; except} ~context =
+      let (base_r, base_u, base_d) = Definition.measure base ~context
+      and (except_r, except_u, except_d) = Definition.measure except ~context in
+      (20. +. Fl.max base_r (except_r +. Bricks.DeadEnd.measure ~context), base_u, base_d +. 5. +. except_u +. except_d)
+
+    let draw {Grammar.Except.base; except} ~context =
+      let (turn_left, turn_right) = Bricks.Turns.get ~context
+      and (base_advance, base_up, _) = Definition.measure base ~context
+      and (except_advance, _, except_down) = Definition.measure except ~context in
+      let w = Fl.max base_advance (except_advance +. Bricks.DeadEnd.measure ~context) in
+
+      C.save context;
+      Bricks.Segment.draw ~context;
+      Definition.draw except ~context;
+      Bricks.DeadEnd.draw ~context;
+      C.restore context;
+
+      turn_right ~context;
+      Bricks.Advance.draw (except_down +. base_up -. 5.) ~context;
+      turn_left ~context;
+      Bricks.Advance.draw ((w -. base_advance) /. 2.) ~context;
+      Definition.draw base ~context;
+      Bricks.Advance.draw ((w -. base_advance) /. 2.) ~context;
+      turn_left ~context;
+      Bricks.Advance.draw (except_down +. base_up -. 5.) ~context;
+      turn_right ~context;
+  end
+
   and Definition: sig
     val measure: Grammar.Definition.t -> context:C.context -> float * float * float
     val draw: Grammar.Definition.t -> context:C.context -> unit
@@ -315,8 +399,8 @@ module Make(C: JsOfOCairo.S) = struct
         | Grammar.Definition.Sequence x -> Sequence.measure x ~context
         | Grammar.Definition.Alternative x -> Alternative.measure x ~context
         | Grammar.Definition.Repetition x -> Repetition.measure x ~context
-        | Grammar.Definition.Special _ -> failwith "@todo Draw Specials"
-        | Grammar.Definition.Except _ -> failwith "@todo Draw Excepts"
+        | Grammar.Definition.Special x -> Special.measure x ~context
+        | Grammar.Definition.Except x -> Except.measure x ~context
 
     let draw definition ~context =
       match definition with
@@ -326,8 +410,8 @@ module Make(C: JsOfOCairo.S) = struct
         | Grammar.Definition.Sequence x -> Sequence.draw x ~context
         | Grammar.Definition.Alternative x -> Alternative.draw x ~context
         | Grammar.Definition.Repetition x -> Repetition.draw x ~context
-        | Grammar.Definition.Special _ -> failwith "@todo Draw Specials"
-        | Grammar.Definition.Except _ -> failwith "@todo Draw Excepts"
+        | Grammar.Definition.Special x -> Special.draw x ~context
+        | Grammar.Definition.Except x -> Except.draw x ~context
   end
 
   module Rule = struct

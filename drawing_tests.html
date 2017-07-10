@@ -13,11 +13,14 @@
       border: 1px solid black;
       background-color: white;
     }
+    .failure {
+      background-color: red;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <div id="drawing_tests">
+    <div class="row" id="drawing_tests">
     </div>
   </div>
 
@@ -39,14 +42,19 @@
       for (var i = 1; i < drawing_tests.length; i++) {
         var test = drawing_tests[i];
         var html_template =
-            '<div id="{0}">'
-          + '<p>{0}</p>'
-          + '<canvas class="img-fluid" />'
+            '<div class="col-md-6 col-lg-4" id="{0}">'
+          + '<canvas class="img-fluid" width="50" height="50" />'
           + '</div>'
           + '</div>';
         $("#drawing_tests").append(html_template.format(test.name));
 
-        test.draw_on_canvas($(document.getElementById(test.name)).find("canvas").get(0));
+        var div = $(document.getElementById(test.name));
+
+        try {
+          test.draw_on_canvas(div.find("canvas").get(0));
+        } catch(err) {
+          div.append('<p class="failure">Exception: {0}</p>'.format(err))
+        }
       }
     })
   </script>
