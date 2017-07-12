@@ -7,7 +7,7 @@ let single_rule_grammars =
     ("terminal", Definition.Terminal {Terminal.value="in a rounded rectangle"});
     ("rule with a name longer than its definition", Definition.Terminal {Terminal.value="short"});
     ("non-terminal", Definition.NonTerminal {NonTerminal.name="in a rectangle"});
-    ("special", Definition.Special {Special.value="in a pointy rectangle"});
+    ("special", Definition.Special {Special.value="in an octogon"});
     ("sequence", Definition.Sequence {Sequence.elements=[
       Definition.Terminal {Terminal.value="t1"};
       Definition.NonTerminal {NonTerminal.name="nt"};
@@ -64,6 +64,36 @@ let single_rule_grammars =
         backward = Definition.Terminal {Terminal.value="backward 2"};
       };
     });
+    ("repetitions in sequence", Definition.Sequence {Sequence.elements=[
+      Definition.Repetition {
+        Repetition.forward = Definition.Terminal {Terminal.value="forward 1"};
+        backward = Definition.Terminal {Terminal.value="backward 1"};
+      };
+      Definition.Repetition {
+        Repetition.forward = Definition.Terminal {Terminal.value="forward 2"};
+        backward = Definition.Terminal {Terminal.value="backward 2"};
+      };
+    ]});
+    ("exceptions in sequence", Definition.Sequence {Sequence.elements=[
+      Definition.Except {
+        Except.base = Definition.Terminal {Terminal.value="base 1"};
+        except = Definition.Terminal {Terminal.value="except 1"};
+      };
+      Definition.Except {
+        Except.base = Definition.Terminal {Terminal.value="base 2"};
+        except = Definition.Terminal {Terminal.value="except 2"};
+      };
+    ]});
+    ("alternatives in sequence", Definition.Sequence {Sequence.elements=[
+      Definition.Alternative {Alternative.elements=[
+        Definition.Terminal {Terminal.value="t1"};
+        Definition.Terminal {Terminal.value="t2"};
+      ]};
+      Definition.Alternative {Alternative.elements=[
+        Definition.Terminal {Terminal.value="t3"};
+        Definition.Terminal {Terminal.value="t4"};
+      ]};
+    ]});
     ("alternatives in repetition", Definition.Repetition {
       Repetition.forward = Definition.Alternative {Alternative.elements=[
         Definition.Terminal {Terminal.value="t1"};
@@ -98,4 +128,9 @@ let single_rule_grammars =
   )
 
 let tests =
-  single_rule_grammars
+  single_rule_grammars @ Grammar.[
+    ("several rules", {rules=[
+      {Rule.name="rule1"; definition=Definition.Terminal {Terminal.value="t1"}};
+      {Rule.name="rule2"; definition=Definition.Terminal {Terminal.value="t2"}};
+    ]});
+  ]
