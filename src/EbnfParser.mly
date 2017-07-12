@@ -35,7 +35,7 @@
 (* 4.2: syntax = syntax rule, {syntax rule}; *)
 syntax:
   | rules=nonempty_list(syntax_rule) EOF
-    { {Grammar.rules} }
+    { {rules} }
 
 (* 4.3: syntax rule = meta identifier, defining symbol, definitions list, terminator symbol; *)
 syntax_rule:

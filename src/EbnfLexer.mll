@@ -9,8 +9,8 @@
 let white = [' ' '\t' '\n' '\r']
 
 rule token = parse
-  | white  { token lexbuf }
-  | eof   { EOF }
+  | white { token lexbuf }
+  | eof { EOF }
 
   | ['0'-'9']+ as value { INTEGER (Int.of_string value) }
   | ['a'-'z' 'A'-'Z' '0'-'9' '_']+ as name { META_IDENTIFIER name }
@@ -34,7 +34,7 @@ rule token = parse
   | ';' { TERMINATOR_SYMBOL }
 
 and skip_comment i = parse
-  | "(*"  { skip_comment (i + 1) lexbuf }
-  | "*)"  { if i > 0 then skip_comment (i - 1) lexbuf }
-  | eof   { failwith "end of file in comment" }
-  | _     { skip_comment i lexbuf}
+  | "(*" { skip_comment (i + 1) lexbuf }
+  | "*)" { if i > 0 then skip_comment (i - 1) lexbuf }
+  | eof { failwith "End of file in comment" }
+  | _ { skip_comment i lexbuf}
