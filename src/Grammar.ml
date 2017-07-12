@@ -173,7 +173,7 @@ let rule name definition = {Rule.name; definition}
 
 let grammar rules = {rules}
 
-
+(* @todo Re-order rules in the order they are used?  *)
 let simplify =
   let rec simplify_def = Definition.(function
     | (Null | Terminal _ | NonTerminal _ | Special _) as x -> x
