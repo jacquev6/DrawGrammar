@@ -7,11 +7,6 @@
 
   <title>DrawGrammar</title>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
-  <style>
-    #output {
-      border: 1px solid black;
-    }
-  </style>
 </head>
 <body>
   <div class="container">
@@ -70,6 +65,7 @@ digit = '0' | '1' | '...' | '9' | 'A' | '...' | 'F';</textarea>
       <div class="col-sm-8">
         <p>Output:</p>
         <canvas class="img-fluid" id="output"></canvas>
+        <p id="error"></p>
       </div>
     </div>
   </div>
@@ -107,13 +103,24 @@ digit = '0' | '1' | '...' | '9' | 'A' | '...' | 'F';</textarea>
         secondary_settings[setting.attr("id")] = parseFloat(setting.val());
       });
 
-      DrawGrammar.on_canvas(
-        $("#syntax").val(),
-        $("#grammar").val(),
-        $("#output").get(0),
-        primary_settings,
-        secondary_settings,
-      );
+      var output = $("#output");
+      var error = $("#error");
+      try {
+        error.hide();
+        DrawGrammar.on_canvas(
+          $("#syntax").val(),
+          $("#grammar").val(),
+          output.get(0),
+          primary_settings,
+          secondary_settings,
+        );
+        output.show();
+      } catch(err) {
+        output.hide();
+        // @todo Display useful error message
+        error.html("Error: {0} (We're working on making this message more useful)".format(err));
+        error.show();
+      }
     }
 
     function make_option(value, is_default) {

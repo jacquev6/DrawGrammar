@@ -63,8 +63,8 @@ let draw grammar (canvas: Dom_html.element Js.t) (primary_settings: primary_sett
     let turn_radius = secondary_settings##.turn_radius_
   end) in
   let (w, h) = Drawer.measure grammar ~context in
-  canvas##.width := Int.of_float w;
-  canvas##.height := Int.of_float h;
+  canvas##.width := 1 + Int.of_float w;
+  canvas##.height := 1 + Int.of_float h;
   Drawer.draw grammar ~context
 
 let draw_grammar =
