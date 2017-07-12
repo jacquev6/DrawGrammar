@@ -1,0 +1,56 @@
+(* The following comes from http://www.cl.cam.ac.uk/~mgk25/iso-14977.pdf, section 8.2. *)
+
+(* This example defines Extended BNF informally.
+Many of the syntax rules include a comment to explain their meaning;
+inside a comment a meta identifier is enclosed in angle brackets "<" and ">" to avoid confusion with similar English words.
+The non-terminal symbols <letter>, <decimal_digit> and <character> are not defined.
+The position of <comment>s is stated in a comment but not formally defined. *)
+
+syntax = syntax_rule, {syntax_rule};
+
+syntax_rule = meta_identifier, '=', definitions_list, ';'
+(* A <syntax_rule> defines the sequences of symbols represented by a <meta_identifier> *);
+
+definitions_list = single_definition, {'|', single_definition}
+(* "|" separates alternative <single_definition>s *);
+
+single_definition = term, {',', term}
+(* "," separates successive <term>s *);
+
+term = factor, ['-', exception]
+(* A <term> represents any sequence of symbols that is defined by the <factor> but not defined by the <exception> *);
+
+exception = factor
+(* A <factor> may be used as an <exception> if it could be replaced by a <factor> containing no <meta_identifiers> *);
+
+factor = [integer, '*'], primary
+(* The <integer> specifies the number of repetitions of the <primary> *);
+
+primary = optional_sequence | repeated_sequence | special_sequence | grouped_sequence | meta_identifier | terminal_string | empty;
+
+empty = ;
+
+optional_sequence = '[', definitions_list, ']'
+(* The brackets "[" and "]" enclose symbols which are optional *);
+
+repeated_sequence = '{', definitions_list, '}'
+(* The brackets "{" and "}" enclose symbols which may be repeated any number of times *);
+
+grouped_sequence = '(', definitions_list, ')'
+(* The brackets "(" and ")" allow any <definitions_list> to be a <primary> *);
+
+terminal_string = "'", character - "'", {character - "'"}, "'" | '"', character - '"', {character - '"'}, '"'
+(* A <terminal_string> represents the <characters> between the quote symbols '_' or "_" *);
+
+meta_identifier = letter, {letter | decimal_digit}
+(* A <meta_identifier> is the name of a syntactic element of the language being defined *);
+
+integer = decimal_digit, {decimal_digit};
+
+special_sequence = '?', {character - '?'}, '?'
+(* The meaning of a <special_sequence> is not defined in the standard metalanguage. *);
+
+comment = '(*', {comment_symbol}, '*)'
+(* A comment is allowed anywhere outside a <terminal_string>, <meta_identifier>, <integer> or <special_sequence> *);
+
+comment_symbol = comment | terminal_string | special_sequence | character;
