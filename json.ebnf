@@ -1,0 +1,21 @@
+object = "{", [string, ":", value, {",", string, ":", value}], "}";
+
+array = "[", [value, {",", value}], "]";
+
+value = string | number | object | array | "true" | "false" | "null";
+
+string = '"', [
+    (?any unicode character? - ('"'|"\"))
+    | "\", ('"'|"\"|"/"|"b"|"f"|"n"|"r"|"t"|"u", 4 * hexa_digit)
+    ], '"';
+
+number = ["-"],
+    ("0"| digit19, {digit}),
+    [".", {digit}],
+    [("e"|"E"), ["+"|"-"], {digit}];
+
+hexa_digit = "A" | "B" | "C" | "D" | "E" | "F" | digit;
+
+digit = "0" | digit19;
+
+digit19 = "1", "2", "...", "9";

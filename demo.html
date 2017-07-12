@@ -24,7 +24,9 @@
           <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#settings_tab" role="tab">Settings</a>
           </li>
-          <!-- @todo Add a tab to load examples like Arithmetics, EBNF itself, Python, Json (there are already railway diagrams on http://json.org), etc. -->
+          <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#examples_tab" role="tab">Examples</a>
+          </li>
         </ul>
 
         <div class="tab-content">
@@ -40,15 +42,7 @@
               </div>
               <div class="form-group">
                 <label for="grammar">Grammar:</label>
-                <textarea class="form-control" id="grammar" rows="15">expr = term, { ( '+' | '-' ) , term };
-
-term = { factor, ( '*' | '/' ) }, factor;
-
-factor = integer | '(', expr, ')';
-
-integer = [ '-' ], digit, { digit };
-
-digit = '0' | '1' | '...' | '9' | 'A' | '...' | 'F';</textarea>
+                <textarea class="form-control" id="grammar" rows="15"></textarea>
               </div>
             </form>
           </div>
@@ -59,6 +53,19 @@ digit = '0' | '1' | '...' | '9' | 'A' | '...' | 'F';</textarea>
             <h2>Secondary settings</h2>
             <form id="secondary_settings">
             </form>
+          </div>
+          <div class="tab-pane" id="examples_tab" role="tabpanel">
+            <h2>Examples</h2>
+            <div>
+              <h3>Arithmetics</h3>
+              <p>The language of additions, substrations, multiplications and divisions on integers, with parentheses.
+              <button data-syntax="ebnf" data-src="arithmetics.ebnf">Load</button></p>
+            </div>
+            <div>
+              <h3>JSON</h3>
+              <p>As described on <a href="http://json.org">json.org</a>.
+              <button data-syntax="ebnf" data-src="json.ebnf">Load</button></p>
+            </div>
           </div>
         </div>
       </div>
@@ -123,6 +130,21 @@ digit = '0' | '1' | '...' | '9' | 'A' | '...' | 'F';</textarea>
       }
     }
 
+    function load_example(event) {
+      var button = $(event.target);
+      $("#syntax").val(button.data("syntax"));
+      $.ajax({
+        url: button.data("src"),
+        mimeType: 'text/plain; charset=utf-8',
+        dataType: "text",
+        success: function(data) {
+          $("#grammar").val(data);
+          $('a[href="#grammar_tab"]').tab('show');
+          update();
+        },
+      });
+    };
+
     function make_option(value, is_default) {
       return '<option value="{0}"{1}>{2}{3}</option>'.format(
         value,
@@ -155,7 +177,11 @@ digit = '0' | '1' | '...' | '9' | 'A' | '...' | 'F';</textarea>
     $(document).ready(function() {
       make_settings("#primary_settings", DrawGrammar.default_primary_settings);
       make_settings("#secondary_settings", DrawGrammar.default_secondary_settings);
+      if($("#grammar").val() == "") {
+        load_example($("button").get(0));
+      };
       update();
+      $("#examples_tab button").click(load_example);
       $("#syntax").change(update);
       $("#grammar").keyup(update);
       $("select").change(update);
