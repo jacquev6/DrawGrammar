@@ -14,7 +14,7 @@ let () =
     let grammar =
       input_name
       |> Parse.parse_file
-      |> Grammar.simplify
+      |> Grammar.normalize
     in
     let context = Cairo.create (Cairo.Image.create Cairo.Image.RGB24 ~width:1 ~height:1) in
     let (w, h) = Drawer.measure grammar ~context in

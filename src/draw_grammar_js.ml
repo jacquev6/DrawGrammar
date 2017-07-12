@@ -9,7 +9,7 @@ let parse_grammar syntax grammar =
   grammar
   |> Js.to_string
   |> Parse.parse_string ~syntax
-  |> Grammar.simplify
+  |> Grammar.normalize
 
 class type primary_settings = object
   method rule_label_font_size_: float Js.prop

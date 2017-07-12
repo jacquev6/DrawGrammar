@@ -174,20 +174,21 @@ let rule name definition = {Rule.name; definition}
 let grammar rules = {rules}
 
 (* @todo Re-order rules in the order they are used?  *)
-let simplify =
-  let rec simplify_def = Definition.(function
+(* @todo Merge "a, {a}" and "{a}, a" into Repetition(forward=a, backward=Null) *)
+
+let normalize =
+  let rec aux = Definition.(function
     | (Null | Terminal _ | NonTerminal _ | Special _) as x -> x
     | Sequence {Sequence.elements} ->
-      (* @todo Remove Null *)
-      (* @todo Merge "a, {a}" and "{a}, a" into Repetition(forward=a, backward=Null) *)
       let elements =
         elements
         |> Li.concat_map ~f:(fun element ->
-          match simplify_def element with
+          match aux element with
             | Sequence {Sequence.elements} ->
               elements
             | element -> [element]
         )
+        |> Li.filter ~f:(fun x -> x <> Null)
       in begin
         match elements with
           | [] -> Null
@@ -195,36 +196,37 @@ let simplify =
           | _ -> Sequence {Sequence.elements}
       end
     | Alternative {Alternative.elements} ->
-      (* @todo Deduplicate elements *)
-      (* @todo Put Null in front if present *)
       let elements =
         elements
         |> Li.concat_map ~f:(fun element ->
-          match simplify_def element with
+          match aux element with
             | Alternative {Alternative.elements} ->
               elements
             | element -> [element]
         )
       in
+      let has_null = Li.Poly.contains elements Null
+      and elements = Li.filter ~f:(fun x -> x <> Null) elements in
+      let elements = if has_null then Null::elements else elements in
       begin
         match elements with
           | [element] -> element
           | _ -> Alternative {Alternative.elements}
       end
     | Repetition {Repetition.forward; backward} ->
-      let forward = simplify_def forward
-      and backward = simplify_def backward in
+      let forward = aux forward
+      and backward = aux backward in
       Repetition {Repetition.forward; backward}
     | Except {Except.base; except} ->
-      let base = simplify_def base
-      and except = simplify_def except in
+      let base = aux base
+      and except = aux except in
       Except {Except.base; except}
   ) in
   function {rules} ->
     let rules =
       rules
       |> Li.map ~f:(fun {Rule.name; definition} ->
-        let definition = simplify_def definition in
+        let definition = aux definition in
         {Rule.name; definition}
       )
     in
@@ -239,11 +241,12 @@ module UnitTests = struct
 
   let make rule expected =
     (Definition.to_string rule) >:: (fun _ ->
-      match simplify {rules=[{Rule.name="r"; definition=rule}]} with
+      match normalize {rules=[{Rule.name="r"; definition=rule}]} with
         | {rules=[{Rule.name="r"; definition}]} -> check_definition expected definition
         | _ -> fail "weird, really..."
     )
 
+  let n = null
   let s = sequence
   let a = alternative
   let r = repetition
@@ -252,7 +255,7 @@ module UnitTests = struct
   let t2 = terminal "t2"
   let t3 = terminal "t3"
 
-  let test = "Grammar" >::: ["simplify" >::: [
+  let test = "Grammar" >::: ["normalize" >::: [
     make Definition.Null Definition.Null;
     make t1 t1;
     make nt nt;
@@ -271,5 +274,7 @@ module UnitTests = struct
     make (a [t1; a [a [t2; t3]]]) (a [t1; t2; t3]);
     make (a [t1; a [a [a [t2; t3]]]]) (a [t1; t2; t3]);
     make (r (s [t1]) (a [t2])) (r t1 t2);
+    make (s [t1; n; t2]) (s [t1; t2]);
+    make (a [t1; n; t2]) (a [n; t1; t2]);
   ]]
 end
