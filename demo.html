@@ -20,20 +20,32 @@
         <h1>DrawGrammar</h1>
       </div>
     </div>
-    <!-- @todo Add a UI to load examples like Arithmetics, EBNF itself, Python, Json (there are already railway diagrams on http://json.org), etc. -->
     <div class="row">
       <div class="col-sm-4">
-        <form>
-          <div class="form-group">
-            <label for="syntax">Syntax:</label>
-            <select class="form-control" id="syntax">
-              <option value="ebnf">EBNF (ISO-14977)</option>
-              <!-- <option>Python</option> -->
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="grammar">Grammar:</label>
-            <textarea class="form-control" id="grammar" rows="15">expr = term, { ( '+' | '-' ) , term };
+        <ul class="nav nav-tabs" role="tablist">
+          <li class="nav-item">
+            <a class="nav-link active" data-toggle="tab" href="#grammar_tab" role="tab">Grammar</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#settings_tab" role="tab">Settings</a>
+          </li>
+          <!-- @todo Add a tab to load examples like Arithmetics, EBNF itself, Python, Json (there are already railway diagrams on http://json.org), etc. -->
+        </ul>
+
+        <div class="tab-content">
+          <div class="tab-pane active" id="grammar_tab" role="tabpanel">
+            <h2>Grammar</h2>
+            <form>
+              <div class="form-group">
+                <label for="syntax">Syntax:</label>
+                <select class="form-control" id="syntax">
+                  <option value="ebnf">EBNF (ISO-14977)</option>
+                  <!-- <option>Python</option> -->
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="grammar">Grammar:</label>
+                <textarea class="form-control" id="grammar" rows="15">expr = term, { ( '+' | '-' ) , term };
 
 term = { factor, ( '*' | '/' ) }, factor;
 
@@ -42,8 +54,18 @@ factor = integer | '(', expr, ')';
 integer = [ '-' ], digit, { digit };
 
 digit = '0' | '1' | '...' | '9' | 'A' | '...' | 'F';</textarea>
+              </div>
+            </form>
           </div>
-        </form>
+          <div class="tab-pane" id="settings_tab" role="tabpanel">
+            <h2>Primary settings</h2>
+            <form id="primary_settings">
+            </form>
+            <h2>Secondary settings</h2>
+            <form id="secondary_settings">
+            </form>
+          </div>
+        </div>
       </div>
       <div class="col-sm-8">
         <p>Output:</p>
@@ -58,20 +80,81 @@ digit = '0' | '1' | '...' | '9' | 'A' | '...' | 'F';</textarea>
     integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
     crossorigin="anonymous"></script>
   <script>
+    // https://stackoverflow.com/a/5077091/905845
+    String.prototype.format = function() {
+      var args = arguments;
+      return this.replace(/\{\{|\}\}|\{(\d+)\}/g, function(m, n) {
+        if (m == "{{") { return "{"; }
+        if (m == "}}") { return "}"; }
+        return args[n];
+      });
+    };
+    // https://stackoverflow.com/a/3291856/905845
+    String.prototype.capitalize = function() {
+      return this.charAt(0).toUpperCase() + this.slice(1);
+    }
+
     function update() {
-      draw_grammar_on_canvas(
+      var primary_settings = {};
+      $("#primary_settings select").each(function() {
+        var setting = $(this);
+        primary_settings[setting.attr("id")] = parseFloat(setting.val());
+      });
+
+      var secondary_settings = {};
+      $("#secondary_settings select").each(function() {
+        var setting = $(this);
+        secondary_settings[setting.attr("id")] = parseFloat(setting.val());
+      });
+
+      DrawGrammar.on_canvas(
         $("#syntax").val(),
         $("#grammar").val(),
         $("#output").get(0),
-        {},
+        primary_settings,
+        secondary_settings,
       );
     }
 
+    function make_option(value, is_default) {
+      return '<option value="{0}"{1}>{2}{3}</option>'.format(
+        value,
+        is_default ? " selected" : "",
+        Math.round(100 * value) / 100,
+        is_default ? " (default)" : "",
+      );
+    }
+
+    function make_options(default_value) {
+      var options = make_option(0);
+      for(var i = 4; i != 0; --i) {
+        options += make_option(default_value * Math.sqrt(2) ** -i);
+      };
+      options += make_option(default_value, is_default=true);
+      for(var i = 1; i != 10; ++i) {
+        options += make_option(default_value * Math.sqrt(2) ** i);
+      };
+      return options;
+    }
+
+    var select_html_template = '<div class="form-group"><label for="{0}">{1}:</label><select class="form-control" id="{0}">{2}</select></div>';
+    function make_settings(selector, settings) {
+      for(var name in settings) {
+        var default_value = settings[name];
+        $(selector).append(select_html_template.format(name, name.replace(/_/g, ' ').capitalize(), make_options(default_value)))
+      };
+    }
+
     $(document).ready(function() {
+      make_settings("#primary_settings", DrawGrammar.default_primary_settings);
+      make_settings("#secondary_settings", DrawGrammar.default_secondary_settings);
       update();
       $("#syntax").change(update);
       $("#grammar").keyup(update);
+      $("select").change(update);
     })
   </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
 </body>
 </html>

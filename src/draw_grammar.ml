@@ -2,7 +2,7 @@ open General.Abbr
 
 (* @todo Parse command-line options for Drawer.Settings *)
 
-module Drawer = Drawer.Make(Cairo)(Drawer.DefaultSettings)
+module Drawer = Drawer.Make(Cairo)(Drawer.DefaultPrimarySettings)(Drawer.DefaultSecondarySettings)
 
 let () =
   OCamlStandard.Sys.argv

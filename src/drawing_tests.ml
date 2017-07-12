@@ -9,8 +9,8 @@ let drawing_tests =
   |> Li.map ~f:(fun (name, grammar) ->
     object%js (_)
       val name = Js.string name
-      method draw_on_canvas_ canvas settings =
-        Draw_grammar_js.draw grammar canvas settings
+      method draw_on_canvas_ canvas primary_settings secondary_settings =
+        Draw_grammar_js.draw grammar canvas primary_settings secondary_settings
     end
   )
   |> Li.to_array

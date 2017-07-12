@@ -21,23 +21,16 @@
 <body>
   <div class="container">
     <div class="row">
-      <div class="col-sm-2">
-        <p>Settings (multipliers applied to default values)</p>
-        <form>
-          <div class="form-group"><label for="arrow_size">Arrow size:</label><select class="form-control" id="arrow_size"></select> </div>
-          <div class="form-group"><label for="dead_end_size">Dead-end size:</label><select class="form-control" id="dead_end_size"></select> </div>
-          <div class="form-group"><label for="definitions_font_size">Definitions font size:</label><select class="form-control" id="definitions_font_size"></select> </div>
-          <div class="form-group"><label for="line_width">Line width:</label><select class="form-control" id="line_width"></select> </div>
-          <div class="form-group"><label for="minimal_vertical_spacing">Minimal vertical spacing:</label><select class="form-control" id="minimal_vertical_spacing"></select> </div>
-          <div class="form-group"><label for="minimal_horizontal_spacing">Minimal horizontal spacing:</label><select class="form-control" id="minimal_horizontal_spacing"></select> </div>
-          <div class="form-group"><label for="rule_label_font_size">Rule label font size:</label><select class="form-control" id="rule_label_font_size"></select> </div>
-          <div class="form-group"><label for="space_between_rules">Space between rules:</label><select class="form-control" id="space_between_rules"></select> </div>
-          <div class="form-group"><label for="start_radius">Start radius:</label><select class="form-control" id="start_radius"></select> </div>
-          <div class="form-group"><label for="stop_radius">Stop radius:</label><select class="form-control" id="stop_radius"></select> </div>
-          <div class="form-group"><label for="turn_radius">Turn radius:</label><select class="form-control" id="turn_radius"></select> </div>
+      <div class="col-sm-3">
+        <h1>Primary settings</h1>
+        <form id="primary_settings">
+        </form>
+        <h1>Secondary settings</h1>
+        <form id="secondary_settings">
         </form>
       </div>
-      <div class="col-sm-10">
+      <div class="col-sm-9">
+        <h1>Drawing tests</h1>
         <div class="row" id="drawing_tests">
         </div>
       </div>
@@ -55,42 +48,73 @@
         return args[n];
       });
     };
+    // https://stackoverflow.com/a/3291856/905845
+    String.prototype.capitalize = function() {
+      return this.charAt(0).toUpperCase() + this.slice(1);
+    }
 
     function update() {
       $("#drawing_tests").html("");
 
-      var options = {};
-      $("select").each(function() {
+      var primary_settings = {};
+      $("#primary_settings select").each(function() {
         var setting = $(this);
-        if(setting.val() != "default") {
-          options[setting.attr("id")] = parseFloat(setting.val());
-        }
+        primary_settings[setting.attr("id")] = parseFloat(setting.val());
       });
 
+      var secondary_settings = {};
+      $("#secondary_settings select").each(function() {
+        var setting = $(this);
+        secondary_settings[setting.attr("id")] = parseFloat(setting.val());
+      });
+
+      var test_html_template = '<div class="col-md-6 col-lg-4" id="{0}"><canvas class="img-fluid" width="50" height="50" /></div></div>';
       for (var i = 1; i < drawing_tests.length; i++) {
         var test = drawing_tests[i];
-        var html_template =
-            '<div class="col-md-6 col-lg-4" id="{0}">'
-          + '<canvas class="img-fluid" width="50" height="50" />'
-          + '</div>'
-          + '</div>';
-        $("#drawing_tests").append(html_template.format(test.name));
+        $("#drawing_tests").append(test_html_template.format(test.name));
 
         var div = $(document.getElementById(test.name));
 
         try {
-          test.draw_on_canvas(div.find("canvas").get(0), options);
+          test.draw_on_canvas(div.find("canvas").get(0), primary_settings, secondary_settings);
         } catch(err) {
           div.append('<p class="failure">Exception: {0}</p>'.format(err))
         }
       }
     }
 
-    $(document).ready(function() {
-      $("select").append("<option selected>default</option><option>0</option><option>0.5</option><option>1</option>");
-      for(var i = 2; i != 12; ++i) {
-        $("select").append("<option>{0}</option>".format(Math.round(Math.sqrt(2) ** i)));
+    function make_option(value, is_default) {
+      return '<option value="{0}"{1}>{2}{3}</option>'.format(
+        value,
+        is_default ? " selected" : "",
+        Math.round(100 * value) / 100,
+        is_default ? " (default)" : "",
+      );
+    }
+
+    function make_options(default_value) {
+      var options = make_option(0);
+      for(var i = 4; i != 0; --i) {
+        options += make_option(default_value * Math.sqrt(2) ** -i);
       };
+      options += make_option(default_value, is_default=true);
+      for(var i = 1; i != 10; ++i) {
+        options += make_option(default_value * Math.sqrt(2) ** i);
+      };
+      return options;
+    }
+
+    var select_html_template = '<div class="form-group"><label for="{0}">{1}:</label><select class="form-control" id="{0}">{2}</select></div>';
+    function make_settings(selector, settings) {
+      for(var name in settings) {
+        var default_value = settings[name];
+        $(selector).append(select_html_template.format(name, name.replace(/_/g, ' ').capitalize(), make_options(default_value)))
+      };
+    }
+
+    $(document).ready(function() {
+      make_settings("#primary_settings", DrawGrammar.default_primary_settings);
+      make_settings("#secondary_settings", DrawGrammar.default_secondary_settings);
       update();
       $("select").change(update);
     })

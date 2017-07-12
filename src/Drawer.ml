@@ -2,45 +2,47 @@ open General.Abbr
 
 let sprintf = OCamlStandard.Printf.sprintf
 
-module DefaultSettings = struct
-  let arrow_size = None
-  let dead_end_size = None
-  let definitions_font_size = None
-  let line_width = None
-  let minimal_vertical_spacing = None
-  let minimal_horizontal_spacing = None
-  let rule_label_font_size = None
-  let space_between_rules = None
-  let start_radius = None
-  let stop_radius = None
-  let turn_radius = None
+module DefaultPrimarySettings = struct
+  let rule_label_font_size = 15.
+  let space_between_rules = 10.
+  let definitions_font_size = 12.
+  let line_width = 2.
 end
 
-module Make(C: JsOfOCairo.S)(SettingOverrides: sig
-  val arrow_size: float option
-  val dead_end_size: float option
-  val definitions_font_size: float option
-  val line_width: float option
-  val minimal_vertical_spacing: float option
-  val minimal_horizontal_spacing: float option
-  val rule_label_font_size: float option
-  val space_between_rules: float option
-  val start_radius: float option
-  val stop_radius: float option
-  val turn_radius: float option
+module DefaultSecondarySettings = struct
+  let arrow_size = 2.
+  let dead_end_size = 4.
+  let minimal_horizontal_spacing = 1.
+  let minimal_vertical_spacing = 1.
+  let start_radius = Fl.sqrt 2.
+  let stop_radius = 1.5 *. Fl.sqrt 2.
+  let turn_radius = 4.
+end
+
+module Make(C: JsOfOCairo.S)(PrimarySettings: sig
+  val rule_label_font_size: float
+  val space_between_rules: float
+  val definitions_font_size: float
+  val line_width: float
+end)(SecondarySettings: sig
+  val arrow_size: float
+  val dead_end_size: float
+  val minimal_horizontal_spacing: float
+  val minimal_vertical_spacing: float
+  val start_radius: float
+  val stop_radius: float
+  val turn_radius: float
 end) = struct
   module S = struct
-    let arrow_size = Opt.value_def SettingOverrides.arrow_size ~def:5.
-    let dead_end_size = Opt.value_def SettingOverrides.dead_end_size ~def:12.
-    let definitions_font_size = Opt.value_def SettingOverrides.definitions_font_size ~def:12.
-    let line_width = Opt.value_def SettingOverrides.line_width ~def:2.
-    let minimal_vertical_spacing = Opt.value_def SettingOverrides.minimal_vertical_spacing ~def:5.
-    let minimal_horizontal_spacing = Opt.value_def SettingOverrides.minimal_horizontal_spacing ~def:5.
-    let start_radius = Opt.value_def SettingOverrides.start_radius ~def:6.
-    let stop_radius = Opt.value_def SettingOverrides.stop_radius ~def:9.
-    let turn_radius = Opt.value_def SettingOverrides.turn_radius ~def:5.
-    let space_between_rules = Opt.value_def SettingOverrides.space_between_rules ~def:10.
-    let rule_label_font_size = Opt.value_def SettingOverrides.rule_label_font_size ~def:15.
+    include PrimarySettings
+
+    let arrow_size = line_width *. SecondarySettings.arrow_size
+    let dead_end_size = line_width *. SecondarySettings.dead_end_size
+    let minimal_horizontal_spacing = line_width *. SecondarySettings.minimal_horizontal_spacing
+    let minimal_vertical_spacing = line_width *. SecondarySettings.minimal_vertical_spacing
+    let start_radius = line_width *. SecondarySettings.start_radius
+    let stop_radius = line_width *. SecondarySettings.stop_radius
+    let turn_radius = line_width *. SecondarySettings.turn_radius
 
     let half_line_width = line_width /. 2.
   end

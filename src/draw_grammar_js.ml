@@ -11,43 +11,71 @@ let parse_grammar syntax grammar =
   |> Parse.parse_string ~syntax
   |> Grammar.simplify
 
-class type settings = object
-  method arrow_size_: float Js.optdef Js.readonly_prop
-  method dead_end_size_: float Js.optdef Js.readonly_prop
-  method definitions_font_size_: float Js.optdef Js.readonly_prop
-  method line_width_: float Js.optdef Js.readonly_prop
-  method minimal_vertical_spacing_: float Js.optdef Js.readonly_prop
-  method minimal_horizontal_spacing_: float Js.optdef Js.readonly_prop
-  method rule_label_font_size_: float Js.optdef Js.readonly_prop
-  method space_between_rules_: float Js.optdef Js.readonly_prop
-  method start_radius_: float Js.optdef Js.readonly_prop
-  method stop_radius_: float Js.optdef Js.readonly_prop
-  method turn_radius_: float Js.optdef Js.readonly_prop
+class type primary_settings = object
+  method rule_label_font_size_: float Js.prop
+  method space_between_rules_: float Js.prop
+  method definitions_font_size_: float Js.prop
+  method line_width_: float Js.prop
 end
 
-let draw grammar (canvas: Dom_html.element Js.t) (settings: settings Js.t) =
+let default_primary_settings = object%js (_)
+  val rule_label_font_size_ = Drawer.DefaultPrimarySettings.rule_label_font_size
+  val space_between_rules_ = Drawer.DefaultPrimarySettings.space_between_rules
+  val definitions_font_size_ = Drawer.DefaultPrimarySettings.definitions_font_size
+  val line_width_ = Drawer.DefaultPrimarySettings.line_width
+end
+
+class type secondary_settings = object
+  method arrow_size_: float Js.prop
+  method dead_end_size_: float Js.prop
+  method minimal_vertical_spacing_: float Js.prop
+  method minimal_horizontal_spacing_: float Js.prop
+  method start_radius_: float Js.prop
+  method stop_radius_: float Js.prop
+  method turn_radius_: float Js.prop
+end
+
+let default_secondary_settings = object%js (_)
+  val arrow_size_ = Drawer.DefaultSecondarySettings.arrow_size
+  val dead_end_size_ = Drawer.DefaultSecondarySettings.dead_end_size
+  val minimal_vertical_spacing_ = Drawer.DefaultSecondarySettings.minimal_vertical_spacing
+  val minimal_horizontal_spacing_ = Drawer.DefaultSecondarySettings.minimal_horizontal_spacing
+  val start_radius_ = Drawer.DefaultSecondarySettings.start_radius
+  val stop_radius_ = Drawer.DefaultSecondarySettings.stop_radius
+  val turn_radius_ = Drawer.DefaultSecondarySettings.turn_radius
+end
+
+let draw grammar (canvas: Dom_html.element Js.t) (primary_settings: primary_settings Js.t) (secondary_settings: secondary_settings Js.t) =
   let canvas = Js.Opt.get (Dom_html.CoerceTo.canvas canvas) (fun _ -> failwith "Not a canvas") in
   let context = JsOfOCairo.create (canvas##getContext Dom_html._2d_) in
   let module Drawer = Drawer.Make(JsOfOCairo)(struct
-    let arrow_size = Js.Optdef.to_option settings##.arrow_size_
-    let dead_end_size = Js.Optdef.to_option settings##.dead_end_size_
-    let definitions_font_size = Js.Optdef.to_option settings##.definitions_font_size_
-    let line_width = Js.Optdef.to_option settings##.line_width_
-    let minimal_vertical_spacing = Js.Optdef.to_option settings##.minimal_vertical_spacing_
-    let minimal_horizontal_spacing = Js.Optdef.to_option settings##.minimal_horizontal_spacing_
-    let rule_label_font_size = Js.Optdef.to_option settings##.rule_label_font_size_
-    let space_between_rules = Js.Optdef.to_option settings##.space_between_rules_
-    let start_radius = Js.Optdef.to_option settings##.start_radius_
-    let stop_radius = Js.Optdef.to_option settings##.stop_radius_
-    let turn_radius = Js.Optdef.to_option settings##.turn_radius_
+    let rule_label_font_size = primary_settings##.rule_label_font_size_
+    let space_between_rules = primary_settings##.space_between_rules_
+    let definitions_font_size = primary_settings##.definitions_font_size_
+    let line_width = primary_settings##.line_width_
+  end)(struct
+    let arrow_size = secondary_settings##.arrow_size_
+    let dead_end_size = secondary_settings##.dead_end_size_
+    let minimal_vertical_spacing = secondary_settings##.minimal_vertical_spacing_
+    let minimal_horizontal_spacing = secondary_settings##.minimal_horizontal_spacing_
+    let start_radius = secondary_settings##.start_radius_
+    let stop_radius = secondary_settings##.stop_radius_
+    let turn_radius = secondary_settings##.turn_radius_
   end) in
   let (w, h) = Drawer.measure grammar ~context in
   canvas##.width := Int.of_float w;
   canvas##.height := Int.of_float h;
   Drawer.draw grammar ~context
 
-let draw_grammar_on_canvas syntax grammar canvas settings =
-  let grammar = parse_grammar syntax grammar in
-  draw grammar canvas settings
+let draw_grammar =
+  object%js (_)
+    val default_primary_settings_ = default_primary_settings
 
-let () = Js.Unsafe.global##.draw_grammar_on_canvas_ := Js.wrap_callback draw_grammar_on_canvas
+    val default_secondary_settings_ = default_secondary_settings
+
+    method on_canvas_ syntax grammar canvas settings =
+      let grammar = parse_grammar syntax grammar in
+      draw grammar canvas settings
+  end
+
+let () = Js.export "DrawGrammar" draw_grammar
