@@ -20,6 +20,7 @@ end) = struct
     set_file_name lexbuf file_name;
     lexbuf
     |> Parser.syntax Lexer.token
+    |> Grammar.normalize
 
   let parse_chan ?file_name chan =
     chan
@@ -99,21 +100,22 @@ module EbnfUnitTests = struct
   let ex = Grammar.except
 
   let test = "Ebnf" >::: [
-    make "'t'" (a [s [t]]);
-    make "\"t\"" (a [s [t]]);
-    make "v1" (a [s [v1]]);
-    make "v1, v2, v3, v4" (a [s [v1; v2; v3; v4]]);
-    make "v1, (v2, v3), v4" (a [s [v1; a [s [v2; v3]]; v4]]);
-    make "v1 | v2 ! v3 / v4" (a [s [v1]; s [v2]; s [v3]; s [v4]]);
-    make "v1 | (v2 | v3) | v4" (a [s [v1]; s [a [s [v2]; s [v3]]]; s [v4]]);
-    make "{v1}" (a [s [r n (a [s [v1]])]]);
-    make "(:v1:)" (a [s [r n (a [s [v1]])]]);
-    make "5 * v1" (a [s [r v1 n]]);
-    make "[v1]" (a [s [a [n; (a [s [v1]])]]]);
-    make "(/v1/)" (a [s [a [n; (a [s [v1]])]]]);
-    make "" (a [s [n]]);
-    make "v1 - v2" (a [s [ex v1 v2]]);
-    make "? foo bar baz ?" (a [s [sp "foo bar baz"]]);
+    make "'t'" t;
+    make "'t' (* foobar *)" t;
+    make "\"t\"" t;
+    make "v1" v1;
+    make "v1, v2, v3, v4" (s [v1; v2; v3; v4]);
+    make "v1, (v2, v3), v4" (s [v1; v2; v3; v4]);
+    make "v1 | v2 ! v3 / v4" (a [v1; v2; v3; v4]);
+    make "v1 | (v2 | v3) | v4" (a [v1; v2; v3; v4]);
+    make "{v1}" (r n v1);
+    make "(:v1:)" (r n v1);
+    make "5 * v1" (r v1 n);
+    make "[v1]" (a [n; v1]);
+    make "(/v1/)" (a [n; v1]);
+    make "" n;
+    make "v1 - v2" (ex v1 v2);
+    make "? foo bar baz ?" (sp "foo bar baz");
   ]
 end
 
@@ -142,19 +144,19 @@ module PythonUnitTests = struct
   let ex = Grammar.except
 
   let test = "Python" >::: [
-    make "FOO" (a [s [t "FOO"]]);
-    make "FOO # bar baz\n" (a [s [t "FOO"]]);
-    make "foo" (a [s [nt "foo"]]);
-    make "FOO | BAR" (a [s [t "FOO"]; s [t "BAR"]]);
-    make "FOO BAR" (a [s [t "FOO"; t "BAR"]]);
+    make "FOO" (t "FOO");
+    make "FOO # bar baz\n" (t "FOO");
+    make "foo" (nt "foo");
+    make "FOO | BAR" (a [t "FOO"; t "BAR"]);
+    make "FOO BAR" (s [t "FOO"; t "BAR"]);
     make "FOO BAR | BAZ BIM" (a [s [t "FOO"; t "BAR"]; s [t "BAZ"; t "BIM"]]);
-    make "FOO (BAR | BAZ) BIM" (a [s [t "FOO"; a [s [t "BAR"]; s [t "BAZ"]]; t "BIM"]]);
-    make "[FOO]" (a [s [a [n; a [s [t "FOO"]]]]]);
-    make "FOO*" (a [s [r n (t "FOO")]]);
-    make "FOO+" (a [s [r (t "FOO") n]]);
+    make "FOO (BAR | BAZ) BIM" (s [t "FOO"; a [t "BAR"; t "BAZ"]; t "BIM"]);
+    make "[FOO]" (a [n; t "FOO"]);
+    make "FOO*" (r n (t "FOO"));
+    make "FOO+" (r (t "FOO") n);
     "several rules" >:: (fun _ ->
       check_poly ~to_string:Grammar.to_string
-        (g [ru "a" (a [s [t "FOO"]]); ru "b"(a [s [t "BAR"]])])
+        (g [ru "a" (t "FOO"); ru "b"(t "BAR")])
         (parse_string ~syntax:Syntax.Python "a: FOO\nb: BAR\n")
     )
   ]

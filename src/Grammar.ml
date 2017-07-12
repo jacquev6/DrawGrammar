@@ -236,15 +236,9 @@ let normalize =
 module UnitTests = struct
   open Tst
 
-  let check_definition expected actual =
-    check_poly ~to_string:Definition.to_string expected actual
-
-  let make rule expected =
-    (Definition.to_string rule) >:: (fun _ ->
-      match normalize {rules=[{Rule.name="r"; definition=rule}]} with
-        | {rules=[{Rule.name="r"; definition}]} -> check_definition expected definition
-        | _ -> fail "weird, really..."
-    )
+  let check_single_definition expected = function
+    | {rules=[{Rule.name="r"; definition}]} -> check_poly ~to_string:Definition.to_string expected definition
+    | _ -> fail "weird, really..."
 
   let n = null
   let s = sequence
@@ -255,26 +249,35 @@ module UnitTests = struct
   let t2 = terminal "t2"
   let t3 = terminal "t3"
 
-  let test = "Grammar" >::: ["normalize" >::: [
-    make Definition.Null Definition.Null;
-    make t1 t1;
-    make nt nt;
-    make (s [t1]) t1;
-    make (s [s [t1]]) t1;
-    make (s [s [s [t1]]]) t1;
-    make (s [s [t1; t2]]) (s [t1; t2]);
-    make (s [t1; s [t2; t3]]) (s [t1; t2; t3]);
-    make (s [t1; s [s [t2; t3]]]) (s [t1; t2; t3]);
-    make (s [t1; s [s [s [t2; t3]]]]) (s [t1; t2; t3]);
-    make (a [t1]) t1;
-    make (a [a [t1]]) t1;
-    make (a [a [a [t1]]]) t1;
-    make (a [a [t1; t2]]) (a [t1; t2]);
-    make (a [t1; a [t2; t3]]) (a [t1; t2; t3]);
-    make (a [t1; a [a [t2; t3]]]) (a [t1; t2; t3]);
-    make (a [t1; a [a [a [t2; t3]]]]) (a [t1; t2; t3]);
-    make (r (s [t1]) (a [t2])) (r t1 t2);
-    make (s [t1; n; t2]) (s [t1; t2]);
-    make (a [t1; n; t2]) (a [n; t1; t2]);
-  ]]
+  let test = "Grammar" >::: [
+    "normalize" >::: (
+      let make rule expected =
+        (Definition.to_string rule) >:: (fun _ ->
+          check_single_definition expected (normalize {rules=[{Rule.name="r"; definition=rule}]})
+        )
+      in
+      [
+        make Definition.Null Definition.Null;
+        make t1 t1;
+        make nt nt;
+        make (s [t1]) t1;
+        make (s [s [t1]]) t1;
+        make (s [s [s [t1]]]) t1;
+        make (s [s [t1; t2]]) (s [t1; t2]);
+        make (s [t1; s [t2; t3]]) (s [t1; t2; t3]);
+        make (s [t1; s [s [t2; t3]]]) (s [t1; t2; t3]);
+        make (s [t1; s [s [s [t2; t3]]]]) (s [t1; t2; t3]);
+        make (a [t1]) t1;
+        make (a [a [t1]]) t1;
+        make (a [a [a [t1]]]) t1;
+        make (a [a [t1; t2]]) (a [t1; t2]);
+        make (a [t1; a [t2; t3]]) (a [t1; t2; t3]);
+        make (a [t1; a [a [t2; t3]]]) (a [t1; t2; t3]);
+        make (a [t1; a [a [a [t2; t3]]]]) (a [t1; t2; t3]);
+        make (r (s [t1]) (a [t2])) (r t1 t2);
+        make (s [t1; n; t2]) (s [t1; t2]);
+        make (a [t1; n; t2]) (a [n; t1; t2]);
+      ]
+    );
+  ]
 end
