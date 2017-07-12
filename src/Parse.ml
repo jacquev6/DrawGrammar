@@ -39,8 +39,10 @@ end) = struct
     |> parse_lexbuf ?file_name
 end
 
+(* @todo Rename Iso14977Ebnf *)
 module Ebnf = Make(EbnfParser)(EbnfLexer)
 
+(* @todo Rename PythonEbnf *)
 module Python = Make(PythonParser)(PythonLexer)
 
 module Syntax = struct

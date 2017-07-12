@@ -16,7 +16,7 @@ rule token = parse
   | (identifier as name) ':' { RULE name }
   | identifier as name { IDENTIFIER name }
   | '\'' ([^'\'']+ as value) '\'' { TERMINAL value }
-  | (['A'-'Z']+ as value) { TERMINAL value }
+  | (['A'-'Z']+ as value) { TERMINAL value (* @todo Add a TOKEN token and draw them differently from literal terminals *) }
 
   | '|' { ALTERNATIVE }
   | '(' { START_GROUP }

@@ -325,6 +325,7 @@ end) = struct
       Bricks.Advance.draw S.arrow_size ~context;
   end
 
+  (* @todo Display text in fixed-width font *)
   module Terminal = TextSymbol(struct
     type t = Grammar.Terminal.t
     let text {Grammar.Terminal.value} =
