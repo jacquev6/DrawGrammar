@@ -41,18 +41,23 @@ end
 
 module Ebnf = Make(EbnfParser)(EbnfLexer)
 
+module Python = Make(PythonParser)(PythonLexer)
+
 module Syntax = struct
   type t =
     | Ebnf
+    | Python
 
   let of_string = function
     | "ebnf" -> Ebnf
+    | "python" -> Python
     | syntax -> failwith (sprintf "Unknown grammar syntax %s" syntax)
 end
 
 let parse_string ~syntax s =
   match syntax with
     | Syntax.Ebnf -> Ebnf.parse_string s
+    | Syntax.Python -> Python.parse_string s
 
 let parse_file name =
   let syntax =
@@ -64,6 +69,7 @@ let parse_file name =
   in
   match syntax with
     | Syntax.Ebnf -> Ebnf.parse_file name
+    | Syntax.Python -> Python.parse_file name
 
 module EbnfUnitTests = struct
   open Tst
@@ -109,10 +115,54 @@ module EbnfUnitTests = struct
   ]
 end
 
+module PythonUnitTests = struct
+  open Tst
+
+  let check_definition expected actual =
+    check_poly ~to_string:Grammar.Definition.to_string expected actual
+
+  let make rule expected =
+    rule >:: (fun _ ->
+      match parse_string ~syntax:Syntax.Python (sprintf "r: %s\n" rule) with
+        | {Grammar.rules=[{Grammar.Rule.name="r"; definition}]} -> check_definition expected definition
+        | _ -> fail "weird, really..."
+    )
+
+  let g = Grammar.grammar
+  let nt = Grammar.non_terminal
+  let t = Grammar.terminal
+  let s = Grammar.sequence
+  let a = Grammar.alternative
+  let r = Grammar.repetition
+  let ru = Grammar.rule
+  let n = Grammar.null
+  let sp = Grammar.special
+  let ex = Grammar.except
+
+  let test = "Python" >::: [
+    make "FOO" (a [s [t "FOO"]]);
+    make "FOO # bar baz\n" (a [s [t "FOO"]]);
+    make "foo" (a [s [nt "foo"]]);
+    make "FOO | BAR" (a [s [t "FOO"]; s [t "BAR"]]);
+    make "FOO BAR" (a [s [t "FOO"; t "BAR"]]);
+    make "FOO BAR | BAZ BIM" (a [s [t "FOO"; t "BAR"]; s [t "BAZ"; t "BIM"]]);
+    make "FOO (BAR | BAZ) BIM" (a [s [t "FOO"; a [s [t "BAR"]; s [t "BAZ"]]; t "BIM"]]);
+    make "[FOO]" (a [s [a [n; a [s [t "FOO"]]]]]);
+    make "FOO*" (a [s [r n (t "FOO")]]);
+    make "FOO+" (a [s [r (t "FOO") n]]);
+    "several rules" >:: (fun _ ->
+      check_poly ~to_string:Grammar.to_string
+        (g [ru "a" (a [s [t "FOO"]]); ru "b"(a [s [t "BAR"]])])
+        (parse_string ~syntax:Syntax.Python "a: FOO\nb: BAR\n")
+    )
+  ]
+end
+
 module UnitTests = struct
   open Tst
 
   let test = "Parse" >::: [
     EbnfUnitTests.test;
+    PythonUnitTests.test;
   ]
 end

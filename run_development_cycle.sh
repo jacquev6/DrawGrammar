@@ -15,6 +15,7 @@ cd src
 build draw_grammar.byte
 cd ..
 src/_build/draw_grammar.byte *.ebnf
+src/_build/draw_grammar.byte *.python
 echo
 echo "Have a look at $(pwd)/*.png"
 echo

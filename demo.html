@@ -37,7 +37,7 @@
                 <label for="syntax">Syntax:</label>
                 <select class="form-control" id="syntax">
                   <option value="ebnf">EBNF (ISO-14977)</option>
-                  <!-- <option>Python</option> -->
+                  <option value="python">Python</option>
                 </select>
               </div>
               <div class="form-group">
@@ -70,6 +70,16 @@
               <h3>EBNF</h3>
               <p>As described in <a href="http://www.cl.cam.ac.uk/~mgk25/iso-14977.pdf">ISO/IEC 14977 : 1996(E)</a>.
               <button data-syntax="ebnf" data-src="ebnf.ebnf">Load</button></p>
+            </div>
+            <div>
+              <h3>Python 2.7</h3>
+              <p>As defined by <a href="https://github.com/python/cpython/blob/2.7/Grammar/Grammar">this grammar</a>.
+              <button data-syntax="python" data-src="https://cdn.rawgit.com/python/cpython/2.7/Grammar/Grammar">Load</button></p>
+            </div>
+            <div>
+              <h3>Python 3.6</h3>
+              <p>As defined by <a href="https://github.com/python/cpython/blob/3.6/Grammar/Grammar">this grammar</a>.
+              <button data-syntax="python" data-src="https://cdn.rawgit.com/python/cpython/3.6/Grammar/Grammar">Load</button></p>
             </div>
           </div>
         </div>
