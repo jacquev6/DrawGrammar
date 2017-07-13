@@ -9,9 +9,9 @@ let parse_grammar syntax grammar =
   grammar
   |> Js.to_string
   |> Parse.parse_string ~syntax
-  |> Grammar.simplify
 
 class type primary_settings = object
+  method simplify: bool Js.t Js.prop
   method rule_label_font_size_: float Js.prop
   method space_between_rules_: float Js.prop
   method definitions_font_size_: float Js.prop
@@ -19,6 +19,7 @@ class type primary_settings = object
 end
 
 let default_primary_settings = object%js (_)
+  val simplify = Js.bool true
   val rule_label_font_size_ = Drawer.DefaultPrimarySettings.rule_label_font_size
   val space_between_rules_ = Drawer.DefaultPrimarySettings.space_between_rules
   val definitions_font_size_ = Drawer.DefaultPrimarySettings.definitions_font_size
@@ -46,6 +47,12 @@ let default_secondary_settings = object%js (_)
 end
 
 let draw grammar (canvas: Dom_html.element Js.t) (primary_settings: primary_settings Js.t) (secondary_settings: secondary_settings Js.t) =
+  let grammar =
+    if Js.to_bool primary_settings##.simplify then
+      Grammar.simplify grammar
+    else
+      grammar
+  in
   let canvas = Js.Opt.get (Dom_html.CoerceTo.canvas canvas) (fun _ -> failwith "Not a canvas") in
   let context = JsOfOCairo.create (canvas##getContext Dom_html._2d_) in
   let module Drawer = Drawer.Make(JsOfOCairo)(struct

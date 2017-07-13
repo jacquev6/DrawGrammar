@@ -38,35 +38,13 @@
 
   <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha256-k2WSCIexGzOj3Euiig+TlR8gA0EmPjuc79OEeY5L45g=" crossorigin="anonymous"></script>
   <script src="src/_build/drawing_tests.js"></script>
+  <script src="settings.js"></script>
   <script>
-    // https://stackoverflow.com/a/5077091/905845
-    String.prototype.format = function() {
-      var args = arguments;
-      return this.replace(/\{\{|\}\}|\{(\d+)\}/g, function(m, n) {
-        if (m == "{{") { return "{"; }
-        if (m == "}}") { return "}"; }
-        return args[n];
-      });
-    };
-    // https://stackoverflow.com/a/3291856/905845
-    String.prototype.capitalize = function() {
-      return this.charAt(0).toUpperCase() + this.slice(1);
-    }
-
     function update() {
       $("#drawing_tests").html("");
 
-      var primary_settings = {};
-      $("#primary_settings select").each(function() {
-        var setting = $(this);
-        primary_settings[setting.attr("id")] = parseFloat(setting.val());
-      });
-
-      var secondary_settings = {};
-      $("#secondary_settings select").each(function() {
-        var setting = $(this);
-        secondary_settings[setting.attr("id")] = parseFloat(setting.val());
-      });
+      var primary_settings = get_settings("#primary_settings");
+      var secondary_settings = get_settings("#secondary_settings");
 
       var test_html_template = '<div class="col-md-6 col-lg-4" id="{0}"><canvas class="img-fluid" width="50" height="50" /></div></div>';
       for (var i = 1; i < drawing_tests.length; i++) {
@@ -81,35 +59,6 @@
           div.append('<p class="failure">Exception: {0}</p>'.format(err))
         }
       }
-    }
-
-    function make_option(value, is_default) {
-      return '<option value="{0}"{1}>{2}{3}</option>'.format(
-        value,
-        is_default ? " selected" : "",
-        Math.round(100 * value) / 100,
-        is_default ? " (default)" : "",
-      );
-    }
-
-    function make_options(default_value) {
-      var options = make_option(0);
-      for(var i = 4; i != 0; --i) {
-        options += make_option(default_value * Math.sqrt(2) ** -i);
-      };
-      options += make_option(default_value, is_default=true);
-      for(var i = 1; i != 10; ++i) {
-        options += make_option(default_value * Math.sqrt(2) ** i);
-      };
-      return options;
-    }
-
-    var select_html_template = '<div class="form-group"><label for="{0}">{1}:</label><select class="form-control" id="{0}">{2}</select></div>';
-    function make_settings(selector, settings) {
-      for(var name in settings) {
-        var default_value = settings[name];
-        $(selector).append(select_html_template.format(name, name.replace(/_/g, ' ').capitalize(), make_options(default_value)))
-      };
     }
 
     $(document).ready(function() {
