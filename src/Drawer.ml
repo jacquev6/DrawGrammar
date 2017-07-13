@@ -602,6 +602,8 @@ end) = struct
 
     let draw_definition rule =
       make_draw (fun context ->
+        C.set_line_width context S.line_width;
+        C.set_line_cap context C.ROUND;
         let definition = Grammar.Rule.definition rule in
         let (_, definition_ascent, definition_descent) = measure_definition rule ~context in
         C.translate context ~x:0. ~y:definition_ascent;
@@ -631,7 +633,6 @@ end) = struct
 
   let measure grammar =
     make_measure (fun context ->
-      C.set_line_width context S.line_width;
       let rules = Grammar.rules grammar in
       rules
       |> Li.map ~f:(Rule.measure ~context)
@@ -642,7 +643,6 @@ end) = struct
 
   let draw grammar =
     make_draw (fun context ->
-      C.set_line_width context S.line_width;
       let rules = Grammar.rules grammar in
       let (_, height) = measure grammar ~context in
       rules
