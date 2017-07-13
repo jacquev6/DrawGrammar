@@ -5,6 +5,7 @@ open General.Abbr
 let single_rule_grammars =
   Grammar.[
     ("terminal", terminal "in a rounded rectangle");
+    ("token", token "in a rounded rectangle");
     ("rule with a name longer than its definition", terminal "short");
     ("non-terminal", non_terminal "in a rectangle");
     ("special", special "in an octogon");

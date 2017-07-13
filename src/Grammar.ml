@@ -13,6 +13,17 @@ module Terminal = struct
     sprintf "%S" value
 end
 
+module Token = struct
+  type t = {
+    name: string;
+  }
+
+  let name {name} = name
+
+  let to_string {name} =
+    name
+end
+
 module NonTerminal = struct
   type t = {
     name: string;
@@ -124,6 +135,7 @@ and Definition: sig
   type t =
     | Null
     | Terminal of Terminal.t
+    | Token of Token.t
     | NonTerminal of NonTerminal.t
     | Sequence of Sequence.t
     | Alternative of Alternative.t
@@ -136,6 +148,7 @@ end = struct
   type t =
     | Null
     | Terminal of Terminal.t
+    | Token of Token.t
     | NonTerminal of NonTerminal.t
     | Sequence of Sequence.t
     | Alternative of Alternative.t
@@ -146,6 +159,7 @@ end = struct
   let to_string = function
     | Null -> "ε"
     | Terminal x -> Terminal.to_string x
+    | Token x -> Token.to_string x
     | NonTerminal x -> NonTerminal.to_string x
     | Sequence x -> Sequence.to_string x
     | Alternative x -> Alternative.to_string x
@@ -183,6 +197,8 @@ module Constructors = struct
   let null = Definition.Null
 
   let non_terminal name = Definition.NonTerminal {NonTerminal.name}
+
+  let token name = Definition.Token {Token.name}
 
   let terminal value = Definition.Terminal {Terminal.value}
 
@@ -309,7 +325,7 @@ let simplify =
     aux []
   in
   let rec aux = function
-    | (Definition.Null | Definition.NonTerminal _ | Definition.Terminal _ | Definition.Special _) as x -> x
+    | (Definition.Null | Definition.NonTerminal _ | Definition.Token _ | Definition.Terminal _ | Definition.Special _) as x -> x
     | Definition.Alternative {Alternative.elements} ->
       let elements = Li.map ~f:aux elements in
       Definition.Alternative {Alternative.elements}

@@ -10,6 +10,7 @@
 %token <string> IDENTIFIER
 %token <string> RULE
 %token <string> TERMINAL
+%token <string> TOKEN
 %token ALTERNATIVE
 %token EOF
 %token REPEAT_ONE
@@ -54,6 +55,8 @@ repetition:
 single_definition:
   | value=TERMINAL
     { terminal value }
+  | name=TOKEN
+    { token name }
   | name=IDENTIFIER
     { non_terminal name }
   | definition=delimited(START_GROUP, definition, END_GROUP)

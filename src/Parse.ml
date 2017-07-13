@@ -121,7 +121,7 @@ module PythonEbnfUnitTests = struct
 
   let g = Grammar.grammar
   let nt = Grammar.non_terminal
-  let t = Grammar.terminal
+  let t = Grammar.token
   let s = Grammar.sequence
   let a = Grammar.alternative
   let r = Grammar.repetition

@@ -306,12 +306,16 @@ end) = struct
   module TextSymbol(Get: sig
     type t
     val text: t -> string
+    val weight: C.weight
+    val slant: C.slant
+    val family: string
   end)(Rectangle: sig
     val measure: string -> context:C.context -> float * float * float
     val draw: string -> context:C.context -> unit
   end) = struct
     let measure symbol =
       make_measure (fun context ->
+        C.select_font_face context ~weight:Get.weight Get.family;
         measure_sequence [
           Bricks.Arrow.measure ~context;
           Rectangle.measure (Get.text symbol) ~context;
@@ -320,25 +324,42 @@ end) = struct
       )
 
     let draw symbol ~context =
+      C.select_font_face context ~slant:Get.slant ~weight:Get.weight Get.family;
       Bricks.Arrow.draw ~context;
       Rectangle.draw (Get.text symbol) ~context;
       Bricks.Advance.draw S.arrow_size ~context;
   end
 
-  (* @todo Display text in fixed-width font *)
   module Terminal = TextSymbol(struct
     type t = Grammar.Terminal.t
     let text = Grammar.Terminal.value
+    let weight = C.Bold
+    let slant = C.Upright
+    let family = "monospace"
+  end)(Bricks.RoundedRectangleText)
+
+  module Token = TextSymbol(struct
+    type t = Grammar.Token.t
+    let text = Grammar.Token.name
+    let weight = C.Normal
+    let slant = C.Upright
+    let family = "sans-serif"
   end)(Bricks.RoundedRectangleText)
 
   module NonTerminal = TextSymbol(struct
     type t = Grammar.NonTerminal.t
     let text = Grammar.NonTerminal.name
+    let weight = C.Normal
+    let slant = C.Italic
+    let family = "sans-serif"
   end)(Bricks.RectangleText)
 
   module Special = TextSymbol(struct
     type t = Grammar.Special.t
     let text = Grammar.Special.value
+    let weight = C.Normal
+    let slant = C.Upright
+    let family = "sans-serif"
   end)(Bricks.PointyRectangleText)
 
   module rec Sequence: sig
@@ -551,6 +572,7 @@ end) = struct
       match definition with
         | Grammar.Definition.Null -> let h = S.half_line_width in (0., h, h)
         | Grammar.Definition.Terminal x -> Terminal.measure x ~context
+        | Grammar.Definition.Token x -> Token.measure x ~context
         | Grammar.Definition.NonTerminal x -> NonTerminal.measure x ~context
         | Grammar.Definition.Sequence x -> Sequence.measure x ~context
         | Grammar.Definition.Alternative x -> Alternative.measure x ~context
@@ -562,6 +584,7 @@ end) = struct
       match definition with
         | Grammar.Definition.Null -> ()
         | Grammar.Definition.Terminal x -> Terminal.draw x ~context
+        | Grammar.Definition.Token x -> Token.draw x ~context
         | Grammar.Definition.NonTerminal x -> NonTerminal.draw x ~context
         | Grammar.Definition.Sequence x -> Sequence.draw x ~context
         | Grammar.Definition.Alternative x -> Alternative.draw x ~context

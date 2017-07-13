@@ -5,6 +5,11 @@ module Terminal: sig
   val value: t -> string
 end
 
+module Token: sig
+  type t
+  val name: t -> string
+end
+
 module NonTerminal: sig
   type t
   val name: t -> string
@@ -41,6 +46,7 @@ and Definition: sig
   type t =
     | Null
     | Terminal of Terminal.t
+    | Token of Token.t
     | NonTerminal of NonTerminal.t
     | Sequence of Sequence.t
     | Alternative of Alternative.t
@@ -64,6 +70,7 @@ val simplify: t -> t
 val null: Definition.t
 val non_terminal: string -> Definition.t
 val terminal: string -> Definition.t
+val token: string -> Definition.t
 val special: string -> Definition.t
 val sequence: Definition.t list -> Definition.t
 val alternative: Definition.t list -> Definition.t
