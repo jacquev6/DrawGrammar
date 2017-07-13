@@ -1,0 +1,261 @@
+syntax: META_IDENTIFIER DEFINING_SYMBOL CONCATENATE_SYMBOL REPETITION_SYMBOL 
+##
+## Ends in an error in state: 6.
+##
+## separated_nonempty_list(CONCATENATE_SYMBOL,syntactic_term) -> syntactic_term CONCATENATE_SYMBOL . separated_nonempty_list(CONCATENATE_SYMBOL,syntactic_term) [ TERMINATOR_SYMBOL END_REPEAT_SYMBOL END_OPTION_SYMBOL END_GROUP_SYMBOL DEFINITION_SEPARATOR_SYMBOL ]
+##
+## The known suffix of the stack is as follows:
+## syntactic_term CONCATENATE_SYMBOL 
+##
+
+(IsoEbnf 1)
+
+syntax: META_IDENTIFIER DEFINING_SYMBOL DEFINITION_SEPARATOR_SYMBOL REPETITION_SYMBOL 
+##
+## Ends in an error in state: 15.
+##
+## separated_nonempty_list(DEFINITION_SEPARATOR_SYMBOL,single_definition) -> single_definition DEFINITION_SEPARATOR_SYMBOL . separated_nonempty_list(DEFINITION_SEPARATOR_SYMBOL,single_definition) [ TERMINATOR_SYMBOL END_REPEAT_SYMBOL END_OPTION_SYMBOL END_GROUP_SYMBOL ]
+##
+## The known suffix of the stack is as follows:
+## single_definition DEFINITION_SEPARATOR_SYMBOL 
+##
+
+(IsoEbnf 2)
+
+syntax: META_IDENTIFIER DEFINING_SYMBOL EXCEPT_SYMBOL META_IDENTIFIER TERMINAL_STRING 
+##
+## Ends in an error in state: 5.
+##
+## separated_nonempty_list(CONCATENATE_SYMBOL,syntactic_term) -> syntactic_term . [ TERMINATOR_SYMBOL END_REPEAT_SYMBOL END_OPTION_SYMBOL END_GROUP_SYMBOL DEFINITION_SEPARATOR_SYMBOL ]
+## separated_nonempty_list(CONCATENATE_SYMBOL,syntactic_term) -> syntactic_term . CONCATENATE_SYMBOL separated_nonempty_list(CONCATENATE_SYMBOL,syntactic_term) [ TERMINATOR_SYMBOL END_REPEAT_SYMBOL END_OPTION_SYMBOL END_GROUP_SYMBOL DEFINITION_SEPARATOR_SYMBOL ]
+##
+## The known suffix of the stack is as follows:
+## syntactic_term 
+##
+
+(IsoEbnf 3)
+
+syntax: META_IDENTIFIER DEFINING_SYMBOL EXCEPT_SYMBOL REPETITION_SYMBOL 
+##
+## Ends in an error in state: 8.
+##
+## option(preceded(EXCEPT_SYMBOL,syntactic_exception)) -> EXCEPT_SYMBOL . syntactic_exception [ TERMINATOR_SYMBOL END_REPEAT_SYMBOL END_OPTION_SYMBOL END_GROUP_SYMBOL DEFINITION_SEPARATOR_SYMBOL CONCATENATE_SYMBOL ]
+##
+## The known suffix of the stack is as follows:
+## EXCEPT_SYMBOL 
+##
+
+(IsoEbnf 4)
+
+syntax: META_IDENTIFIER DEFINING_SYMBOL INTEGER REPETITION_SYMBOL DEFINING_SYMBOL 
+##
+## Ends in an error in state: 11.
+##
+## syntactic_factor -> boption(terminated(INTEGER,REPETITION_SYMBOL)) . syntactic_primary [ TERMINATOR_SYMBOL EXCEPT_SYMBOL END_REPEAT_SYMBOL END_OPTION_SYMBOL END_GROUP_SYMBOL DEFINITION_SEPARATOR_SYMBOL CONCATENATE_SYMBOL ]
+##
+## The known suffix of the stack is as follows:
+## boption(terminated(INTEGER,REPETITION_SYMBOL)) 
+##
+
+(IsoEbnf 5)
+
+syntax: META_IDENTIFIER DEFINING_SYMBOL INTEGER TERMINATOR_SYMBOL 
+##
+## Ends in an error in state: 3.
+##
+## boption(terminated(INTEGER,REPETITION_SYMBOL)) -> INTEGER . REPETITION_SYMBOL [ TERMINATOR_SYMBOL TERMINAL_STRING START_REPEAT_SYMBOL START_OPTION_SYMBOL START_GROUP_SYMBOL SPECIAL_SEQUENCE META_IDENTIFIER EXCEPT_SYMBOL END_REPEAT_SYMBOL END_OPTION_SYMBOL END_GROUP_SYMBOL DEFINITION_SEPARATOR_SYMBOL CONCATENATE_SYMBOL ]
+##
+## The known suffix of the stack is as follows:
+## INTEGER 
+##
+
+(IsoEbnf 6)
+
+syntax: META_IDENTIFIER DEFINING_SYMBOL REPETITION_SYMBOL 
+##
+## Ends in an error in state: 2.
+##
+## syntax_rule -> META_IDENTIFIER DEFINING_SYMBOL . definitions_list TERMINATOR_SYMBOL [ META_IDENTIFIER EOF ]
+##
+## The known suffix of the stack is as follows:
+## META_IDENTIFIER DEFINING_SYMBOL 
+##
+
+(IsoEbnf 7)
+
+syntax: META_IDENTIFIER DEFINING_SYMBOL START_GROUP_SYMBOL TERMINAL_STRING TERMINATOR_SYMBOL 
+##
+## Ends in an error in state: 25.
+##
+## grouped_sequence -> START_GROUP_SYMBOL definitions_list . END_GROUP_SYMBOL [ TERMINATOR_SYMBOL EXCEPT_SYMBOL END_REPEAT_SYMBOL END_OPTION_SYMBOL END_GROUP_SYMBOL DEFINITION_SEPARATOR_SYMBOL CONCATENATE_SYMBOL ]
+##
+## The known suffix of the stack is as follows:
+## START_GROUP_SYMBOL definitions_list 
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 7, spurious reduction of production option(preceded(EXCEPT_SYMBOL,syntactic_exception)) -> 
+## In state 34, spurious reduction of production syntactic_term -> syntactic_factor option(preceded(EXCEPT_SYMBOL,syntactic_exception)) 
+## In state 5, spurious reduction of production separated_nonempty_list(CONCATENATE_SYMBOL,syntactic_term) -> syntactic_term 
+## In state 17, spurious reduction of production single_definition -> separated_nonempty_list(CONCATENATE_SYMBOL,syntactic_term) 
+## In state 14, spurious reduction of production separated_nonempty_list(DEFINITION_SEPARATOR_SYMBOL,single_definition) -> single_definition 
+## In state 18, spurious reduction of production definitions_list -> separated_nonempty_list(DEFINITION_SEPARATOR_SYMBOL,single_definition) 
+##
+
+(IsoEbnf 8)
+
+syntax: META_IDENTIFIER DEFINING_SYMBOL START_GROUP_SYMBOL TERMINATOR_SYMBOL 
+##
+## Ends in an error in state: 24.
+##
+## grouped_sequence -> START_GROUP_SYMBOL . definitions_list END_GROUP_SYMBOL [ TERMINATOR_SYMBOL EXCEPT_SYMBOL END_REPEAT_SYMBOL END_OPTION_SYMBOL END_GROUP_SYMBOL DEFINITION_SEPARATOR_SYMBOL CONCATENATE_SYMBOL ]
+##
+## The known suffix of the stack is as follows:
+## START_GROUP_SYMBOL 
+##
+
+(IsoEbnf 9)
+
+syntax: META_IDENTIFIER DEFINING_SYMBOL START_OPTION_SYMBOL TERMINAL_STRING TERMINATOR_SYMBOL 
+##
+## Ends in an error in state: 22.
+##
+## optional_sequence -> START_OPTION_SYMBOL definitions_list . END_OPTION_SYMBOL [ TERMINATOR_SYMBOL EXCEPT_SYMBOL END_REPEAT_SYMBOL END_OPTION_SYMBOL END_GROUP_SYMBOL DEFINITION_SEPARATOR_SYMBOL CONCATENATE_SYMBOL ]
+##
+## The known suffix of the stack is as follows:
+## START_OPTION_SYMBOL definitions_list 
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 7, spurious reduction of production option(preceded(EXCEPT_SYMBOL,syntactic_exception)) -> 
+## In state 34, spurious reduction of production syntactic_term -> syntactic_factor option(preceded(EXCEPT_SYMBOL,syntactic_exception)) 
+## In state 5, spurious reduction of production separated_nonempty_list(CONCATENATE_SYMBOL,syntactic_term) -> syntactic_term 
+## In state 17, spurious reduction of production single_definition -> separated_nonempty_list(CONCATENATE_SYMBOL,syntactic_term) 
+## In state 14, spurious reduction of production separated_nonempty_list(DEFINITION_SEPARATOR_SYMBOL,single_definition) -> single_definition 
+## In state 18, spurious reduction of production definitions_list -> separated_nonempty_list(DEFINITION_SEPARATOR_SYMBOL,single_definition) 
+##
+
+(IsoEbnf 10)
+
+syntax: META_IDENTIFIER DEFINING_SYMBOL START_OPTION_SYMBOL TERMINATOR_SYMBOL 
+##
+## Ends in an error in state: 21.
+##
+## optional_sequence -> START_OPTION_SYMBOL . definitions_list END_OPTION_SYMBOL [ TERMINATOR_SYMBOL EXCEPT_SYMBOL END_REPEAT_SYMBOL END_OPTION_SYMBOL END_GROUP_SYMBOL DEFINITION_SEPARATOR_SYMBOL CONCATENATE_SYMBOL ]
+##
+## The known suffix of the stack is as follows:
+## START_OPTION_SYMBOL 
+##
+
+(IsoEbnf 11)
+
+syntax: META_IDENTIFIER DEFINING_SYMBOL START_REPEAT_SYMBOL TERMINAL_STRING TERMINATOR_SYMBOL 
+##
+## Ends in an error in state: 19.
+##
+## repeated_sequence -> START_REPEAT_SYMBOL definitions_list . END_REPEAT_SYMBOL [ TERMINATOR_SYMBOL EXCEPT_SYMBOL END_REPEAT_SYMBOL END_OPTION_SYMBOL END_GROUP_SYMBOL DEFINITION_SEPARATOR_SYMBOL CONCATENATE_SYMBOL ]
+##
+## The known suffix of the stack is as follows:
+## START_REPEAT_SYMBOL definitions_list 
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 7, spurious reduction of production option(preceded(EXCEPT_SYMBOL,syntactic_exception)) -> 
+## In state 34, spurious reduction of production syntactic_term -> syntactic_factor option(preceded(EXCEPT_SYMBOL,syntactic_exception)) 
+## In state 5, spurious reduction of production separated_nonempty_list(CONCATENATE_SYMBOL,syntactic_term) -> syntactic_term 
+## In state 17, spurious reduction of production single_definition -> separated_nonempty_list(CONCATENATE_SYMBOL,syntactic_term) 
+## In state 14, spurious reduction of production separated_nonempty_list(DEFINITION_SEPARATOR_SYMBOL,single_definition) -> single_definition 
+## In state 18, spurious reduction of production definitions_list -> separated_nonempty_list(DEFINITION_SEPARATOR_SYMBOL,single_definition) 
+##
+
+(IsoEbnf 12)
+
+syntax: META_IDENTIFIER DEFINING_SYMBOL START_REPEAT_SYMBOL TERMINATOR_SYMBOL 
+##
+## Ends in an error in state: 13.
+##
+## repeated_sequence -> START_REPEAT_SYMBOL . definitions_list END_REPEAT_SYMBOL [ TERMINATOR_SYMBOL EXCEPT_SYMBOL END_REPEAT_SYMBOL END_OPTION_SYMBOL END_GROUP_SYMBOL DEFINITION_SEPARATOR_SYMBOL CONCATENATE_SYMBOL ]
+##
+## The known suffix of the stack is as follows:
+## START_REPEAT_SYMBOL 
+##
+
+(IsoEbnf 13)
+
+syntax: META_IDENTIFIER DEFINING_SYMBOL TERMINAL_STRING END_REPEAT_SYMBOL 
+##
+## Ends in an error in state: 36.
+##
+## syntax_rule -> META_IDENTIFIER DEFINING_SYMBOL definitions_list . TERMINATOR_SYMBOL [ META_IDENTIFIER EOF ]
+##
+## The known suffix of the stack is as follows:
+## META_IDENTIFIER DEFINING_SYMBOL definitions_list 
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 7, spurious reduction of production option(preceded(EXCEPT_SYMBOL,syntactic_exception)) -> 
+## In state 34, spurious reduction of production syntactic_term -> syntactic_factor option(preceded(EXCEPT_SYMBOL,syntactic_exception)) 
+## In state 5, spurious reduction of production separated_nonempty_list(CONCATENATE_SYMBOL,syntactic_term) -> syntactic_term 
+## In state 17, spurious reduction of production single_definition -> separated_nonempty_list(CONCATENATE_SYMBOL,syntactic_term) 
+## In state 14, spurious reduction of production separated_nonempty_list(DEFINITION_SEPARATOR_SYMBOL,single_definition) -> single_definition 
+## In state 18, spurious reduction of production definitions_list -> separated_nonempty_list(DEFINITION_SEPARATOR_SYMBOL,single_definition) 
+##
+
+(IsoEbnf 14)
+
+syntax: META_IDENTIFIER DEFINING_SYMBOL TERMINAL_STRING TERMINAL_STRING 
+##
+## Ends in an error in state: 7.
+##
+## syntactic_term -> syntactic_factor . option(preceded(EXCEPT_SYMBOL,syntactic_exception)) [ TERMINATOR_SYMBOL END_REPEAT_SYMBOL END_OPTION_SYMBOL END_GROUP_SYMBOL DEFINITION_SEPARATOR_SYMBOL CONCATENATE_SYMBOL ]
+##
+## The known suffix of the stack is as follows:
+## syntactic_factor 
+##
+
+(IsoEbnf 15)
+
+syntax: META_IDENTIFIER DEFINING_SYMBOL TERMINATOR_SYMBOL TERMINATOR_SYMBOL 
+##
+## Ends in an error in state: 38.
+##
+## nonempty_list(syntax_rule) -> syntax_rule . [ EOF ]
+## nonempty_list(syntax_rule) -> syntax_rule . nonempty_list(syntax_rule) [ EOF ]
+##
+## The known suffix of the stack is as follows:
+## syntax_rule 
+##
+
+(IsoEbnf 16)
+
+syntax: META_IDENTIFIER TERMINATOR_SYMBOL 
+##
+## Ends in an error in state: 1.
+##
+## syntax_rule -> META_IDENTIFIER . DEFINING_SYMBOL definitions_list TERMINATOR_SYMBOL [ META_IDENTIFIER EOF ]
+##
+## The known suffix of the stack is as follows:
+## META_IDENTIFIER 
+##
+
+(IsoEbnf 17)
+
+syntax: TERMINATOR_SYMBOL 
+##
+## Ends in an error in state: 0.
+##
+## syntax' -> . syntax [ # ]
+##
+## The known suffix of the stack is as follows:
+## 
+##
+
+(IsoEbnf 18)

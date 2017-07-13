@@ -2,8 +2,23 @@
 
 set -o errexit
 
+for p in src/*.mly
+do
+  m=${p%.mly}.messages
+  c=${p%.mly}_messages.ml
+  menhir --list-errors $p > $m.dummies
+  if [ -f $m ]
+  then
+    menhir --compare-errors $m.dummies --compare-errors $m $p
+    rm $m.dummies
+  else
+    mv $m.dummies $m
+  fi
+  menhir --compile-errors $m $p > $c
+done
+
 function build {
-  ocamlbuild -use-ocamlfind -no-links -tag debug -plugin-tag "package(js_of_ocaml.ocamlbuild)" $@
+  ocamlbuild -use-ocamlfind -menhir "menhir --table" -no-links -tag debug -plugin-tag "package(js_of_ocaml.ocamlbuild)" $@
 }
 
 cd src

@@ -24,14 +24,24 @@ module Errors = struct
   let lexing position message =
     raise (Lexing (Printf.sprintf "%s: lexing error: %s" (position_to_string position) message))
 
-  let parsing position =
-    raise (Parsing (Printf.sprintf "%s: parsing error" (position_to_string position)))
+  let parsing position message =
+    raise (Parsing (Printf.sprintf "%s: parsing error: %s" (position_to_string position) message))
 end
 
 module Make(Parser: sig
   type token
   val syntax: (Lexing.lexbuf -> token) -> Lexing.lexbuf -> Grammar.t
   exception Error
+
+  module MenhirInterpreter: sig
+    include MenhirLib.IncrementalEngine.INCREMENTAL_ENGINE with type token = token
+  end
+
+  module Incremental: sig
+    val syntax: Lexing.position -> Grammar.t MenhirInterpreter.checkpoint
+  end
+end)(Messages: sig
+  val message: int -> string
 end)(Lexer: sig
   val token: Lexing.lexbuf -> Parser.token
   exception Error of string
@@ -39,10 +49,20 @@ end) = struct
   let parse_lexbuf ?file_name lexbuf =
     set_file_name lexbuf file_name;
     try
-      Parser.syntax Lexer.token lexbuf
+      Parser.MenhirInterpreter.loop_handle
+        identity
+        (function
+          | Parser.MenhirInterpreter.HandlingError env ->
+            env
+            |> Parser.MenhirInterpreter.current_state_number
+            |> Messages.message
+            |> Errors.parsing (Lexing.lexeme_start_p lexbuf)
+          | _ -> Errors.parsing (Lexing.lexeme_start_p lexbuf) "unknown"
+        )
+        (Parser.MenhirInterpreter.lexer_lexbuf_to_supplier Lexer.token lexbuf)
+        (Parser.Incremental.syntax lexbuf.Lexing.lex_curr_p)
     with
       | Lexer.Error message -> Errors.lexing (Lexing.lexeme_start_p lexbuf) message
-      | Parser.Error -> Errors.parsing (Lexing.lexeme_start_p lexbuf)
 
   let parse_chan ?file_name chan =
     chan
@@ -61,9 +81,9 @@ end) = struct
     |> parse_lexbuf ?file_name
 end
 
-module IsoEbnf = Make(IsoEbnfParser)(IsoEbnfLexer)
+module IsoEbnf = Make(IsoEbnfParser)(IsoEbnfParser_messages)(IsoEbnfLexer)
 
-module PythonEbnf = Make(PythonEbnfParser)(PythonEbnfLexer)
+module PythonEbnf = Make(PythonEbnfParser)(PythonEbnfParser_messages)(PythonEbnfLexer)
 
 (* @todo Parse Mehnir/ocamlyacc's .mly files *)
 

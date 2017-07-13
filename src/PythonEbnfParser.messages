@@ -1,0 +1,143 @@
+syntax: RULE RULE 
+##
+## Ends in an error in state: 1.
+##
+## rule -> RULE . definition [ RULE EOF ]
+##
+## The known suffix of the stack is as follows:
+## RULE 
+##
+
+(PythonEbnf 1)
+
+syntax: RULE START_GROUP RULE 
+##
+## Ends in an error in state: 5.
+##
+## single_definition -> START_GROUP . definition END_GROUP [ TOKEN TERMINAL START_OPTION START_GROUP RULE REPEAT_ZERO REPEAT_ONE IDENTIFIER EOF END_OPTION END_GROUP ALTERNATIVE ]
+##
+## The known suffix of the stack is as follows:
+## START_GROUP 
+##
+
+(PythonEbnf 2)
+
+syntax: RULE START_GROUP TOKEN RULE 
+##
+## Ends in an error in state: 17.
+##
+## single_definition -> START_GROUP definition . END_GROUP [ TOKEN TERMINAL START_OPTION START_GROUP RULE REPEAT_ZERO REPEAT_ONE IDENTIFIER EOF END_OPTION END_GROUP ALTERNATIVE ]
+##
+## The known suffix of the stack is as follows:
+## START_GROUP definition 
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 7, spurious reduction of production repetition -> single_definition 
+## In state 13, spurious reduction of production nonempty_list(repetition) -> repetition 
+## In state 15, spurious reduction of production sequence -> nonempty_list(repetition) 
+## In state 10, spurious reduction of production separated_nonempty_list(ALTERNATIVE,sequence) -> sequence 
+## In state 16, spurious reduction of production alternative -> separated_nonempty_list(ALTERNATIVE,sequence) 
+## In state 19, spurious reduction of production definition -> alternative 
+##
+
+(PythonEbnf 3)
+
+syntax: RULE START_OPTION RULE 
+##
+## Ends in an error in state: 4.
+##
+## single_definition -> START_OPTION . definition END_OPTION [ TOKEN TERMINAL START_OPTION START_GROUP RULE REPEAT_ZERO REPEAT_ONE IDENTIFIER EOF END_OPTION END_GROUP ALTERNATIVE ]
+##
+## The known suffix of the stack is as follows:
+## START_OPTION 
+##
+
+(PythonEbnf 4)
+
+syntax: RULE START_OPTION TOKEN RULE 
+##
+## Ends in an error in state: 20.
+##
+## single_definition -> START_OPTION definition . END_OPTION [ TOKEN TERMINAL START_OPTION START_GROUP RULE REPEAT_ZERO REPEAT_ONE IDENTIFIER EOF END_OPTION END_GROUP ALTERNATIVE ]
+##
+## The known suffix of the stack is as follows:
+## START_OPTION definition 
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 7, spurious reduction of production repetition -> single_definition 
+## In state 13, spurious reduction of production nonempty_list(repetition) -> repetition 
+## In state 15, spurious reduction of production sequence -> nonempty_list(repetition) 
+## In state 10, spurious reduction of production separated_nonempty_list(ALTERNATIVE,sequence) -> sequence 
+## In state 16, spurious reduction of production alternative -> separated_nonempty_list(ALTERNATIVE,sequence) 
+## In state 19, spurious reduction of production definition -> alternative 
+##
+
+(PythonEbnf 5)
+
+syntax: RULE TOKEN ALTERNATIVE RULE 
+##
+## Ends in an error in state: 11.
+##
+## separated_nonempty_list(ALTERNATIVE,sequence) -> sequence ALTERNATIVE . separated_nonempty_list(ALTERNATIVE,sequence) [ RULE EOF END_OPTION END_GROUP ]
+##
+## The known suffix of the stack is as follows:
+## sequence ALTERNATIVE 
+##
+
+(PythonEbnf 6)
+
+syntax: RULE TOKEN END_OPTION 
+##
+## Ends in an error in state: 24.
+##
+## nonempty_list(rule) -> rule . [ EOF ]
+## nonempty_list(rule) -> rule . nonempty_list(rule) [ EOF ]
+##
+## The known suffix of the stack is as follows:
+## rule 
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 7, spurious reduction of production repetition -> single_definition 
+## In state 13, spurious reduction of production nonempty_list(repetition) -> repetition 
+## In state 15, spurious reduction of production sequence -> nonempty_list(repetition) 
+## In state 10, spurious reduction of production separated_nonempty_list(ALTERNATIVE,sequence) -> sequence 
+## In state 16, spurious reduction of production alternative -> separated_nonempty_list(ALTERNATIVE,sequence) 
+## In state 19, spurious reduction of production definition -> alternative 
+## In state 22, spurious reduction of production rule -> RULE definition 
+##
+
+(PythonEbnf 7)
+
+syntax: RULE TOKEN REPEAT_ZERO REPEAT_ZERO 
+##
+## Ends in an error in state: 13.
+##
+## nonempty_list(repetition) -> repetition . [ RULE EOF END_OPTION END_GROUP ALTERNATIVE ]
+## nonempty_list(repetition) -> repetition . nonempty_list(repetition) [ RULE EOF END_OPTION END_GROUP ALTERNATIVE ]
+##
+## The known suffix of the stack is as follows:
+## repetition 
+##
+
+(PythonEbnf 8)
+
+syntax: TOKEN 
+##
+## Ends in an error in state: 0.
+##
+## syntax' -> . syntax [ # ]
+##
+## The known suffix of the stack is as follows:
+## 
+##
+
+(PythonEbnf 9)

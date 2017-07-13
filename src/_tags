@@ -2,9 +2,11 @@ true: strict_sequence
 true: strict_formats
 true: safe_string
 true: use_menhir
-true: warn(@A-4-44)
+<*Parser.ml>: warn(@A-9-44)
+not <*Parser.ml>: warn(@A-4-44)
 true: package(General)
 true: package(JsOfOCairo)
 true: package(js_of_ocaml)
 true: package(js_of_ocaml.ppx)
 true: package(cairo2)
+true: package(menhirLib)

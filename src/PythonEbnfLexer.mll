@@ -23,6 +23,7 @@ rule token = parse
 
   | (identifier as name) ':' { RULE name }
   | identifier as name { IDENTIFIER name }
+  (* @todo error on unclosed terminals *)
   | '\'' ([^'\'']+ as value) '\'' { TERMINAL value }
   | (['A'-'Z']+ as value) { TOKEN value }
 
