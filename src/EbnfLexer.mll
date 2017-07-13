@@ -22,7 +22,7 @@ rule token = parse
 
   | ',' { CONCATENATE_SYMBOL }
   | '=' { DEFINING_SYMBOL }
-  | '|'| '/'| '!' { DEFINITION_SEPARATOR_SYMBOL } (* @todo Why? *)
+  | '|'| '/'| '!' { DEFINITION_SEPARATOR_SYMBOL }
   | '-' { EXCEPT_SYMBOL }
   | '*' { REPETITION_SYMBOL }
   | '(' { START_GROUP_SYMBOL }
