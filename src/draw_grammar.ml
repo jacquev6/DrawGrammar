@@ -1,6 +1,6 @@
 open General.Abbr
 
-(* @todo Parse command-line options for Drawer.Settings *)
+(* @todo Parse command-line options for Drawer.Settings and --simplify *)
 
 module Drawer = Drawer.Make(Cairo)(Drawer.DefaultPrimarySettings)(Drawer.DefaultSecondarySettings)
 
@@ -14,6 +14,7 @@ let () =
     let grammar =
       input_name
       |> Parse.parse_file
+      |> Grammar.simplify
     in
     let context = Cairo.create (Cairo.Image.create Cairo.Image.RGB24 ~width:1 ~height:1) in
     let (w, h) = Drawer.measure grammar ~context in

@@ -20,7 +20,6 @@ end) = struct
     set_file_name lexbuf file_name;
     lexbuf
     |> Parser.syntax Lexer.token
-    |> Grammar.normalize
 
   let parse_chan ?file_name chan =
     chan
@@ -77,14 +76,9 @@ let parse_file name =
 module EbnfUnitTests = struct
   open Tst
 
-  let check_definition expected actual =
-    check_poly ~to_string:Grammar.Definition.to_string expected actual
-
-  let make rule expected =
-    rule >:: (fun _ ->
-      match parse_string ~syntax:Syntax.Ebnf (sprintf "r = %s;" rule) with
-        | {Grammar.rules=[{Grammar.Rule.name="r"; definition}]} -> check_definition expected definition
-        | _ -> fail "weird, really..."
+  let make s expected =
+    s >:: (fun _ ->
+      check_poly ~to_string:Grammar.to_string Grammar.(grammar [rule "r" expected]) (parse_string ~syntax:Syntax.Ebnf (sprintf "r = %s;" s))
     )
 
   let t = Grammar.terminal "t"
@@ -122,14 +116,9 @@ end
 module PythonUnitTests = struct
   open Tst
 
-  let check_definition expected actual =
-    check_poly ~to_string:Grammar.Definition.to_string expected actual
-
-  let make rule expected =
-    rule >:: (fun _ ->
-      match parse_string ~syntax:Syntax.Python (sprintf "r: %s\n" rule) with
-        | {Grammar.rules=[{Grammar.Rule.name="r"; definition}]} -> check_definition expected definition
-        | _ -> fail "weird, really..."
+  let make s expected =
+    s >:: (fun _ ->
+      check_poly ~to_string:Grammar.to_string Grammar.(grammar [rule "r" expected]) (parse_string ~syntax:Syntax.Python (sprintf "r: %s" s))
     )
 
   let g = Grammar.grammar

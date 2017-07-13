@@ -4,133 +4,64 @@ open General.Abbr
 
 let single_rule_grammars =
   Grammar.[
-    ("terminal", Definition.Terminal {Terminal.value="in a rounded rectangle"});
-    ("rule with a name longer than its definition", Definition.Terminal {Terminal.value="short"});
-    ("non-terminal", Definition.NonTerminal {NonTerminal.name="in a rectangle"});
-    ("special", Definition.Special {Special.value="in an octogon"});
-    ("sequence", Definition.Sequence {Sequence.elements=[
-      Definition.Terminal {Terminal.value="t1"};
-      Definition.NonTerminal {NonTerminal.name="nt"};
-      Definition.Terminal {Terminal.value="t2"};
-    ]});
-    ("alternative", Definition.Alternative {Alternative.elements=[
-      Definition.Terminal {Terminal.value="short"};
-      Definition.NonTerminal {NonTerminal.name="longestttttt"};
-      Definition.Terminal {Terminal.value="medium"};
-    ]});
-    ("alternative with null branch", Definition.Alternative {Alternative.elements=[
-      Definition.Null;
-      Definition.Terminal {Terminal.value="t"};
-    ]});
-    ("sequence with null", Definition.Sequence {Sequence.elements=[
-      Definition.Terminal {Terminal.value="same space here ->"};
-      Definition.Null;
-      Definition.Terminal {Terminal.value="and here ->"};
-      Definition.Terminal {Terminal.value="t"};
-    ]});
-    ("repetition with long forward branch", Definition.Repetition {
-      Repetition.forward = Definition.Terminal {Terminal.value="long branch"};
-      backward = Definition.Terminal {Terminal.value="short"};
-    });
-    ("repetition with long backward branch", Definition.Repetition {
-      Repetition.forward = Definition.Terminal {Terminal.value="short"};
-      backward = Definition.Terminal {Terminal.value="long branch"};
-    });
-    ("repetition with null forward branch", Definition.Repetition {
-      Repetition.forward = Definition.Null;
-      backward = Definition.Terminal {Terminal.value="t"};
-    });
-    ("repetition with null backward branch", Definition.Repetition {
-      Repetition.forward = Definition.Terminal {Terminal.value="t"};
-      backward = Definition.Null;
-    });
-    ("nested alternatives", Definition.Alternative {Alternative.elements=[
-      Definition.Alternative {Alternative.elements=[
-        Definition.Terminal {Terminal.value="t1"};
-        Definition.Terminal {Terminal.value="t2"};
-      ]};
-      Definition.Alternative {Alternative.elements=[
-        Definition.Terminal {Terminal.value="t3"};
-        Definition.Terminal {Terminal.value="t4"};
-      ]};
-    ]});
-    ("nested repetitions", Definition.Repetition {
-      Repetition.forward = Definition.Repetition {
-        Repetition.forward = Definition.Terminal {Terminal.value="forward 1"};
-        backward = Definition.Terminal {Terminal.value="backward 1"};
-      };
-      backward = Definition.Repetition {
-        Repetition.forward = Definition.Terminal {Terminal.value="forward 2"};
-        backward = Definition.Terminal {Terminal.value="backward 2"};
-      };
-    });
-    ("repetitions in sequence", Definition.Sequence {Sequence.elements=[
-      Definition.Repetition {
-        Repetition.forward = Definition.Terminal {Terminal.value="forward 1"};
-        backward = Definition.Terminal {Terminal.value="backward 1"};
-      };
-      Definition.Repetition {
-        Repetition.forward = Definition.Terminal {Terminal.value="forward 2"};
-        backward = Definition.Terminal {Terminal.value="backward 2"};
-      };
-    ]});
-    ("exceptions in sequence", Definition.Sequence {Sequence.elements=[
-      Definition.Except {
-        Except.base = Definition.Terminal {Terminal.value="base 1"};
-        except = Definition.Terminal {Terminal.value="except 1"};
-      };
-      Definition.Except {
-        Except.base = Definition.Terminal {Terminal.value="base 2"};
-        except = Definition.Terminal {Terminal.value="except 2"};
-      };
-    ]});
-    ("alternatives in sequence", Definition.Sequence {Sequence.elements=[
-      Definition.Alternative {Alternative.elements=[
-        Definition.Terminal {Terminal.value="t1"};
-        Definition.Terminal {Terminal.value="t2"};
-      ]};
-      Definition.Alternative {Alternative.elements=[
-        Definition.Terminal {Terminal.value="t3"};
-        Definition.Terminal {Terminal.value="t4"};
-      ]};
-    ]});
-    ("alternatives in repetition", Definition.Repetition {
-      Repetition.forward = Definition.Alternative {Alternative.elements=[
-        Definition.Terminal {Terminal.value="t1"};
-        Definition.Terminal {Terminal.value="t2"};
-      ]};
-      backward = Definition.Alternative {Alternative.elements=[
-        Definition.Terminal {Terminal.value="t3"};
-        Definition.Terminal {Terminal.value="t4"};
-      ]};
-    });
-    ("repetitions in alternative", Definition.Alternative {Alternative.elements=[
-      Definition.Repetition {
-        Repetition.forward = Definition.Terminal {Terminal.value="forward 1"};
-        backward = Definition.Terminal {Terminal.value="backward 1"};
-      };
-      Definition.Repetition {
-        Repetition.forward = Definition.Terminal {Terminal.value="forward 2"};
-        backward = Definition.Terminal {Terminal.value="backward 2"};
-      };
-    ]});
-    ("exception with long base", Definition.Except {
-      Except.base = Definition.Terminal {Terminal.value="long base branch"};
-      except = Definition.Terminal {Terminal.value="except"};
-    });
-    ("exception with long except", Definition.Except {
-      Except.base = Definition.Terminal {Terminal.value="base"};
-      except = Definition.Terminal {Terminal.value="long except branch"};
-    });
+    ("terminal", terminal "in a rounded rectangle");
+    ("rule with a name longer than its definition", terminal "short");
+    ("non-terminal", non_terminal "in a rectangle");
+    ("special", special "in an octogon");
+    ("sequence", sequence [terminal "t1"; non_terminal "nt"; terminal "t2"]);
+    ("alternative", alternative [terminal "short"; non_terminal "longestttttt"; terminal "medium"]);
+    ("alternative with null branch", alternative [null; terminal "t"]);
+    ("sequence with null", sequence [terminal "a"; null; terminal "b"; terminal "c"]);
+    ("repetition with long forward branch", repetition (terminal "long branch") (terminal "short"));
+    ("repetition with long backward branch", repetition (terminal "short") (terminal "long branch"));
+    ("repetition with null forward branch", repetition null (terminal "t"));
+    ("repetition with null backward branch", repetition (terminal "t") null);
+    ("nested alternatives", alternative [
+      alternative [terminal "t1"; terminal "t2"];
+      alternative [terminal "t3"; terminal "t4"];
+    ]);
+    ("nested sequences", sequence [
+      sequence [terminal "t1"; terminal "t2"];
+      sequence [terminal "t3"; terminal "t4"];
+    ]);
+    ("nested repetitions", repetition
+      (repetition (terminal "forward 1") (terminal "backward 1"))
+      (repetition (terminal "forward 2") (terminal "backward 2"))
+    );
+    ("repetitions in sequence", sequence [
+      repetition (terminal "forward 1") (terminal "backward 1");
+      repetition (terminal "forward 2") (terminal "backward 2");
+    ]);
+    ("exceptions in sequence", sequence [
+      except (terminal "base 1") (terminal "except 1");
+      except (terminal "base 2") (terminal "except 2");
+    ]);
+    ("alternatives in sequence", sequence [
+      alternative [terminal "t1"; terminal "t2"];
+      alternative [terminal "t3"; terminal "t4"];
+    ]);
+    ("alternatives in repetition", repetition
+      (alternative [terminal "t1"; terminal "t2"])
+      (alternative [terminal "t3"; terminal "t4"])
+    );
+    ("repetitions in alternative", alternative [
+      repetition (terminal "forward 1") (terminal "backward 1");
+      repetition (terminal "forward 2") (terminal "backward 2");
+    ]);
+    ("exception with long base", except (terminal "long base branch") (terminal "except"));
+    ("exception with long except", except (terminal "base") (terminal "long except branch"));
   ]
   |> Li.map ~f:(fun (name, definition) ->
-    (name, {Grammar.rules=[{Grammar.Rule.name; definition}]})
+    (name, Grammar.(grammar [rule name definition]))
   )
 
 let tests =
   single_rule_grammars @ Grammar.[
-    ("several rules", {rules=[
-      {Rule.name="rule1"; definition=Definition.Terminal {Terminal.value="t1"}};
-      {Rule.name="rule2"; definition=Definition.Terminal {Terminal.value="t2"}};
-    ]});
+    (
+      "several rules",
+      grammar [
+        rule "rule1" (terminal "t1");
+        rule "rule2" (terminal "t2");
+      ]
+    );
   ]

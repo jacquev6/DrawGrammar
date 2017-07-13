@@ -328,27 +328,25 @@ end) = struct
   (* @todo Display text in fixed-width font *)
   module Terminal = TextSymbol(struct
     type t = Grammar.Terminal.t
-    let text {Grammar.Terminal.value} =
-      value
+    let text = Grammar.Terminal.value
   end)(Bricks.RoundedRectangleText)
 
   module NonTerminal = TextSymbol(struct
     type t = Grammar.NonTerminal.t
-    let text {Grammar.NonTerminal.name} =
-      name
+    let text = Grammar.NonTerminal.name
   end)(Bricks.RectangleText)
 
   module Special = TextSymbol(struct
     type t = Grammar.Special.t
-    let text {Grammar.Special.value} =
-      value
+    let text = Grammar.Special.value
   end)(Bricks.PointyRectangleText)
 
   module rec Sequence: sig
     val measure: Grammar.Sequence.t -> context:C.context -> float * float * float
     val draw: Grammar.Sequence.t -> context:C.context -> unit
   end = struct
-    let measure {Grammar.Sequence.elements} ~context =
+    let measure sequence ~context =
+      let elements = Grammar.Sequence.elements sequence in
       let (advance, ascent, descent) =
         elements
         |> Li.map ~f:(Definition.measure ~context)
@@ -356,8 +354,9 @@ end) = struct
       in
       (advance +. (S.minimal_horizontal_spacing *. Fl.of_int (Li.size elements - 1)), ascent, descent)
 
-    let draw {Grammar.Sequence.elements} ~context =
-      elements
+    let draw sequence ~context =
+      sequence
+      |> Grammar.Sequence.elements
       |> Li.iter_i ~f:(fun i definition ->
         if i <> 0 then Bricks.Advance.draw S.minimal_horizontal_spacing ~context;
         Definition.draw definition ~context
@@ -368,10 +367,17 @@ end) = struct
     val measure: Grammar.Repetition.t -> context:C.context -> float * float * float
     val draw: Grammar.Repetition.t -> context:C.context -> unit
   end = struct
-    let measure {Grammar.Repetition.forward; backward} =
+    let measure repetition =
       make_measure (fun context ->
-        let (forward_advance, forward_ascent, forward_descent) = Definition.measure forward ~context
-        and (backward_advance, backward_ascent, backward_descent) = Definition.measure backward ~context in
+        let (forward_advance, forward_ascent, forward_descent) =
+          repetition
+          |> Grammar.Repetition.forward
+          |> Definition.measure ~context
+        and (backward_advance, backward_ascent, backward_descent) =
+          repetition
+          |> Grammar.Repetition.backward
+          |> Definition.measure ~context
+        in
         let advance = (2. *. S.turn_radius +. S.line_width +. Fl.max forward_advance backward_advance)
         and ascent = Fl.max S.half_line_width forward_ascent
         and descent = backward_descent +. Fl.max
@@ -381,8 +387,10 @@ end) = struct
         (advance, ascent, descent)
       )
 
-    let draw ({Grammar.Repetition.forward; backward} as repetition) =
+    let draw repetition =
       make_draw (fun context ->
+        let forward = Grammar.Repetition.forward repetition
+        and backward = Grammar.Repetition.backward repetition in
         let (_, turn_right) = Bricks.Turns.get ~context
         and (advance, _, _) = measure repetition ~context
         and (forward_advance, _, forward_descent) = Definition.measure forward ~context
@@ -415,8 +423,10 @@ end) = struct
     val measure: Grammar.Except.t -> context:C.context -> float * float * float
     val draw: Grammar.Except.t -> context:C.context -> unit
   end = struct
-    let measure {Grammar.Except.base; except} =
+    let measure exception_ =
       make_measure (fun context ->
+        let base = Grammar.Except.base exception_
+        and except = Grammar.Except.except exception_ in
         let (except_advance, except_ascent, except_descent) = measure_sequence [Definition.measure except ~context; Bricks.DeadEnd.measure ~context]
         and (base_advance, base_ascent, base_descent) = Definition.measure base ~context in
         let advance = (4. *. S.turn_radius +. Fl.max except_advance base_advance)
@@ -428,8 +438,10 @@ end) = struct
         (advance, ascent, descent)
       )
 
-    let draw ({Grammar.Except.base; except} as exception_) =
+    let draw exception_ =
       make_draw (fun context ->
+        let base = Grammar.Except.base exception_
+        and except = Grammar.Except.except exception_ in
         let (turn_left, turn_right) = Bricks.Turns.get ~context
         and (advance, _, _) = measure exception_ ~context
         and (except_advance, _, except_descent) = measure_sequence [Definition.measure except ~context; Bricks.DeadEnd.measure ~context]
@@ -458,8 +470,9 @@ end) = struct
     val measure: Grammar.Alternative.t -> context:C.context -> float * float * float
     val draw: Grammar.Alternative.t -> context:C.context -> unit
   end = struct
-    let measure {Grammar.Alternative.elements} =
+    let measure alternative =
       make_measure (fun context ->
+        let elements = Grammar.Alternative.elements alternative in
         let first_element = Li.head elements
         and other_elements = Li.tail elements in
         let (first_advance, first_ascent, first_descent) = Definition.measure first_element ~context in
@@ -479,8 +492,9 @@ end) = struct
         (advance, first_ascent, descent +. last_descent)
       )
 
-    let draw ({Grammar.Alternative.elements} as alternative) =
+    let draw alternative =
       make_draw (fun context ->
+        let elements = Grammar.Alternative.elements alternative in
         let (turn_left, turn_right) = Bricks.Turns.get ~context
         and first_element = Li.head elements
         and other_elements = Li.tail elements in
@@ -557,14 +571,16 @@ end) = struct
   end
 
   module Rule = struct
-    let measure_label {Grammar.Rule.name; _} =
+    let measure_label rule =
       make_measure (fun context ->
+        let name = Grammar.Rule.name rule in
         C.set_font_size context S.rule_label_font_size;
         Bricks.Text.measure (sprintf "%s:" name) ~context
       )
 
-    let draw_label ({Grammar.Rule.name; _} as rule) =
+    let draw_label rule =
       make_draw (fun context ->
+        let name = Grammar.Rule.name rule in
         let (_, label_ascent, label_descent) = measure_label rule ~context in
         C.set_font_size context S.rule_label_font_size;
         C.translate context ~x:0. ~y:label_ascent;
@@ -572,8 +588,9 @@ end) = struct
         (0., label_ascent +. label_descent)
       )
 
-    let measure_definition {Grammar.Rule.definition; _} =
+    let measure_definition rule =
       make_measure (fun context ->
+        let definition = Grammar.Rule.definition rule in
         let (definition_advance, definition_ascent, definition_descent) = Definition.measure definition ~context
         and (start_advance, start_ascent, start_descent) = Bricks.Start.measure ~context
         and (stop_advance, stop_ascent, stop_descent) = Bricks.Stop.measure ~context in
@@ -583,8 +600,9 @@ end) = struct
         (advance, ascent, descent)
       )
 
-    let draw_definition ({Grammar.Rule.definition; _} as rule) =
+    let draw_definition rule =
       make_draw (fun context ->
+        let definition = Grammar.Rule.definition rule in
         let (_, definition_ascent, definition_descent) = measure_definition rule ~context in
         C.translate context ~x:0. ~y:definition_ascent;
         Bricks.Start.draw ~context;
@@ -611,10 +629,10 @@ end) = struct
       )
   end
 
-  let measure {Grammar.rules} =
+  let measure grammar =
     make_measure (fun context ->
       C.set_line_width context S.line_width;
-
+      let rules = Grammar.rules grammar in
       rules
       |> Li.map ~f:(Rule.measure ~context)
       |> Li.fold ~init:(0., -.S.space_between_rules) ~f:(fun (width, height) (w, h) ->
@@ -622,10 +640,10 @@ end) = struct
       )
     )
 
-  let draw ({Grammar.rules} as grammar) =
+  let draw grammar =
     make_draw (fun context ->
       C.set_line_width context S.line_width;
-
+      let rules = Grammar.rules grammar in
       let (_, height) = measure grammar ~context in
       rules
       |> Li.iter ~f:(fun rule ->

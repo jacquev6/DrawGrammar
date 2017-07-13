@@ -5,8 +5,6 @@
   module Pervasives = OCamlStandard.Pervasives
 
   open Grammar
-  open Grammar.Rule
-  open Grammar.Definition
 %}
 
 %token <string> IDENTIFIER
@@ -27,11 +25,11 @@
 
 syntax:
   | rules=nonempty_list(rule) EOF
-    { {rules} }
+    { grammar rules }
 
 rule:
   | name=RULE definition=definition
-    { {name; definition} }
+    { rule name definition }
 
 definition:
   | alternative=alternative
@@ -39,26 +37,26 @@ definition:
 
 alternative:
   | elements=separated_nonempty_list(ALTERNATIVE, sequence)
-    { Alternative {Alternative.elements}}
+    { alternative elements }
 
 sequence:
   | elements=nonempty_list(repetition)
-    { Sequence {Sequence.elements}}
+    { sequence elements }
 
 repetition:
   | definition=single_definition REPEAT_ZERO
-    { Repetition {Repetition.forward=Null; backward=definition} }
+    { repetition null definition }
   | definition=single_definition REPEAT_ONE
-    { Repetition {Repetition.forward=definition; backward=Null} }
+    { repetition definition null }
   | definition=single_definition
     { definition }
 
 single_definition:
   | value=TERMINAL
-    { Terminal {Terminal.value }}
+    { terminal value }
   | name=IDENTIFIER
-    { NonTerminal {NonTerminal.name }}
+    { non_terminal name }
   | definition=delimited(START_GROUP, definition, END_GROUP)
     { definition }
   | definition=delimited(START_OPTION, definition, END_OPTION)
-    { Alternative {Alternative.elements=[Null; definition]} }
+    { Grammar.alternative [null; definition] }

@@ -7,6 +7,8 @@ module Terminal = struct
     value: string;
   }
 
+  let value {value} = value
+
   let to_string {value} =
     sprintf "%S" value
 end
@@ -15,6 +17,8 @@ module NonTerminal = struct
   type t = {
     name: string;
   }
+
+  let name {name} = name
 
   let to_string {name} =
     name
@@ -25,6 +29,8 @@ module Special = struct
     value: string;
   }
 
+  let value {value} = value
+
   let to_string {value} =
     sprintf "Special(%S)" value
 end
@@ -33,12 +39,14 @@ module rec Sequence: sig
   type t = {
     elements: Definition.t list;
   }
-
+  val elements: t -> Definition.t list
   val to_string: t -> string
 end = struct
   type t = {
     elements: Definition.t list;
   }
+
+  let elements {elements} = elements
 
   let to_string {elements} =
     elements
@@ -51,12 +59,14 @@ and Alternative: sig
   type t = {
     elements: Definition.t list;
   }
-
+  val elements: t -> Definition.t list
   val to_string: t -> string
 end = struct
   type t = {
     elements: Definition.t list;
   }
+
+  let elements {elements} = elements
 
   let to_string {elements} =
     elements
@@ -71,13 +81,18 @@ and Repetition: sig
     forward: Definition.t;
     backward: Definition.t;
   }
-
+  val forward: t -> Definition.t
+  val backward: t -> Definition.t
   val to_string: t -> string
 end = struct
   type t = {
     forward: Definition.t;
     backward: Definition.t;
   }
+
+  let forward {forward; _} = forward
+
+  let backward {backward; _} = backward
 
   let to_string {forward; backward} =
     sprintf "Repetition(%s, %s)" (Definition.to_string forward) (Definition.to_string backward)
@@ -88,13 +103,18 @@ and Except: sig
     base: Definition.t;
     except: Definition.t;
   }
-
+  val base: t -> Definition.t
+  val except: t -> Definition.t
   val to_string: t -> string
 end = struct
   type t = {
     base: Definition.t;
     except: Definition.t;
   }
+
+  let base {base; _} = base
+
+  let except {except; _} = except
 
   let to_string {base; except} =
     sprintf "Except(%s, %s)" (Definition.to_string base) (Definition.to_string except)
@@ -140,6 +160,10 @@ module Rule = struct
     definition: Definition.t;
   }
 
+  let name {name; _} = name
+
+  let definition {definition; _} = definition
+
   let to_string {name; definition} =
     sprintf "%s = %s;\n" name (Definition.to_string definition)
 end
@@ -148,80 +172,163 @@ type t = {
   rules: Rule.t list;
 }
 
+let rules {rules} = rules
+
 let to_string {rules} =
   rules
   |> Li.map ~f:Rule.to_string
   |> StrLi.concat ~sep:"\n"
 
-let null = Definition.Null
+module Constructors = struct
+  let null = Definition.Null
 
-let non_terminal name = Definition.NonTerminal {NonTerminal.name}
+  let non_terminal name = Definition.NonTerminal {NonTerminal.name}
 
-let terminal value = Definition.Terminal {Terminal.value}
+  let terminal value = Definition.Terminal {Terminal.value}
 
-let special value = Definition.Special {Special.value}
+  let special value = Definition.Special {Special.value}
 
-let sequence elements = Definition.Sequence {Sequence.elements}
+  let sequence elements =
+    let elements =
+      elements
+      |> Li.concat_map ~f:(function
+        | Definition.Sequence {Sequence.elements} -> elements
+        | element -> [element]
+      )
+      |> Li.filter ~f:(fun x -> x <> Definition.Null)
+    in
+    match elements with
+      | [] -> Definition.Null
+      | [e] -> e
+      | elements -> Definition.Sequence {Sequence.elements}
 
-let alternative elements = Definition.Alternative {Alternative.elements}
+  let alternative elements =
+    let elements =
+      elements
+      |> Li.concat_map ~f:(function
+        | Definition.Alternative {Alternative.elements} -> elements
+        | element -> [element]
+      )
+    in
+    let has_null = Li.Poly.contains elements Definition.Null
+    and elements = Li.filter ~f:(fun x -> x <> Definition.Null) elements in
+    let elements = if has_null then Definition.Null::elements else elements in
+    match elements with
+      | [] -> failwith "Empty alternative"
+      | [element] -> element
+      | _ -> Definition.Alternative {Alternative.elements}
 
-let repetition forward backward = Definition.Repetition {Repetition.forward; backward}
+  let repetition forward backward = Definition.Repetition {Repetition.forward; backward}
 
-let except base except = Definition.Except {Except.base; except}
+  let except base except = Definition.Except {Except.base; except}
 
-let rule name definition = {Rule.name; definition}
+  let rule name definition = {Rule.name; definition}
 
-let grammar rules = {rules}
+  let grammar rules = {rules}
+end
 
-(* @todo Re-order rules in the order they are used?  *)
-(* @todo Merge "a, {a}" and "{a}, a" into Repetition(forward=a, backward=Null) *)
+module Raw = struct
+  open Constructors
 
-let normalize =
-  let rec aux = Definition.(function
-    | (Null | Terminal _ | NonTerminal _ | Special _) as x -> x
-    | Sequence {Sequence.elements} ->
-      let elements =
-        elements
-        |> Li.concat_map ~f:(fun element ->
-          match aux element with
-            | Sequence {Sequence.elements} ->
-              elements
-            | element -> [element]
-        )
-        |> Li.filter ~f:(fun x -> x <> Null)
-      in begin
-        match elements with
-          | [] -> Null
-          | [element] -> element
-          | _ -> Sequence {Sequence.elements}
+  let n = null
+  let nt = non_terminal
+  let t = terminal
+  (* let sp = special *)
+  let seq elements = Definition.Sequence {Sequence.elements}
+  let alt elements = Definition.Alternative {Alternative.elements}
+  let rep = repetition
+  (* let ex = except *)
+  let r = rule
+  let g = grammar
+end
+
+module ConstructorsUnitTests = struct
+  open Tst
+
+  let make expected actual =
+    (Definition.to_string actual) >:: (fun _ ->
+      check_poly ~to_string Raw.(g [r "r" expected]) Constructors.(grammar [rule "r" actual])
+    )
+
+  let test = "constructors" >::: [
+    make Raw.n Constructors.null;
+    make Raw.(t "t") Constructors.(terminal "t");
+    make Raw.(nt "nt") Constructors.(non_terminal "nt");
+    make Raw.(t "t1") Constructors.(sequence [terminal "t1"]);
+    make Raw.(t "t1") Constructors.(sequence [sequence [terminal "t1"]]);
+    make Raw.(t "t1") Constructors.(sequence [sequence [sequence [terminal "t1"]]]);
+    make Raw.(seq [t "t1"; t "t2"]) Constructors.(sequence [sequence [terminal "t1"; terminal "t2"]]);
+    make Raw.(seq [t "t1"; t "t2"; t "t3"]) Constructors.(sequence [terminal "t1"; sequence [terminal "t2"; terminal "t3"]]);
+    make Raw.(seq [t "t1"; t "t2"; t "t3"]) Constructors.(sequence [terminal "t1"; sequence [sequence [terminal "t2"; terminal "t3"]]]);
+    make Raw.(seq [t "t1"; t "t2"; t "t3"]) Constructors.(sequence [terminal "t1"; sequence [sequence [sequence [terminal "t2"; terminal "t3"]]]]);
+    make Raw.(t "t1") Constructors.(alternative [terminal "t1"]);
+    make Raw.(t "t1") Constructors.(alternative [alternative [terminal "t1"]]);
+    make Raw.(t "t1") Constructors.(alternative [alternative [alternative [terminal "t1"]]]);
+    make Raw.(alt [t "t1"; t "t2"]) Constructors.(alternative [alternative [terminal "t1"; terminal "t2"]]);
+    make Raw.(alt [t "t1"; t "t2"; t "t3"]) Constructors.(alternative [terminal "t1"; alternative [terminal "t2"; terminal "t3"]]);
+    make Raw.(alt [t "t1"; t "t2"; t "t3"]) Constructors.(alternative [terminal "t1"; alternative [alternative [terminal "t2"; terminal "t3"]]]);
+    make Raw.(alt [t "t1"; t "t2"; t "t3"]) Constructors.(alternative [terminal "t1"; alternative [alternative [alternative [terminal "t2"; terminal "t3"]]]]);
+    make Raw.(seq [t "t1"; t "t2"]) Constructors.(sequence [terminal "t1"; null; terminal "t2"]);
+    make Raw.(alt [n; t "t1"; t "t2"]) Constructors.(alternative [terminal "t1"; null; terminal "t2"]);
+  ]
+end
+
+include Constructors
+
+let simplify =
+  (* @todo Factorize common pre/suffixes in alternatives? *)
+  (* More generaly common parts before railtracks join or after railtrack splits could be merged. *)
+  let common_prefix =
+    let rec aux rev_prefix xs ys =
+      match (xs, ys) with
+        | (x::xs, y::ys) when x = y -> aux (x::rev_prefix) xs ys
+        | _ -> (Li.reverse rev_prefix, xs, ys)
+    in
+    aux []
+  in
+  let process_sequence_elements =
+    let rec aux rev_before = function
+      | [] -> Li.reverse rev_before
+      | current::after -> begin
+        match current with 
+          | Definition.Repetition {Repetition.forward; backward} ->
+            let backward = match backward with
+              | Definition.Sequence {Sequence.elements} -> elements
+              | _ -> [backward]
+            in
+            let (prefix, backward, after) = common_prefix backward after in
+            let (rev_suffix, rev_backward, rev_before) = common_prefix (Li.reverse backward) rev_before in
+            let backward = Li.reverse rev_backward
+            and suffix = Li.reverse rev_suffix in
+            let current = repetition (sequence [sequence suffix; forward; sequence prefix]) (sequence backward) in
+            aux (current::rev_before) after
+          | _ ->
+            aux (current::rev_before) after
       end
-    | Alternative {Alternative.elements} ->
+    in
+    aux []
+  in
+  let rec aux = function
+    | (Definition.Null | Definition.NonTerminal _ | Definition.Terminal _ | Definition.Special _) as x -> x
+    | Definition.Alternative {Alternative.elements} ->
+      let elements = Li.map ~f:aux elements in
+      Definition.Alternative {Alternative.elements}
+    | Definition.Sequence {Sequence.elements} ->
       let elements =
         elements
-        |> Li.concat_map ~f:(fun element ->
-          match aux element with
-            | Alternative {Alternative.elements} ->
-              elements
-            | element -> [element]
-        )
+        |> Li.map ~f:aux
+        |> process_sequence_elements
       in
-      let has_null = Li.Poly.contains elements Null
-      and elements = Li.filter ~f:(fun x -> x <> Null) elements in
-      let elements = if has_null then Null::elements else elements in
-      begin
-        match elements with
-          | [element] -> element
-          | _ -> Alternative {Alternative.elements}
-      end
-    | Repetition {Repetition.forward; backward} ->
+      sequence elements
+    | Definition.Repetition {Repetition.forward; backward} ->
       let forward = aux forward
       and backward = aux backward in
-      Repetition {Repetition.forward; backward}
-    | Except {Except.base; except} ->
+      Definition.Repetition {Repetition.forward; backward}
+    | Definition.Except {Except.base; except} ->
       let base = aux base
       and except = aux except in
-      Except {Except.base; except}
-  ) in
+      Definition.Except {Except.base; except}
+  in
   function {rules} ->
     let rules =
       rules
@@ -232,52 +339,56 @@ let normalize =
     in
     {rules}
 
+module SimplifyUnitTests = struct
+  open Tst
+
+  open Raw
+
+  let f1 = t "f1"
+  let f2 = t "f2"
+  let f3 = t "f3"
+  let p1 = t "p1"
+  let p2 = t "p2"
+  let p3 = t "p3"
+  let s1 = t "s1"
+  let s2 = t "s2"
+  let s3 = t "s3"
+  let x1 = t "x1"
+  let x2 = t "x2"
+  let x3 = t "x3"
+  let x4 = t "x4"
+  let x5 = t "x5"
+  let x6 = t "x6"
+  let x7 = t "x7"
+  let x8 = t "x8"
+  let x9 = t "x9"
+
+  let make expected definition =
+    (Definition.to_string definition) >:: (fun _ ->
+      check_poly ~to_string (g [r "r" expected]) (simplify (g [r "r" definition]))
+    )
+
+  let test = "simplify" >::: [
+    make
+      (seq [x1; x2; x3; rep (seq [p1; p2; p3; f1; f2; f3; s1; s2; s3]) (seq [x4; x5; x6]); x7; x8; x9])
+      (seq [x1; x2; x3; p1; p2; p3; rep (seq [f1; f2; f3]) (seq [s1; s2; s3; x4; x5; x6; p1; p2; p3]); s1; s2; s3; x7; x8; x9])
+    ;
+    make
+      (seq [x1; x2; x3; rep s1 n; x7; x8; x9])
+      (seq [x1; x2; x3; rep n s1; s1; x7; x8; x9])
+    ;
+    make
+      (seq [x1; x2; x3; rep p1 n; x7; x8; x9])
+      (seq [x1; x2; x3; p1; rep n p1; x7; x8; x9])
+    ;
+  ]
+end
 
 module UnitTests = struct
   open Tst
 
-  let check_single_definition expected = function
-    | {rules=[{Rule.name="r"; definition}]} -> check_poly ~to_string:Definition.to_string expected definition
-    | _ -> fail "weird, really..."
-
-  let n = null
-  let s = sequence
-  let a = alternative
-  let r = repetition
-  let nt = non_terminal "nt"
-  let t1 = terminal "t1"
-  let t2 = terminal "t2"
-  let t3 = terminal "t3"
-
   let test = "Grammar" >::: [
-    "normalize" >::: (
-      let make rule expected =
-        (Definition.to_string rule) >:: (fun _ ->
-          check_single_definition expected (normalize {rules=[{Rule.name="r"; definition=rule}]})
-        )
-      in
-      [
-        make Definition.Null Definition.Null;
-        make t1 t1;
-        make nt nt;
-        make (s [t1]) t1;
-        make (s [s [t1]]) t1;
-        make (s [s [s [t1]]]) t1;
-        make (s [s [t1; t2]]) (s [t1; t2]);
-        make (s [t1; s [t2; t3]]) (s [t1; t2; t3]);
-        make (s [t1; s [s [t2; t3]]]) (s [t1; t2; t3]);
-        make (s [t1; s [s [s [t2; t3]]]]) (s [t1; t2; t3]);
-        make (a [t1]) t1;
-        make (a [a [t1]]) t1;
-        make (a [a [a [t1]]]) t1;
-        make (a [a [t1; t2]]) (a [t1; t2]);
-        make (a [t1; a [t2; t3]]) (a [t1; t2; t3]);
-        make (a [t1; a [a [t2; t3]]]) (a [t1; t2; t3]);
-        make (a [t1; a [a [a [t2; t3]]]]) (a [t1; t2; t3]);
-        make (r (s [t1]) (a [t2])) (r t1 t2);
-        make (s [t1; n; t2]) (s [t1; t2]);
-        make (a [t1; n; t2]) (a [n; t1; t2]);
-      ]
-    );
+    ConstructorsUnitTests.test;
+    SimplifyUnitTests.test;
   ]
 end
