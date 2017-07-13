@@ -3,7 +3,7 @@
   module Lexing = OCamlStandard.Lexing
   module Array = OCamlStandard.Array
 
-  open EbnfParser
+  open IsoEbnfParser
 }
 
 let white = [' ' '\t' '\n' '\r']

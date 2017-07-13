@@ -14,8 +14,7 @@ src/_build/unit_tests.byte
 cd src
 build draw_grammar.byte
 cd ..
-src/_build/draw_grammar.byte *.ebnf
-src/_build/draw_grammar.byte *.python
+src/_build/draw_grammar.byte *.*-ebnf
 echo
 echo "Have a look at $(pwd)/*.png"
 echo

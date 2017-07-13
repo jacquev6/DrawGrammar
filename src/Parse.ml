@@ -39,27 +39,25 @@ end) = struct
     |> parse_lexbuf ?file_name
 end
 
-(* @todo Rename Iso14977Ebnf *)
-module Ebnf = Make(EbnfParser)(EbnfLexer)
+module IsoEbnf = Make(IsoEbnfParser)(IsoEbnfLexer)
 
-(* @todo Rename PythonEbnf *)
-module Python = Make(PythonParser)(PythonLexer)
+module PythonEbnf = Make(PythonEbnfParser)(PythonEbnfLexer)
 
 module Syntax = struct
   type t =
-    | Ebnf
-    | Python
+    | IsoEbnf
+    | PythonEbnf
 
   let of_string = function
-    | "ebnf" -> Ebnf
-    | "python" -> Python
+    | "iso-ebnf" -> IsoEbnf
+    | "python-ebnf" -> PythonEbnf
     | syntax -> failwith (sprintf "Unknown grammar syntax %s" syntax)
 end
 
 let parse_string ~syntax s =
   match syntax with
-    | Syntax.Ebnf -> Ebnf.parse_string s
-    | Syntax.Python -> Python.parse_string s
+    | Syntax.IsoEbnf -> IsoEbnf.parse_string s
+    | Syntax.PythonEbnf -> PythonEbnf.parse_string s
 
 let parse_file name =
   let syntax =
@@ -70,15 +68,15 @@ let parse_file name =
     |> Syntax.of_string
   in
   match syntax with
-    | Syntax.Ebnf -> Ebnf.parse_file name
-    | Syntax.Python -> Python.parse_file name
+    | Syntax.IsoEbnf -> IsoEbnf.parse_file name
+    | Syntax.PythonEbnf -> PythonEbnf.parse_file name
 
-module EbnfUnitTests = struct
+module IsoEbnfUnitTests = struct
   open Tst
 
   let make s expected =
     s >:: (fun _ ->
-      check_poly ~to_string:Grammar.to_string Grammar.(grammar [rule "r" expected]) (parse_string ~syntax:Syntax.Ebnf (sprintf "r = %s;" s))
+      check_poly ~to_string:Grammar.to_string Grammar.(grammar [rule "r" expected]) (parse_string ~syntax:Syntax.IsoEbnf (sprintf "r = %s;" s))
     )
 
   let t = Grammar.terminal "t"
@@ -93,7 +91,7 @@ module EbnfUnitTests = struct
   let sp = Grammar.special
   let ex = Grammar.except
 
-  let test = "Ebnf" >::: [
+  let test = "IsoEbnf" >::: [
     make "'t'" t;
     make "'t' (* foobar *)" t;
     make "\"t\"" t;
@@ -113,12 +111,12 @@ module EbnfUnitTests = struct
   ]
 end
 
-module PythonUnitTests = struct
+module PythonEbnfUnitTests = struct
   open Tst
 
   let make s expected =
     s >:: (fun _ ->
-      check_poly ~to_string:Grammar.to_string Grammar.(grammar [rule "r" expected]) (parse_string ~syntax:Syntax.Python (sprintf "r: %s" s))
+      check_poly ~to_string:Grammar.to_string Grammar.(grammar [rule "r" expected]) (parse_string ~syntax:Syntax.PythonEbnf (sprintf "r: %s" s))
     )
 
   let g = Grammar.grammar
@@ -132,7 +130,7 @@ module PythonUnitTests = struct
   let sp = Grammar.special
   let ex = Grammar.except
 
-  let test = "Python" >::: [
+  let test = "PythonEbnf" >::: [
     make "FOO" (t "FOO");
     make "FOO # bar baz\n" (t "FOO");
     make "foo" (nt "foo");
@@ -146,7 +144,7 @@ module PythonUnitTests = struct
     "several rules" >:: (fun _ ->
       check_poly ~to_string:Grammar.to_string
         (g [ru "a" (t "FOO"); ru "b"(t "BAR")])
-        (parse_string ~syntax:Syntax.Python "a: FOO\nb: BAR\n")
+        (parse_string ~syntax:Syntax.PythonEbnf "a: FOO\nb: BAR\n")
     )
   ]
 end
@@ -155,7 +153,7 @@ module UnitTests = struct
   open Tst
 
   let test = "Parse" >::: [
-    EbnfUnitTests.test;
-    PythonUnitTests.test;
+    IsoEbnfUnitTests.test;
+    PythonEbnfUnitTests.test;
   ]
 end

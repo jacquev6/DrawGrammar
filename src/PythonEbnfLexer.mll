@@ -3,7 +3,7 @@
   module Lexing = OCamlStandard.Lexing
   module Array = OCamlStandard.Array
 
-  open PythonParser
+  open PythonEbnfParser
 }
 
 let identifier = ['a'-'z'] ['a'-'z' '_' '0'-'9']*
