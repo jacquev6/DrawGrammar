@@ -138,7 +138,7 @@
       make_settings("#primary_settings", DrawGrammar.default_primary_settings);
       make_settings("#secondary_settings", DrawGrammar.default_secondary_settings);
       if($("#grammar").val() == "") {
-        load_example($("button").get(0));
+        load_example({target: $("button").get(0)});
       };
       update();
       $("#examples_tab button").click(load_example);
