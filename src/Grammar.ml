@@ -2,6 +2,8 @@ open General.Abbr
 
 let sprintf = OCamlStandard.Printf.sprintf
 
+(* @todo Parse and draw comments *)
+
 module Terminal = struct
   type t = {
     value: string;

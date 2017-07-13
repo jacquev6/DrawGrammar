@@ -27,7 +27,6 @@ end) = struct
     |> parse_lexbuf ?file_name
 
   let parse_file file_name =
-    (* @todo Add In_channel.with_file in General *)
     let chan = open_in file_name in
     let g = parse_chan ~file_name chan in
     close_in chan;
@@ -42,6 +41,8 @@ end
 module IsoEbnf = Make(IsoEbnfParser)(IsoEbnfLexer)
 
 module PythonEbnf = Make(PythonEbnfParser)(PythonEbnfLexer)
+
+(* @todo Parse Mehnir/ocamlyacc's .mly files *)
 
 module Syntax = struct
   type t =
