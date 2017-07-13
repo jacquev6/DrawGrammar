@@ -6,4 +6,4 @@ factor = integer | '(', expr, ')';
 
 integer = [ '-' ], digit, { digit };
 
-digit = '0' | '1' | '...' | '9' | 'A' | '...' | 'F';
+digit = '0' | '1' | '...' | '9';
