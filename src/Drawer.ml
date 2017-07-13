@@ -71,16 +71,6 @@ end) = struct
     )
 
   module Bricks = struct
-    let is_forward context =
-      (* @todo Remove this: we would fail drawing on an already rotated or scaled context.
-      Pass is_forward as a parameter when recursing in the definitions. *)
-      let {C.xx; xy; yx; yy; _} = C.get_matrix context in
-      assert (Fl.abs xy < 1e-6);
-      assert (Fl.abs yx < 1e-6);
-      assert (Fl.abs (xx -. yy) < 1e-6);
-      assert (Fl.abs (xx -. 1.) < 1e-6 || Fl.abs (xx +. 1.) < 1e-6);
-      Fl.abs (xx -. 1.) < 1e-6
-
     module Text = struct
       let measure t =
         make_measure (fun context ->
@@ -90,15 +80,16 @@ end) = struct
           (x_advance, h, h)
         )
 
-      let draw t =
+      let draw t ~is_forward =
         make_draw (fun context ->
           let {C.ascent; descent; _} = C.font_extents context in
-          if is_forward context then begin
+          if is_forward then begin
             C.move_to context ~x:0. ~y:((ascent -. descent) /. 2.);
           end else begin
             let (advance, _, _) = measure t ~context in
-            C.move_to context ~x:advance ~y:((descent -. ascent) /. 2.);
-            C.identity_matrix context;
+            C.translate context ~x:advance ~y:((descent -. ascent) /. 2.);
+            C.rotate context ~angle:Math.pi;
+            C.move_to context ~x:0. ~y:0.;
           end;
           C.show_text context t;
           (0., 0.)
@@ -215,8 +206,8 @@ end) = struct
         C.rotate context ~angle:(Math.pi /. 2.);
         C.translate context ~x:S.turn_radius ~y:0.
 
-      let get ~context =
-        if is_forward context then
+      let get ~is_forward =
+        if is_forward then
           (left, right)
         else
           (right, left)
@@ -231,13 +222,13 @@ end) = struct
           (text_advance +. height, height /. 2., height /. 2.)
         )
 
-      let draw_text text =
+      let draw_text text ~is_forward =
         make_draw (fun context ->
           let (advance, _, _) = measure text ~context in
           C.set_font_size context S.definitions_font_size;
           let (text_advance, _, _) = Text.measure text ~context in
           C.translate context ~x:((advance -. text_advance) /. 2.) ~y:0.;
-          Text.draw text ~context;
+          Text.draw text ~is_forward ~context;
           (0., 0.)
         )
     end
@@ -245,9 +236,9 @@ end) = struct
     module RoundedRectangleText = struct
       include AnyRectangleText
 
-      let draw text =
+      let draw text ~is_forward =
         make_draw (fun context ->
-          draw_text text ~context;
+          draw_text text ~is_forward ~context;
           let (advance, ascent, _) = measure text ~context in
           let radius = ascent -. S.half_line_width in
           C.arc context ~x:ascent ~y:0. ~r:radius ~a1:(Math.pi /. 2.) ~a2:(-.Math.pi /. 2.);
@@ -263,9 +254,9 @@ end) = struct
     module RectangleText = struct
       include AnyRectangleText
 
-      let draw text =
+      let draw text ~is_forward =
         make_draw (fun context ->
-          draw_text text ~context;
+          draw_text text ~is_forward ~context;
           let (advance, h, _) = measure text ~context in
           let radius = h -. S.half_line_width in
           C.rectangle context ~x:S.half_line_width ~y:(-.radius) ~w:(advance -. S.line_width) ~h:(2. *. radius);
@@ -277,9 +268,9 @@ end) = struct
     module PointyRectangleText = struct
       include AnyRectangleText
 
-      let draw text =
+      let draw text ~is_forward =
         make_draw (fun context ->
-          draw_text text ~context;
+          draw_text text ~is_forward ~context;
           let (advance, h, _) = measure text ~context in
           let radius = h -. S.half_line_width in
           C.move_to context ~x:radius ~y:(-.radius);
@@ -297,10 +288,10 @@ end) = struct
     end
   end
 
-  let draw_centered ~total_advance ~advance ~context f =
+  let draw_centered ~total_advance ~advance ~is_forward ~context f =
     let centering_advance = (total_advance -. advance) /. 2. in
     Bricks.Advance.draw centering_advance ~context;
-    f ~context;
+    f ~is_forward ~context;
     Bricks.Advance.draw centering_advance ~context;
 
   module TextSymbol(Get: sig
@@ -311,7 +302,7 @@ end) = struct
     val family: string
   end)(Rectangle: sig
     val measure: string -> context:C.context -> float * float * float
-    val draw: string -> context:C.context -> unit
+    val draw: string -> is_forward:bool -> context:C.context -> unit
   end) = struct
     let measure symbol =
       make_measure (fun context ->
@@ -323,10 +314,10 @@ end) = struct
         ]
       )
 
-    let draw symbol ~context =
+    let draw symbol ~is_forward ~context =
       C.select_font_face context ~slant:Get.slant ~weight:Get.weight Get.family;
       Bricks.Arrow.draw ~context;
-      Rectangle.draw (Get.text symbol) ~context;
+      Rectangle.draw (Get.text symbol) ~is_forward ~context;
       Bricks.Advance.draw S.arrow_size ~context;
   end
 
@@ -364,7 +355,7 @@ end) = struct
 
   module rec Sequence: sig
     val measure: Grammar.Sequence.t -> context:C.context -> float * float * float
-    val draw: Grammar.Sequence.t -> context:C.context -> unit
+    val draw: Grammar.Sequence.t -> is_forward:bool -> context:C.context -> unit
   end = struct
     let measure sequence ~context =
       let elements = Grammar.Sequence.elements sequence in
@@ -375,18 +366,18 @@ end) = struct
       in
       (advance +. (S.minimal_horizontal_spacing *. Fl.of_int (Li.size elements - 1)), ascent, descent)
 
-    let draw sequence ~context =
+    let draw sequence ~is_forward ~context =
       sequence
       |> Grammar.Sequence.elements
       |> Li.iter_i ~f:(fun i definition ->
         if i <> 0 then Bricks.Advance.draw S.minimal_horizontal_spacing ~context;
-        Definition.draw definition ~context
+        Definition.draw definition ~is_forward ~context
       )
   end
 
   and Repetition: sig
     val measure: Grammar.Repetition.t -> context:C.context -> float * float * float
-    val draw: Grammar.Repetition.t -> context:C.context -> unit
+    val draw: Grammar.Repetition.t -> is_forward:bool -> context:C.context -> unit
   end = struct
     let measure repetition =
       make_measure (fun context ->
@@ -408,11 +399,11 @@ end) = struct
         (advance, ascent, descent)
       )
 
-    let draw repetition =
+    let draw repetition ~is_forward =
       make_draw (fun context ->
         let forward = Grammar.Repetition.forward repetition
         and backward = Grammar.Repetition.backward repetition in
-        let (_, turn_right) = Bricks.Turns.get ~context
+        let (_, turn_right) = Bricks.Turns.get ~is_forward
         and (advance, _, _) = measure repetition ~context
         and (forward_advance, _, forward_descent) = Definition.measure forward ~context
         and (backward_advance, backward_ascent, _) = Definition.measure backward ~context in
@@ -420,7 +411,7 @@ end) = struct
 
         Bricks.Advance.draw (S.turn_radius +. S.half_line_width) ~context;
 
-        draw_centered ~total_advance ~advance:forward_advance ~context (Definition.draw forward);
+        draw_centered ~total_advance ~advance:forward_advance ~is_forward ~context (Definition.draw forward);
 
         save_restore ~context (fun context ->
           Bricks.Advance.draw (S.turn_radius +. S.half_line_width) ~context;
@@ -431,7 +422,7 @@ end) = struct
         Bricks.Advance.draw vertical_advance ~context;
         turn_right ~context;
 
-        draw_centered ~total_advance ~advance:backward_advance ~context (Definition.draw backward);
+        draw_centered ~total_advance ~advance:backward_advance ~is_forward:(not is_forward) ~context (Definition.draw backward);
 
         turn_right ~context;
         Bricks.Advance.draw vertical_advance ~context;
@@ -442,7 +433,7 @@ end) = struct
 
   and Except: sig
     val measure: Grammar.Except.t -> context:C.context -> float * float * float
-    val draw: Grammar.Except.t -> context:C.context -> unit
+    val draw: Grammar.Except.t -> is_forward:bool -> context:C.context -> unit
   end = struct
     let measure exception_ =
       make_measure (fun context ->
@@ -459,11 +450,11 @@ end) = struct
         (advance, ascent, descent)
       )
 
-    let draw exception_ =
+    let draw exception_ ~is_forward =
       make_draw (fun context ->
         let base = Grammar.Except.base exception_
         and except = Grammar.Except.except exception_ in
-        let (turn_left, turn_right) = Bricks.Turns.get ~context
+        let (turn_left, turn_right) = Bricks.Turns.get ~is_forward
         and (advance, _, _) = measure exception_ ~context
         and (except_advance, _, except_descent) = measure_sequence [Definition.measure except ~context; Bricks.DeadEnd.measure ~context]
         and (base_advance, base_ascent, _) = Definition.measure base ~context in
@@ -471,7 +462,7 @@ end) = struct
 
         save_restore ~context (fun context ->
           Bricks.Advance.draw (2. *. S.turn_radius) ~context;
-          Definition.draw except ~context;
+          Definition.draw except ~is_forward ~context;
           Bricks.DeadEnd.draw ~context;
         );
 
@@ -479,7 +470,7 @@ end) = struct
         turn_right ~context;
         Bricks.Advance.draw vertical_advance ~context;
         turn_left ~context;
-        draw_centered ~total_advance ~advance:base_advance ~context (Definition.draw base);
+        draw_centered ~total_advance ~advance:base_advance ~is_forward ~context (Definition.draw base);
         turn_left ~context;
         Bricks.Advance.draw vertical_advance ~context;
         turn_right ~context;
@@ -489,7 +480,7 @@ end) = struct
 
   and Alternative: sig
     val measure: Grammar.Alternative.t -> context:C.context -> float * float * float
-    val draw: Grammar.Alternative.t -> context:C.context -> unit
+    val draw: Grammar.Alternative.t -> is_forward:bool -> context:C.context -> unit
   end = struct
     let measure alternative =
       make_measure (fun context ->
@@ -513,10 +504,10 @@ end) = struct
         (advance, first_ascent, descent +. last_descent)
       )
 
-    let draw alternative =
+    let draw alternative ~is_forward =
       make_draw (fun context ->
         let elements = Grammar.Alternative.elements alternative in
-        let (turn_left, turn_right) = Bricks.Turns.get ~context
+        let (turn_left, turn_right) = Bricks.Turns.get ~is_forward
         and first_element = Li.head elements
         and other_elements = Li.tail elements in
         let (advance, _, _) = measure alternative ~context
@@ -525,7 +516,7 @@ end) = struct
 
         save_restore ~context (fun context ->
           Bricks.Advance.draw (2. *. S.turn_radius) ~context;
-          draw_centered ~total_advance ~advance:first_advance ~context (Definition.draw first_element);
+          draw_centered ~total_advance ~advance:first_advance ~is_forward ~context (Definition.draw first_element);
           Bricks.Advance.draw (2. *. S.turn_radius) ~context;
         );
 
@@ -545,7 +536,7 @@ end) = struct
           Bricks.Advance.draw vertical_advance ~context;
           save_restore ~context (fun context ->
             turn_left ~context;
-            draw_centered ~total_advance ~advance ~context (Definition.draw element);
+            draw_centered ~total_advance ~advance ~is_forward ~context (Definition.draw element);
             turn_left ~context;
             Bricks.Advance.draw vertical_advance ~context;
 
@@ -566,7 +557,7 @@ end) = struct
 
   and Definition: sig
     val measure: Grammar.Definition.t -> context:C.context -> float * float * float
-    val draw: Grammar.Definition.t -> context:C.context -> unit
+    val draw: Grammar.Definition.t -> is_forward:bool -> context:C.context -> unit
   end = struct
     let measure definition ~context =
       match definition with
@@ -580,17 +571,17 @@ end) = struct
         | Grammar.Definition.Special x -> Special.measure x ~context
         | Grammar.Definition.Except x -> Except.measure x ~context
 
-    let draw definition ~context =
+    let draw definition ~is_forward ~context =
       match definition with
         | Grammar.Definition.Null -> ()
-        | Grammar.Definition.Terminal x -> Terminal.draw x ~context
-        | Grammar.Definition.Token x -> Token.draw x ~context
-        | Grammar.Definition.NonTerminal x -> NonTerminal.draw x ~context
-        | Grammar.Definition.Sequence x -> Sequence.draw x ~context
-        | Grammar.Definition.Alternative x -> Alternative.draw x ~context
-        | Grammar.Definition.Repetition x -> Repetition.draw x ~context
-        | Grammar.Definition.Special x -> Special.draw x ~context
-        | Grammar.Definition.Except x -> Except.draw x ~context
+        | Grammar.Definition.Terminal x -> Terminal.draw x ~is_forward ~context
+        | Grammar.Definition.Token x -> Token.draw x ~is_forward ~context
+        | Grammar.Definition.NonTerminal x -> NonTerminal.draw x ~is_forward ~context
+        | Grammar.Definition.Sequence x -> Sequence.draw x ~is_forward ~context
+        | Grammar.Definition.Alternative x -> Alternative.draw x ~is_forward ~context
+        | Grammar.Definition.Repetition x -> Repetition.draw x ~is_forward ~context
+        | Grammar.Definition.Special x -> Special.draw x ~is_forward ~context
+        | Grammar.Definition.Except x -> Except.draw x ~is_forward ~context
   end
 
   module Rule = struct
@@ -607,7 +598,7 @@ end) = struct
         let (_, label_ascent, label_descent) = measure_label rule ~context in
         C.set_font_size context S.rule_label_font_size;
         C.translate context ~x:0. ~y:label_ascent;
-        Bricks.Text.draw (sprintf "%s:" name) ~context;
+        Bricks.Text.draw (sprintf "%s:" name) ~is_forward:true ~context;
         (0., label_ascent +. label_descent)
       )
 
@@ -631,7 +622,7 @@ end) = struct
         let (_, definition_ascent, definition_descent) = measure_definition rule ~context in
         C.translate context ~x:0. ~y:definition_ascent;
         Bricks.Start.draw ~context;
-        Definition.draw definition ~context;
+        Definition.draw definition ~is_forward:true ~context;
         Bricks.Stop.draw ~context;
         (0., definition_descent)
       )
