@@ -1,16 +1,24 @@
 {
   open General.Abbr
-  module Lexing = OCamlStandard.Lexing
   module Array = OCamlStandard.Array
+  module Lexing = OCamlStandard.Lexing
+  module Printf = OCamlStandard.Printf
 
   open PythonEbnfParser
+
+  exception Error of string
+
+  let error format =
+    Printf.ksprintf (fun message -> raise (Error message)) format
 }
 
 let identifier = ['a'-'z'] ['a'-'z' '_' '0'-'9']*
 
 rule token = parse
-  | [' ' '\n' '\r']+  { token lexbuf }
-  | '#' [^'\n']* '\n' { token lexbuf }
+  | ['\n']  { Lexing.new_line lexbuf; token lexbuf }
+  | [' ' '\r']+  { token lexbuf }
+  | '#' [^'\n']* '\n' { Lexing.new_line lexbuf; token lexbuf }
+  | '#' [^'\n']* eof { EOF }
   | eof { EOF }
 
   | (identifier as name) ':' { RULE name }
@@ -25,3 +33,4 @@ rule token = parse
   | ']' { END_OPTION }
   | '*' { REPEAT_ZERO }
   | '+' { REPEAT_ONE }
+  | _ as c { error "unexpected character %C." c }

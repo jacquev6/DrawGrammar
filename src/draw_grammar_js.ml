@@ -6,9 +6,25 @@ let parse_grammar syntax grammar =
     |> Js.to_string
     |> Parse.Syntax.of_string
   in
-  grammar
-  |> Js.to_string
-  |> Parse.parse_string ~syntax
+  try
+    grammar
+    |> Js.to_string
+    |> Parse.parse_string ~syntax
+  with
+    | Parse.Errors.Lexing message ->
+      Js.raise_js_error (object%js (_)
+        val mutable name = Js.string "lexing error"
+        val mutable message = Js.string message
+        val mutable stack = Js.undefined
+        method toString = Js.string message
+      end)
+    | Parse.Errors.Parsing message ->
+      Js.raise_js_error (object%js (_)
+        val mutable name = Js.string "parsing error"
+        val mutable message = Js.string message
+        val mutable stack = Js.undefined
+        method toString = Js.string message
+      end)
 
 class type primary_settings = object
   method simplify: bool Js.t Js.prop

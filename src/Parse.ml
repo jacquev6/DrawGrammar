@@ -1,7 +1,7 @@
 open General.Abbr
 
 module Lexing = OCamlStandard.Lexing
-let sprintf = OCamlStandard.Printf.sprintf
+module Printf = OCamlStandard.Printf
 
 let set_file_name lexbuf = Lexing.(function
   | None -> ()
@@ -10,16 +10,39 @@ let set_file_name lexbuf = Lexing.(function
     lexbuf.lex_curr_p <- {lexbuf.lex_curr_p with pos_fname=file_name};
 )
 
+module Errors = struct
+  exception Lexing of string
+  exception Parsing of string
+
+  let position_to_string {Lexing.pos_fname; pos_lnum; pos_bol; pos_cnum; _} =
+    let file = match pos_fname with
+      | "" -> ""
+      | _ -> Printf.sprintf "file %S, " pos_fname
+    in
+    Printf.sprintf "%sline %n, character %n" file pos_lnum (pos_cnum - pos_bol + 1)
+
+  let lexing position message =
+    raise (Lexing (Printf.sprintf "%s: lexing error: %s" (position_to_string position) message))
+
+  let parsing position =
+    raise (Parsing (Printf.sprintf "%s: parsing error" (position_to_string position)))
+end
+
 module Make(Parser: sig
   type token
   val syntax: (Lexing.lexbuf -> token) -> Lexing.lexbuf -> Grammar.t
+  exception Error
 end)(Lexer: sig
   val token: Lexing.lexbuf -> Parser.token
+  exception Error of string
 end) = struct
   let parse_lexbuf ?file_name lexbuf =
     set_file_name lexbuf file_name;
-    lexbuf
-    |> Parser.syntax Lexer.token
+    try
+      Parser.syntax Lexer.token lexbuf
+    with
+      | Lexer.Error message -> Errors.lexing (Lexing.lexeme_start_p lexbuf) message
+      | Parser.Error -> Errors.parsing (Lexing.lexeme_start_p lexbuf)
 
   let parse_chan ?file_name chan =
     chan
@@ -52,7 +75,7 @@ module Syntax = struct
   let of_string = function
     | "iso-ebnf" -> IsoEbnf
     | "python-ebnf" -> PythonEbnf
-    | syntax -> failwith (sprintf "Unknown grammar syntax %s" syntax)
+    | syntax -> failwith (Printf.sprintf "Unknown grammar syntax %s" syntax)
 end
 
 let parse_string ~syntax s =
@@ -77,7 +100,7 @@ module IsoEbnfUnitTests = struct
 
   let make s expected =
     s >:: (fun _ ->
-      check_poly ~to_string:Grammar.to_string Grammar.(grammar [rule "r" expected]) (parse_string ~syntax:Syntax.IsoEbnf (sprintf "r = %s;" s))
+      check_poly ~to_string:Grammar.to_string Grammar.(grammar [rule "r" expected]) (parse_string ~syntax:Syntax.IsoEbnf (Printf.sprintf "r = %s;" s))
     )
 
   let t = Grammar.terminal "t"
@@ -117,7 +140,7 @@ module PythonEbnfUnitTests = struct
 
   let make s expected =
     s >:: (fun _ ->
-      check_poly ~to_string:Grammar.to_string Grammar.(grammar [rule "r" expected]) (parse_string ~syntax:Syntax.PythonEbnf (sprintf "r: %s" s))
+      check_poly ~to_string:Grammar.to_string Grammar.(grammar [rule "r" expected]) (parse_string ~syntax:Syntax.PythonEbnf (Printf.sprintf "r: %s" s))
     )
 
   let g = Grammar.grammar

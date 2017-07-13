@@ -1,14 +1,21 @@
 {
   open General.Abbr
-  module Lexing = OCamlStandard.Lexing
   module Array = OCamlStandard.Array
+  module Lexing = OCamlStandard.Lexing
+  module Printf = OCamlStandard.Printf
 
   open IsoEbnfParser
+
+  exception Error of string
+
+  let error format =
+    Printf.ksprintf (fun message -> raise (Error message)) format
 }
 
 let white = [' ' '\t' '\n' '\r']
 
 rule token = parse
+  | '\n' { Lexing.new_line lexbuf; token lexbuf }
   | white { token lexbuf }
   | eof { EOF }
 
@@ -32,9 +39,11 @@ rule token = parse
   | '{' | "(:" { START_REPEAT_SYMBOL }
   | '}' | ":)" { END_REPEAT_SYMBOL }
   | ';' { TERMINATOR_SYMBOL }
+  | _ as c { error "unexpected character %C" c }
+
 
 and skip_comment i = parse
   | "(*" { skip_comment (i + 1) lexbuf }
   | "*)" { if i > 0 then skip_comment (i - 1) lexbuf }
-  | eof { failwith "End of file in comment" }
+  | eof { error "unexpected end of file in comment" }
   | _ { skip_comment i lexbuf}

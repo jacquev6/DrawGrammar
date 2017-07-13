@@ -112,8 +112,7 @@
         output.show();
       } catch(err) {
         output.hide();
-        // @todo Display useful error message
-        error.html("Error: {0} (We're working on making this message more useful)".format(err));
+        error.html(err.toString());
         error.show();
       }
     }
