@@ -4,7 +4,7 @@
   module Lexing = OCamlStandard.Lexing
   module Printf = OCamlStandard.Printf
 
-  open PythonEbnfParser
+  open PythonEbnf_Parser
 
   exception Error of string
 

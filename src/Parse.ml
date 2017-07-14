@@ -82,9 +82,9 @@ end) = struct
     |> parse_lexbuf ?file_name
 end
 
-module IsoEbnf = Make(IsoEbnfParser)(IsoEbnfParser_messages)(IsoEbnfLexer)
+module IsoEbnf = Make(IsoEbnf_Parser)(IsoEbnf_Messages)(IsoEbnf_Lexer)
 
-module PythonEbnf = Make(PythonEbnfParser)(PythonEbnfParser_messages)(PythonEbnfLexer)
+module PythonEbnf = Make(PythonEbnf_Parser)(PythonEbnf_Messages)(PythonEbnf_Lexer)
 
 (* @todo Parse Mehnir/ocamlyacc's .mly files *)
 

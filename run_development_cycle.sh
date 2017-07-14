@@ -2,10 +2,10 @@
 
 set -o errexit
 
-for p in src/*.mly
+for p in src/*_Parser.mly
 do
-  m=${p%.mly}.messages
-  c=${p%.mly}_messages.ml
+  m=${p%_Parser.mly}_Messages.messages
+  c=${p%_Parser.mly}_Messages.ml
   menhir --list-errors $p > $m.dummies
   if [ -f $m ]
   then
