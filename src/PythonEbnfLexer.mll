@@ -23,8 +23,8 @@ rule token = parse
 
   | (identifier as name) ':' { RULE name }
   | identifier as name { IDENTIFIER name }
-  (* @todo error on unclosed terminals *)
   | '\'' ([^'\'']+ as value) '\'' { TERMINAL value }
+  | '\'' [^'\'']* eof { error "unexpected end of file in literal terminal" }
   | (['A'-'Z']+ as value) { TOKEN value }
 
   | '|' { ALTERNATIVE }
@@ -34,4 +34,4 @@ rule token = parse
   | ']' { END_OPTION }
   | '*' { REPEAT_ZERO }
   | '+' { REPEAT_ONE }
-  | _ as c { error "unexpected character %C." c }
+  | _ as c { error "unexpected character %C" c }

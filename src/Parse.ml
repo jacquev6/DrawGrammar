@@ -56,6 +56,7 @@ end) = struct
             env
             |> Parser.MenhirInterpreter.current_state_number
             |> Messages.message
+            |> Str.drop_suffix ~suf:"\n"
             |> Errors.parsing (Lexing.lexeme_start_p lexbuf)
           | _ -> Errors.parsing (Lexing.lexeme_start_p lexbuf) "unknown"
         )
@@ -118,9 +119,19 @@ let parse_file name =
 module IsoEbnfUnitTests = struct
   open Tst
 
-  let make s expected =
+  let success s expected =
     s >:: (fun _ ->
       check_poly ~to_string:Grammar.to_string Grammar.(grammar [rule "r" expected]) (parse_string ~syntax:Syntax.IsoEbnf (Printf.sprintf "r = %s;" s))
+    )
+
+  let fail_lexing s message =
+    s >::(fun _ ->
+      expect_exception (Errors.Lexing message) (fun _ -> parse_string ~syntax:Syntax.IsoEbnf s)
+    )
+
+  let fail_parsing s message =
+    s >::(fun _ ->
+      expect_exception (Errors.Parsing message) (fun _ -> parse_string ~syntax:Syntax.IsoEbnf s)
     )
 
   let t = Grammar.terminal "t"
@@ -136,31 +147,49 @@ module IsoEbnfUnitTests = struct
   let ex = Grammar.except
 
   let test = "IsoEbnf" >::: [
-    make "'t'" t;
-    make "'t' (* foobar *)" t;
-    make "\"t\"" t;
-    make "v1" v1;
-    make "v1, v2, v3, v4" (s [v1; v2; v3; v4]);
-    make "v1, (v2, v3), v4" (s [v1; v2; v3; v4]);
-    make "v1 | v2 ! v3 / v4" (a [v1; v2; v3; v4]);
-    make "v1 | (v2 | v3) | v4" (a [v1; v2; v3; v4]);
-    make "{v1}" (r n v1);
-    make "(:v1:)" (r n v1);
-    make "5 * v1" (r v1 n);
-    make "[v1]" (a [n; v1]);
-    make "(/v1/)" (a [n; v1]);
-    make "" n;
-    make "v1 - v2" (ex v1 v2);
-    make "? foo bar baz ?" (sp "foo bar baz");
+    success "'t'" t;
+    success "'t' (* foobar *)" t;
+    success "\"t\"" t;
+    success "v1" v1;
+    success "v1, v2, v3, v4" (s [v1; v2; v3; v4]);
+    success "v1, (v2, v3), v4" (s [v1; v2; v3; v4]);
+    success "v1 | v2 ! v3 / v4" (a [v1; v2; v3; v4]);
+    success "v1 | (v2 | v3) | v4" (a [v1; v2; v3; v4]);
+    success "{v1}" (r n v1);
+    success "(:v1:)" (r n v1);
+    success "5 * v1" (r v1 n);
+    success "[v1]" (a [n; v1]);
+    success "(/v1/)" (a [n; v1]);
+    success "" n;
+    success "v1 - v2" (ex v1 v2);
+    success "? foo bar baz ?" (sp "foo bar baz");
+
+    fail_lexing "#" "line 1, character 1: lexing error: unexpected character '#'";
+    fail_lexing "(*" "line 1, character 3: lexing error: unexpected end of file in comment";
+    fail_lexing "'" "line 1, character 1: lexing error: unexpected end of file in string";
+    fail_lexing "\"" "line 1, character 1: lexing error: unexpected end of file in string";
+    fail_lexing "?" "line 1, character 1: lexing error: unexpected end of file in special sequence";
+
+    fail_parsing "a = (;" "line 1, character 6: parsing error: (IsoEbnf 9)";
   ]
 end
 
 module PythonEbnfUnitTests = struct
   open Tst
 
-  let make s expected =
+  let success s expected =
     s >:: (fun _ ->
       check_poly ~to_string:Grammar.to_string Grammar.(grammar [rule "r" expected]) (parse_string ~syntax:Syntax.PythonEbnf (Printf.sprintf "r: %s" s))
+    )
+
+  let fail_lexing s message =
+    s >::(fun _ ->
+      expect_exception (Errors.Lexing message) (fun _ -> parse_string ~syntax:Syntax.PythonEbnf s)
+    )
+
+  let fail_parsing s message =
+    s >::(fun _ ->
+      expect_exception (Errors.Parsing message) (fun _ -> parse_string ~syntax:Syntax.PythonEbnf s)
     )
 
   let g = Grammar.grammar
@@ -175,21 +204,26 @@ module PythonEbnfUnitTests = struct
   let ex = Grammar.except
 
   let test = "PythonEbnf" >::: [
-    make "FOO" (t "FOO");
-    make "FOO # bar baz\n" (t "FOO");
-    make "foo" (nt "foo");
-    make "FOO | BAR" (a [t "FOO"; t "BAR"]);
-    make "FOO BAR" (s [t "FOO"; t "BAR"]);
-    make "FOO BAR | BAZ BIM" (a [s [t "FOO"; t "BAR"]; s [t "BAZ"; t "BIM"]]);
-    make "FOO (BAR | BAZ) BIM" (s [t "FOO"; a [t "BAR"; t "BAZ"]; t "BIM"]);
-    make "[FOO]" (a [n; t "FOO"]);
-    make "FOO*" (r n (t "FOO"));
-    make "FOO+" (r (t "FOO") n);
+    success "FOO" (t "FOO");
+    success "FOO # bar baz\n" (t "FOO");
+    success "foo" (nt "foo");
+    success "FOO | BAR" (a [t "FOO"; t "BAR"]);
+    success "FOO BAR" (s [t "FOO"; t "BAR"]);
+    success "FOO BAR | BAZ BIM" (a [s [t "FOO"; t "BAR"]; s [t "BAZ"; t "BIM"]]);
+    success "FOO (BAR | BAZ) BIM" (s [t "FOO"; a [t "BAR"; t "BAZ"]; t "BIM"]);
+    success "[FOO]" (a [n; t "FOO"]);
+    success "FOO*" (r n (t "FOO"));
+    success "FOO+" (r (t "FOO") n);
     "several rules" >:: (fun _ ->
       check_poly ~to_string:Grammar.to_string
         (g [ru "a" (t "FOO"); ru "b"(t "BAR")])
         (parse_string ~syntax:Syntax.PythonEbnf "a: FOO\nb: BAR\n")
-    )
+    );
+
+    fail_lexing "{" "line 1, character 1: lexing error: unexpected character '{'";
+    fail_lexing "'" "line 1, character 1: lexing error: unexpected end of file in literal terminal";
+
+    fail_parsing "a: )" "line 1, character 4: parsing error: (PythonEbnf 1)";
   ]
 end
 

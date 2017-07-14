@@ -21,10 +21,12 @@ rule token = parse
 
   | ['0'-'9']+ as value { INTEGER (Int.of_string value) }
   | ['a'-'z' 'A'-'Z' '0'-'9' '_']+ as name { META_IDENTIFIER name }
-  (* @todo error on unclosed terminals and specials *)
   | '\'' ([^'\'']+ as value) '\'' { TERMINAL_STRING value }
+  | '\'' [^'\'']* eof { error "unexpected end of file in string" }
   | '"' ([^'"']+ as value) '"' { TERMINAL_STRING value }
+  | '"' [^'"']* eof { error "unexpected end of file in string" }
   | '?' white* (([^'?' ' ' '\t' '\n' '\r']+ (white+ [^'?' ' ' '\t' '\n' '\r']+)*) as value) white* '?' { SPECIAL_SEQUENCE value }
+  | '?' [^'?']* eof { error "unexpected end of file in special sequence" }
 
   | "(*" { skip_comment 0 lexbuf; token lexbuf }
 
