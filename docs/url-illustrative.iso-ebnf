@@ -1,0 +1,9 @@
+url = scheme, ":", ["//", authority], ["/", path], ["?",query], ["#", fragment];
+
+(* scheme = "http" | "https" | "mailto" | "file" | ? etc. ?; *)
+
+authority = [user, [":", password], "@"], host, [":", port];
+
+path = {path_component, "/"};
+
+query = key, "=", value, {"&", key, "=", value};
