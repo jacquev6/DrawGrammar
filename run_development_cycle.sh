@@ -30,7 +30,10 @@ cd src
 build draw_grammar.byte
 cd ..
 src/_build/draw_grammar.byte --help
-src/_build/draw_grammar.byte *.*-ebnf
+cd docs
+../src/_build/draw_grammar.byte *.*-ebnf
+mv *.png ..
+cd ..
 echo
 echo "Have a look at $(pwd)/*.png"
 echo
@@ -38,8 +41,9 @@ echo
 cd src
 build draw_grammar_js.js drawing_tests.js
 cd ..
+cp src/_build/draw_grammar_js.js docs
 echo
 echo "Have a look at $(pwd)/drawing_tests.html"
 echo
-echo "Have a look at $(pwd)/demo.html"
+echo "Have a look at $(pwd)/docs/index.html"
 echo
