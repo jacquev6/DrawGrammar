@@ -227,6 +227,8 @@
       make_settings("#secondary_settings", DrawGrammar.default_secondary_settings);
       if($("#grammar").val() == "") {
         load_example({target: $("button").get(0)});
+      } else {
+        updateSoon();
       };
       $("#examples_tab button").on("click", load_example);
       $("#syntax").on("change", updateSoon);
