@@ -95,9 +95,8 @@
               <div class="form-group">
                 <label for="syntax">Syntax:</label>
                 <select class="form-control" id="syntax">
-                  <option value="iso-ebnf">ISO-14977 EBNF</option>
-                  <option value="python-ebnf">Python EBNF</option>
                 </select>
+                <p><a id="syntax_online_reference" href="#">Syntax refence</a></p>
               </div>
               <div class="form-group">
                 <label for="grammar">Grammar:</label>
@@ -149,6 +148,8 @@
   <script src="settings.js"></script>
   <script>
     function update() {
+      $("#syntax_online_reference").attr("href", $("#syntax option:selected").data("online-reference"));
+
       var primary_settings = get_settings("#primary_settings");
       var secondary_settings = get_settings("#secondary_settings");
 
@@ -187,6 +188,10 @@
     };
 
     $(document).ready(function() {
+      for(var i = 1; i < DrawGrammar.syntaxes.length; ++i) {
+        var syntax = DrawGrammar.syntaxes[i];
+        $("#syntax").append('<option value="{0}" data-online-reference="{2}">{1}</option>'.format(syntax.value, syntax.description, syntax.online_reference));
+      };
       make_settings("#primary_settings", DrawGrammar.default_primary_settings);
       make_settings("#secondary_settings", DrawGrammar.default_secondary_settings);
       if($("#grammar").val() == "") {

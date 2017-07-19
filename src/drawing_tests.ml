@@ -2,8 +2,6 @@
 
 open General.Abbr
 
-
-
 let drawing_tests =
   DrawingTests.tests
   |> Li.map ~f:(fun (name, grammar) ->

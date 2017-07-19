@@ -96,6 +96,19 @@ let draw_grammar =
 
     val default_secondary_settings_ = default_secondary_settings
 
+    val syntaxes =
+      Parse.Syntax.all
+      |> Li.map ~f:(fun syntax ->
+        object%js (_)
+          val value = Js.string (Parse.Syntax.to_string syntax)
+
+          val description = Js.string (Parse.Syntax.description syntax)
+
+          val online_reference_ = Js.string (Parse.Syntax.online_reference syntax)
+        end
+      )
+      |> Li.to_array
+
     method on_canvas_ syntax grammar canvas settings =
       let grammar = parse_grammar syntax grammar in
       draw grammar canvas settings

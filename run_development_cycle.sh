@@ -32,7 +32,7 @@ cd ..
 src/_build/draw_grammar.byte --help
 cd docs
 ../src/_build/draw_grammar.byte *.*-ebnf
-mv *.png ..
+mv *.*-ebnf.png ..
 cd ..
 echo
 echo "Have a look at $(pwd)/*.png"

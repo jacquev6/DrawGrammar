@@ -1,6 +1,7 @@
 open General.Abbr
 module Arg = OCamlStandard.Arg
 module Printf = OCamlStandard.Printf
+module Sys = OCamlStandard.Sys
 
 module Arguments = struct
   let simplify = ref true
@@ -18,9 +19,23 @@ module Arguments = struct
   let stop_radius = ref Drawer.DefaultSecondarySettings.stop_radius
   let turn_radius = ref Drawer.DefaultSecondarySettings.turn_radius
 
+  let syntax = ref None
   let files = ref []
 
   let spec = Arg.[
+    (
+      "--syntax",
+      String (fun s -> syntax := Some s),
+      (
+        Printf.sprintf
+          "[%s]  Force the syntax of the input files, regardless of their extensions"
+          (
+            Parse.Syntax.all
+            |> Li.map ~f:Parse.Syntax.to_string
+            |> StrLi.concat ~sep:"|"
+          )
+      )
+    );
     ("--no-simplify", Clear simplify, " Don't merge common symbols before rails join or after they split");
 
     ("--rule-label-font-size", Set_float rule_label_font_size, (Printf.sprintf "FLOAT  Set rule label font size (default: %.02f)" !rule_label_font_size));
@@ -37,8 +52,35 @@ module Arguments = struct
     ("--turn-radius", Set_float turn_radius, (Printf.sprintf "FLOAT  Set turn radius (default: %.02f)" !turn_radius));
   ]
 
+  let usage =
+    Printf.sprintf
+      "Draw railroad diagrams of a grammar expressed in EBNF\n\
+      \n\
+      %s [options] input_files\n\
+      \n\
+      the syntax used is based on the file extension:\n\
+      %s\
+      \n\
+      Options:\n\
+      "
+      Sys.argv.(0)
+      (
+        Parse.Syntax.all
+        |> Li.map ~f:(fun syntax ->
+          Printf.sprintf
+            "  - .%s for %s (See %s)\n"
+            (Parse.Syntax.to_string syntax)
+            (Parse.Syntax.description syntax)
+            (Parse.Syntax.online_reference syntax)
+        )
+        |> StrLi.concat
+      )
+
   let parse () =
-    Arg.parse spec (fun f -> files := f::!files) ""
+    Arg.parse spec (fun f -> files := f::!files) usage
+
+  let usage () =
+    Arg.usage spec usage
 end
 
 let () = Arguments.parse ()
@@ -59,24 +101,31 @@ end)(struct
 end)
 
 let () =
-  !Arguments.files
-  |> Li.iter ~f:(fun input_name ->
-    let output_name = OCamlStandard.Printf.sprintf "%s.png" input_name in
-    OCamlStandard.Printf.printf "Drawing %s to %s\n" input_name output_name;
-    let grammar = Parse.parse_file input_name in
-    let grammar =
-      if !Arguments.simplify then
-        Grammar.simplify grammar
-      else
-        grammar
-    in
-    let context = Cairo.create (Cairo.Image.create Cairo.Image.RGB24 ~width:1 ~height:1) in
-    let (w, h) = Drawer.measure grammar ~context in
-    let image = Cairo.Image.create Cairo.Image.RGB24 ~width:(Int.of_float w) ~height:(Int.of_float h) in
-    let context = Cairo.create image in
-    Cairo.set_source_rgb context ~r:1. ~g:1. ~b:1.;
-    Cairo.paint context;
-    Cairo.set_source_rgb context ~r:0. ~g:0. ~b:0.;
-    Drawer.draw grammar ~context;
-    Cairo.PNG.write image output_name
-  )
+  let syntax =
+    !Arguments.syntax
+    |> Opt.map ~f:Parse.Syntax.of_string
+  in
+  match !Arguments.files with
+    | [] -> Arguments.usage ()
+    | files ->
+      files
+      |> Li.iter ~f:(fun input_name ->
+        let output_name = OCamlStandard.Printf.sprintf "%s.png" input_name in
+        OCamlStandard.Printf.printf "Drawing %s to %s\n" input_name output_name;
+        let grammar = Parse.parse_file ?syntax input_name in
+        let grammar =
+          if !Arguments.simplify then
+            Grammar.simplify grammar
+          else
+            grammar
+        in
+        let context = Cairo.create (Cairo.Image.create Cairo.Image.RGB24 ~width:1 ~height:1) in
+        let (w, h) = Drawer.measure grammar ~context in
+        let image = Cairo.Image.create Cairo.Image.RGB24 ~width:(Int.of_float w) ~height:(Int.of_float h) in
+        let context = Cairo.create image in
+        Cairo.set_source_rgb context ~r:1. ~g:1. ~b:1.;
+        Cairo.paint context;
+        Cairo.set_source_rgb context ~r:0. ~g:0. ~b:0.;
+        Drawer.draw grammar ~context;
+        Cairo.PNG.write image output_name
+      )
