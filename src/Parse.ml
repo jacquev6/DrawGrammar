@@ -93,6 +93,23 @@ module Syntax = struct
     | IsoEbnf
     | PythonEbnf
 
+  let all = [
+    IsoEbnf;
+    PythonEbnf;
+  ]
+
+  let to_string = function
+    | IsoEbnf -> "iso-ebnf"
+    | PythonEbnf -> "python-ebnf"
+
+  let description = function
+    | IsoEbnf -> "ISO-14977 EBNF"
+    | PythonEbnf -> "Python EBNF variant"
+
+  let online_reference = function
+    | IsoEbnf -> "http://www.cl.cam.ac.uk/~mgk25/iso-14977.pdf"
+    | PythonEbnf -> "https://github.com/python/cpython/blob/master/Grammar/Grammar"
+
   let of_string = function
     | "iso-ebnf" -> IsoEbnf
     | "python-ebnf" -> PythonEbnf
@@ -104,13 +121,16 @@ let parse_string ~syntax s =
     | Syntax.IsoEbnf -> IsoEbnf.parse_string s
     | Syntax.PythonEbnf -> PythonEbnf.parse_string s
 
-let parse_file name =
+let parse_file ?syntax name =
   let syntax =
-    name
-    |> Str.split ~sep:"."
-    |> Li.reverse
-    |> Li.head
-    |> Syntax.of_string
+    syntax
+    |> Opt.value_def ~def:(
+      name
+      |> Str.split ~sep:"."
+      |> Li.reverse
+      |> Li.head
+      |> Syntax.of_string
+    )
   in
   match syntax with
     | Syntax.IsoEbnf -> IsoEbnf.parse_file name
