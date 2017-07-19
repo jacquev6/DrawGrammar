@@ -137,8 +137,9 @@
         </div>
       </div>
       <div class="col-lg-8">
-        <canvas class="img-fluid" id="output"></canvas>
+        <p id="waiting">Computing, please wait...<!-- No animated dancing cow gif because the rendering thread is busy running Javascript :-/ --></p>
         <p id="error"></p>
+        <canvas class="img-fluid" id="output"></canvas>
       </div>
     </div>
   </div>
@@ -147,16 +148,40 @@
   <script src="draw_grammar_js.js"></script>
   <script src="settings.js"></script>
   <script>
-    function update() {
+    var updateDuration = 200;
+    var timeoutBeforeNextUpdate = null;
+    function updateAfterTimeout(timeout) {
+      if(timeoutBeforeNextUpdate) {
+        clearTimeout(timeoutBeforeNextUpdate);
+      };
+      $("#error").hide();
+      $("#output").hide();
+      $("#waiting").show();
+      if(timeout == undefined) {
+        console.log("FOO");
+        timeout = updateDuration;
+      }
+      timeoutBeforeNextUpdate = setTimeout(function() {
+        timeoutBeforeNextUpdate = null;
+        doUpdate();
+      }, timeout);
+    }
+
+    function updateSoon() {
+      // We just want to let the rendering thread show and hide #error, #output and #waiting
+      updateAfterTimeout(10);
+    }
+
+    function doUpdate() {
+      var start_time = performance.now();
+
       $("#syntax_online_reference").attr("href", $("#syntax option:selected").data("online-reference"));
 
       var primary_settings = get_settings("#primary_settings");
       var secondary_settings = get_settings("#secondary_settings");
 
-      var output = $("#output");
-      var error = $("#error");
       try {
-        error.hide();
+        var output = $("#output");
         DrawGrammar.on_canvas(
           $("#syntax").val(),
           $("#grammar").val(),
@@ -166,10 +191,14 @@
         );
         output.show();
       } catch(err) {
-        output.hide();
+        var error = $("#error");
         error.text(err.toString());
         error.show();
       }
+
+      $("#waiting").hide();
+      updateDuration = performance.now() - start_time;
+      // console.log("update() took " + updateDuration + "ms");
     }
 
     function load_example(event) {
@@ -182,12 +211,13 @@
         success: function(data) {
           $("#grammar").val(data);
           $('a[href="#grammar_tab"]').tab('show');
-          update();
+          updateSoon();
         },
       });
     };
 
     $(document).ready(function() {
+      $("#error").hide();
       for(var i = 1; i < DrawGrammar.syntaxes.length; ++i) {
         var syntax = DrawGrammar.syntaxes[i];
         $("#syntax").append('<option value="{0}" data-online-reference="{2}">{1}</option>'.format(syntax.value, syntax.description, syntax.online_reference));
@@ -197,11 +227,16 @@
       if($("#grammar").val() == "") {
         load_example({target: $("button").get(0)});
       };
-      update();
-      $("#examples_tab button").click(load_example);
-      $("#syntax").change(update);
-      $("#grammar").keyup(update);
-      $("select").change(update);
+      $("#examples_tab button").on("click", load_example);
+      $("#syntax").on("change", updateSoon);
+      $("#grammar").on("paste", updateSoon);
+      $("#grammar").on("keyup", function(event) {
+        // https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
+        if([16, 17, 18, 19, 20, 33, 34, 35, 36, 37, 38, 39, 40, 45, 91, 92, 144, 145].indexOf(event.which) == -1) {
+          updateAfterTimeout();
+        }
+      });
+      $("select").on("change", updateSoon);
     })
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
