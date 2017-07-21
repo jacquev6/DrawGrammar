@@ -31,6 +31,7 @@ rule token = parse
 
   | "\\\\" { token lexbuf }
 
+  | "...." '.'* { ANYTHING }
   | "||" { ALTERNATIVE }
   | '|' { ALTERNATIVE }
   | '(' { BEGIN_GROUP }
@@ -43,6 +44,7 @@ rule token = parse
   | ']' { END_OPTION }
   | ';' { token lexbuf }
   | "\\ldots" { RANGE }
+  | "..." { RANGE }
   | _ as c { error "unexpected character %C" c }
 
 and skip_text = parse

@@ -11,12 +11,13 @@
 %token <string> RULE
 %token <string> TERMINAL
 %token ALTERNATIVE
-%token EOF
-%token RANGE
+%token ANYTHING
 %token BEGIN_GROUP, END_GROUP
 %token BEGIN_OPTION, END_OPTION
 %token BEGIN_REPEAT_ONE, END_REPEAT_ONE
 %token BEGIN_REPEAT_ZERO, END_REPEAT_ZERO
+%token EOF
+%token RANGE
 
 %start grammar
 
@@ -29,9 +30,16 @@ grammar:
     { grammar rules }
 
 rule:
-  | name=RULE option(pair(RANGE, ALTERNATIVE)) definition=definition
-    (* @todo Display that a rule is an addition to an existing rule in case there is a (RANGE, ALTERNATIVE) *)
-    { rule name definition }
+  | name=RULE is_extension=boption(pair(RANGE, ALTERNATIVE)) definition=definition
+    {
+      let definition =
+        if is_extension then
+          alternative [special "previous definition"; definition]
+        else
+          definition
+      in
+      rule name definition
+    }
 
 definition:
   | elements=separated_nonempty_list(ALTERNATIVE, range)
@@ -60,3 +68,5 @@ single_definition:
     { repetition null definition }
   | definition=delimited(BEGIN_REPEAT_ONE, definition, END_REPEAT_ONE)
     { repetition definition null }
+  | ANYTHING
+    { special "anything" }
