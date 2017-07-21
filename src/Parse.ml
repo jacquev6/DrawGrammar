@@ -82,33 +82,41 @@ module IsoEbnf = Make(IsoEbnf_Parser)(IsoEbnf_Messages)(IsoEbnf_Lexer)
 
 module PythonEbnf = Make(PythonEbnf_Parser)(PythonEbnf_Messages)(PythonEbnf_Lexer)
 
+module OCamlETexEbnf = Make(OCamlETexEbnf_Parser)(OCamlETexEbnf_Messages)(OCamlETexEbnf_Lexer)
+
 (* @todo Parse Mehnir/ocamlyacc's .mly files *)
 
 module Syntax = struct
   type t =
     | IsoEbnf
     | PythonEbnf
+    | OCamlETexEbnf
 
   let all = [
     IsoEbnf;
     PythonEbnf;
+    OCamlETexEbnf;
   ]
 
   let to_string = function
     | IsoEbnf -> "iso-ebnf"
     | PythonEbnf -> "python-ebnf"
+    | OCamlETexEbnf -> "ocaml-etex-ebnf"
 
   let description = function
     | IsoEbnf -> "ISO-14977 EBNF"
-    | PythonEbnf -> "Python EBNF variant"
+    | PythonEbnf -> "syntax used in Python grammar file"
+    | OCamlETexEbnf -> "syntax used in OCaml manual .etex sources"
 
   let online_reference = function
     | IsoEbnf -> "http://www.cl.cam.ac.uk/~mgk25/iso-14977.pdf"
     | PythonEbnf -> "https://github.com/python/cpython/blob/master/Grammar/Grammar"
+    | OCamlETexEbnf -> "https://github.com/ocaml/ocaml/tree/trunk/manual/manual/refman"
 
   let of_string = function
     | "iso-ebnf" -> IsoEbnf
     | "python-ebnf" -> PythonEbnf
+    | "ocaml-etex-ebnf" -> OCamlETexEbnf
     | syntax -> failwith (Printf.sprintf "Unknown grammar syntax %s" syntax)
 end
 
@@ -116,6 +124,7 @@ let parse_string ~syntax s =
   match syntax with
     | Syntax.IsoEbnf -> IsoEbnf.parse_string s
     | Syntax.PythonEbnf -> PythonEbnf.parse_string s
+    | Syntax.OCamlETexEbnf -> OCamlETexEbnf.parse_string s
 
 let parse_file ?syntax name =
   let syntax =
@@ -131,6 +140,7 @@ let parse_file ?syntax name =
   match syntax with
     | Syntax.IsoEbnf -> IsoEbnf.parse_file name
     | Syntax.PythonEbnf -> PythonEbnf.parse_file name
+    | Syntax.OCamlETexEbnf -> OCamlETexEbnf.parse_file name
 
 module IsoEbnfUnitTests = struct
   open Tst
@@ -243,11 +253,52 @@ module PythonEbnfUnitTests = struct
   ]
 end
 
+module OCamlETexEbnfUnitTests = struct
+  open Tst
+
+  let success s expected =
+    s >:: (fun _ ->
+      let s = Printf.sprintf "{lkqjsd|\\begin{syntax}r: %s\\end{syntax}x{{xx\\begin{syntax}s: 't'\\end{syntax}flkdjf" s in
+      check_poly ~to_string:Grammar.to_string Grammar.(grammar [rule "r" expected; rule "s" (terminal "t")]) (parse_string ~syntax:Syntax.OCamlETexEbnf s)
+    )
+
+  let fail_lexing s message =
+    s >::(fun _ ->
+      expect_exception (Errors.Lexing message) (fun _ -> parse_string ~syntax:Syntax.OCamlETexEbnf s)
+    )
+
+  let fail_parsing s message =
+    s >::(fun _ ->
+      expect_exception (Errors.Parsing message) (fun _ -> parse_string ~syntax:Syntax.OCamlETexEbnf s)
+    )
+
+  let g = Grammar.grammar
+  let nt = Grammar.non_terminal
+  let t = Grammar.terminal
+  let s = Grammar.sequence
+  let a = Grammar.alternative
+  let r = Grammar.repetition
+  let ra = Grammar.range
+  let ru = Grammar.rule
+  let n = Grammar.null
+  let sp = Grammar.special
+  let ex = Grammar.except
+
+  let test = "OCamlETexEbnf" >::: [
+    success "foo" (nt "foo");
+    success "\"bar\"" (t "bar");
+    success "foo | bar" (a [nt "foo"; nt "bar"]);
+    success "foo || bar" (a [nt "foo"; nt "bar"]);
+    success "foo \\ldots bar" (ra (nt "foo") (nt "bar"));
+  ]
+end
+
 module UnitTests = struct
   open Tst
 
   let test = "Parse" >::: [
     IsoEbnfUnitTests.test;
     PythonEbnfUnitTests.test;
+    OCamlETexEbnfUnitTests.test;
   ]
 end

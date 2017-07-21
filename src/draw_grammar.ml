@@ -115,6 +115,7 @@ let () =
       |> Li.iter ~f:(fun input_name ->
         let output_name = OCamlStandard.Printf.sprintf "%s.png" input_name in
         OCamlStandard.Printf.printf "Drawing %s to %s\n" input_name output_name;
+        flush stdout;
         let grammar = Parse.parse_file ?syntax input_name in
         let grammar =
           if !Arguments.simplify then
