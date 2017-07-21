@@ -62,4 +62,4 @@ single_definition:
   | definition=delimited(START_GROUP, definition, END_GROUP)
     { definition }
   | definition=delimited(START_OPTION, definition, END_OPTION)
-    { Grammar.alternative [null; definition] }
+    { alternative [null; definition] }

@@ -30,6 +30,7 @@ end
 
 module Make(Parser: sig
   type token
+  (* @todo Rename syntax to grammar *)
   val syntax: (Lexing.lexbuf -> token) -> Lexing.lexbuf -> Grammar.t
   exception Error
 
