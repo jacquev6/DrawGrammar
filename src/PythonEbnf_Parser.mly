@@ -18,13 +18,13 @@
 %token START_GROUP, END_GROUP
 %token START_OPTION, END_OPTION
 
-%start syntax
+%start grammar
 
-%type <Grammar.t> syntax
+%type <Grammar.t> grammar
 
 %%
 
-syntax:
+grammar:
   | rules=nonempty_list(rule) EOF
     { grammar rules }
 

@@ -1,4 +1,4 @@
-syntax: RULE RULE 
+grammar: RULE RULE 
 ##
 ## Ends in an error in state: 1.
 ##
@@ -10,7 +10,7 @@ syntax: RULE RULE
 
 (PythonEbnf 1)
 
-syntax: RULE START_GROUP RULE 
+grammar: RULE START_GROUP RULE 
 ##
 ## Ends in an error in state: 5.
 ##
@@ -22,7 +22,7 @@ syntax: RULE START_GROUP RULE
 
 (PythonEbnf 2)
 
-syntax: RULE START_GROUP TOKEN RULE 
+grammar: RULE START_GROUP TOKEN RULE 
 ##
 ## Ends in an error in state: 17.
 ##
@@ -45,7 +45,7 @@ syntax: RULE START_GROUP TOKEN RULE
 
 (PythonEbnf 3)
 
-syntax: RULE START_OPTION RULE 
+grammar: RULE START_OPTION RULE 
 ##
 ## Ends in an error in state: 4.
 ##
@@ -57,7 +57,7 @@ syntax: RULE START_OPTION RULE
 
 (PythonEbnf 4)
 
-syntax: RULE START_OPTION TOKEN RULE 
+grammar: RULE START_OPTION TOKEN RULE 
 ##
 ## Ends in an error in state: 20.
 ##
@@ -80,7 +80,7 @@ syntax: RULE START_OPTION TOKEN RULE
 
 (PythonEbnf 5)
 
-syntax: RULE TOKEN ALTERNATIVE RULE 
+grammar: RULE TOKEN ALTERNATIVE RULE 
 ##
 ## Ends in an error in state: 11.
 ##
@@ -92,7 +92,7 @@ syntax: RULE TOKEN ALTERNATIVE RULE
 
 (PythonEbnf 6)
 
-syntax: RULE TOKEN END_OPTION 
+grammar: RULE TOKEN END_OPTION 
 ##
 ## Ends in an error in state: 24.
 ##
@@ -117,7 +117,7 @@ syntax: RULE TOKEN END_OPTION
 
 (PythonEbnf 7)
 
-syntax: RULE TOKEN REPEAT_ZERO REPEAT_ZERO 
+grammar: RULE TOKEN REPEAT_ZERO REPEAT_ZERO 
 ##
 ## Ends in an error in state: 13.
 ##
@@ -130,7 +130,7 @@ syntax: RULE TOKEN REPEAT_ZERO REPEAT_ZERO
 
 (PythonEbnf 8)
 
-syntax: TOKEN 
+grammar: TOKEN 
 ##
 ## Ends in an error in state: 0.
 ##

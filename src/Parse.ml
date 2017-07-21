@@ -29,22 +29,17 @@ module Errors = struct
 end
 
 module Make(Parser: sig
-  type token
-  (* @todo Rename syntax to grammar *)
-  val syntax: (Lexing.lexbuf -> token) -> Lexing.lexbuf -> Grammar.t
-  exception Error
-
   module MenhirInterpreter: sig
-    include MenhirLib.IncrementalEngine.INCREMENTAL_ENGINE with type token = token
+    include MenhirLib.IncrementalEngine.INCREMENTAL_ENGINE
   end
 
   module Incremental: sig
-    val syntax: Lexing.position -> Grammar.t MenhirInterpreter.checkpoint
+    val grammar: Lexing.position -> Grammar.t MenhirInterpreter.checkpoint
   end
 end)(Messages: sig
   val message: int -> string
 end)(Lexer: sig
-  val token: Lexing.lexbuf -> Parser.token
+  val token: Lexing.lexbuf -> Parser.MenhirInterpreter.token
   exception Error of string
 end) = struct
   let parse_lexbuf ?file_name lexbuf =
@@ -62,7 +57,7 @@ end) = struct
           | _ -> Errors.parsing (Lexing.lexeme_start_p lexbuf) "unknown"
         )
         (Parser.MenhirInterpreter.lexer_lexbuf_to_supplier Lexer.token lexbuf)
-        (Parser.Incremental.syntax lexbuf.Lexing.lex_curr_p)
+        (Parser.Incremental.grammar lexbuf.Lexing.lex_curr_p)
     with
       | Lexer.Error message -> Errors.lexing (Lexing.lexeme_start_p lexbuf) message
 
