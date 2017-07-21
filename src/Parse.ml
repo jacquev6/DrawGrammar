@@ -128,14 +128,14 @@ let parse_string ~syntax s =
 
 let parse_file ?syntax name =
   let syntax =
-    syntax
-    |> Opt.value_def ~def:(
-      name
-      |> Str.split ~sep:"."
-      |> Li.reverse
-      |> Li.head
-      |> Syntax.of_string
-    )
+    match syntax with
+      | Some syntax -> syntax
+      | None ->
+        name
+        |> Str.split ~sep:"."
+        |> Li.reverse
+        |> Li.head
+        |> Syntax.of_string
   in
   match syntax with
     | Syntax.IsoEbnf -> IsoEbnf.parse_file name
