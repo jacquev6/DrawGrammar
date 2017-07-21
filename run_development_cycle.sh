@@ -31,6 +31,8 @@ build draw_grammar.byte
 cd ..
 src/_build/draw_grammar.byte --help
 cd docs
+[ -e python2.7.python-ebnf ] || wget https://raw.githubusercontent.com/python/cpython/2.7/Grammar/Grammar --output-document python2.7.python-ebnf
+[ -e python3.6.python-ebnf ] || wget https://raw.githubusercontent.com/python/cpython/3.6/Grammar/Grammar --output-document python3.6.python-ebnf
 ../src/_build/draw_grammar.byte *.*-ebnf
 mv *.*-ebnf.png ..
 cd ..
