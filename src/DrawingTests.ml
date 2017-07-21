@@ -51,6 +51,13 @@ let single_rule_grammars =
     ]);
     ("exception with long base", except (terminal "long base branch") (terminal "except"));
     ("exception with long except", except (terminal "base") (terminal "long except branch"));
+    ("range with long bottom", range (terminal "short") (terminal "to quite long branch"));
+    ("range with long top", range (terminal "quite a bit longer") (terminal "to short"));
+    ("short range", range (terminal "a") (terminal "z"));
+    ("ranges in repetition", repetition
+      (range (terminal "min 1") (terminal "max 1"))
+      (range (terminal "min 2") (terminal "max 2"))
+    );
   ]
   |> Li.map ~f:(fun (name, definition) ->
     (name, Grammar.(grammar [rule name definition]))

@@ -88,6 +88,28 @@ end = struct
     |> sprintf "Alternative(%s)"
 end
 
+and Range: sig
+  type t = {
+    min: Definition.t;
+    max: Definition.t;
+  }
+  val min: t -> Definition.t
+  val max: t -> Definition.t
+  val to_string: t -> string
+end = struct
+  type t = {
+    min: Definition.t;
+    max: Definition.t;
+  }
+
+  let min {min; _} = min
+
+  let max {max; _} = max
+
+  let to_string {min; max} =
+    sprintf "Range(%s, %s)" (Definition.to_string min) (Definition.to_string max)
+end
+
 and Repetition: sig
   (* @todo Add an int option for the number of repetitions *)
   type t = {
@@ -141,6 +163,7 @@ and Definition: sig
     | NonTerminal of NonTerminal.t
     | Sequence of Sequence.t
     | Alternative of Alternative.t
+    | Range of Range.t
     | Repetition of Repetition.t
     | Special of Special.t
     | Except of Except.t
@@ -154,6 +177,7 @@ end = struct
     | NonTerminal of NonTerminal.t
     | Sequence of Sequence.t
     | Alternative of Alternative.t
+    | Range of Range.t
     | Repetition of Repetition.t
     | Special of Special.t
     | Except of Except.t
@@ -165,6 +189,7 @@ end = struct
     | NonTerminal x -> NonTerminal.to_string x
     | Sequence x -> Sequence.to_string x
     | Alternative x -> Alternative.to_string x
+    | Range x -> Range.to_string x
     | Repetition x -> Repetition.to_string x
     | Special x -> Special.to_string x
     | Except x -> Except.to_string x
@@ -204,6 +229,7 @@ module Constructors = struct
 
   let terminal value = Definition.Terminal {Terminal.value}
 
+
   let special value = Definition.Special {Special.value}
 
   let sequence elements =
@@ -236,6 +262,8 @@ module Constructors = struct
       | [element] -> element
       | _ -> Definition.Alternative {Alternative.elements}
 
+  let range min max = Definition.Range {Range.min; max}
+
   let repetition forward backward = Definition.Repetition {Repetition.forward; backward}
 
   let except base except = Definition.Except {Except.base; except}
@@ -251,6 +279,7 @@ module Raw = struct
   let n = null
   let nt = non_terminal
   let t = terminal
+  (* let tr = terminal_range *)
   (* let sp = special *)
   let seq elements = Definition.Sequence {Sequence.elements}
   let alt elements = Definition.Alternative {Alternative.elements}
@@ -331,6 +360,9 @@ let simplify =
     | Definition.Alternative {Alternative.elements} ->
       let elements = Li.map ~f:aux elements in
       Definition.Alternative {Alternative.elements}
+    | Definition.Range {Range.min; max} ->
+      let min = aux min and max = aux max in
+      Definition.Range {Range.min; max}
     | Definition.Sequence {Sequence.elements} ->
       let elements =
         elements

@@ -44,7 +44,6 @@ rule token = parse
   | ';' { TERMINATOR_SYMBOL }
   | _ as c { error "unexpected character %C" c }
 
-
 and skip_comment i = parse
   | "(*" { skip_comment (i + 1) lexbuf }
   | "*)" { if i > 0 then skip_comment (i - 1) lexbuf }

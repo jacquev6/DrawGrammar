@@ -31,6 +31,20 @@ build draw_grammar.byte
 cd ..
 src/_build/draw_grammar.byte --help
 cd docs
+[ -e python2.7.python-ebnf ] || wget https://raw.githubusercontent.com/python/cpython/2.7/Grammar/Grammar --output-document python2.7.python-ebnf
+[ -e python3.6.python-ebnf ] || wget https://raw.githubusercontent.com/python/cpython/3.6/Grammar/Grammar --output-document python3.6.python-ebnf
+[ -e lex.ocaml-etex-ebnf ] || wget https://raw.githubusercontent.com/ocaml/ocaml/trunk/manual/manual/refman/lex.etex --output-document lex.ocaml-etex-ebnf
+[ -e names.ocaml-etex-ebnf ] || wget https://raw.githubusercontent.com/ocaml/ocaml/trunk/manual/manual/refman/names.etex --output-document names.ocaml-etex-ebnf
+[ -e types.ocaml-etex-ebnf ] || wget https://raw.githubusercontent.com/ocaml/ocaml/trunk/manual/manual/refman/types.etex --output-document types.ocaml-etex-ebnf
+[ -e const.ocaml-etex-ebnf ] || wget https://raw.githubusercontent.com/ocaml/ocaml/trunk/manual/manual/refman/const.etex --output-document const.ocaml-etex-ebnf
+[ -e patterns.ocaml-etex-ebnf ] || wget https://raw.githubusercontent.com/ocaml/ocaml/trunk/manual/manual/refman/patterns.etex --output-document patterns.ocaml-etex-ebnf
+[ -e expr.ocaml-etex-ebnf ] || wget https://raw.githubusercontent.com/ocaml/ocaml/trunk/manual/manual/refman/expr.etex --output-document expr.ocaml-etex-ebnf
+[ -e typedecl.ocaml-etex-ebnf ] || wget https://raw.githubusercontent.com/ocaml/ocaml/trunk/manual/manual/refman/typedecl.etex --output-document typedecl.ocaml-etex-ebnf
+[ -e classes.ocaml-etex-ebnf ] || wget https://raw.githubusercontent.com/ocaml/ocaml/trunk/manual/manual/refman/classes.etex --output-document classes.ocaml-etex-ebnf
+[ -e modtypes.ocaml-etex-ebnf ] || wget https://raw.githubusercontent.com/ocaml/ocaml/trunk/manual/manual/refman/modtypes.etex --output-document modtypes.ocaml-etex-ebnf
+[ -e modules.ocaml-etex-ebnf ] || wget https://raw.githubusercontent.com/ocaml/ocaml/trunk/manual/manual/refman/modules.etex --output-document modules.ocaml-etex-ebnf
+[ -e compunit.ocaml-etex-ebnf ] || wget https://raw.githubusercontent.com/ocaml/ocaml/trunk/manual/manual/refman/compunit.etex --output-document compunit.ocaml-etex-ebnf
+[ -e exten.ocaml-etex-ebnf ] || wget https://raw.githubusercontent.com/ocaml/ocaml/trunk/manual/manual/refman/exten.etex --output-document exten.ocaml-etex-ebnf
 ../src/_build/draw_grammar.byte *.*-ebnf
 mv *.*-ebnf.png ..
 cd ..

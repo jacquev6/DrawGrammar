@@ -24,14 +24,14 @@
 %token START_REPEAT_SYMBOL, END_REPEAT_SYMBOL
 %token TERMINATOR_SYMBOL
 
-%start syntax
+%start grammar
 
-%type <Grammar.t> syntax
+%type <Grammar.t> grammar
 
 %%
 
 (* 4.2: syntax = syntax rule, {syntax rule}; *)
-syntax:
+grammar:
   | rules=nonempty_list(syntax_rule) EOF
     { grammar rules }
 

@@ -1,3 +1,5 @@
 /src/_build/
 /*.png
 /src/*_Messages.ml
+/docs/*.python-ebnf
+/docs/*.ocaml-etex-ebnf

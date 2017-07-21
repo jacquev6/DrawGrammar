@@ -15,8 +15,8 @@
 let identifier = ['a'-'z'] ['a'-'z' '_' '0'-'9']*
 
 rule token = parse
-  | ['\n']  { Lexing.new_line lexbuf; token lexbuf }
-  | [' ' '\r']+  { token lexbuf }
+  | '\n' { Lexing.new_line lexbuf; token lexbuf }
+  | [' ' '\r']+ { token lexbuf }
   | '#' [^'\n']* '\n' { Lexing.new_line lexbuf; token lexbuf }
   | '#' [^'\n']* eof { EOF }
   | eof { EOF }

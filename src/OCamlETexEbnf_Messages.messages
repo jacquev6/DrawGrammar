@@ -1,0 +1,252 @@
+grammar: RULE BEGIN_GROUP RULE 
+##
+## Ends in an error in state: 10.
+##
+## single_definition -> BEGIN_GROUP . definition END_GROUP [ TERMINAL RULE RANGE IDENTIFIER EOF END_REPEAT_ZERO END_REPEAT_ONE END_OPTION END_GROUP BEGIN_REPEAT_ZERO BEGIN_REPEAT_ONE BEGIN_OPTION BEGIN_GROUP ALTERNATIVE ]
+##
+## The known suffix of the stack is as follows:
+## BEGIN_GROUP 
+##
+
+(OCamlETexEbnf 1)
+
+grammar: RULE BEGIN_GROUP TERMINAL RULE 
+##
+## Ends in an error in state: 21.
+##
+## single_definition -> BEGIN_GROUP definition . END_GROUP [ TERMINAL RULE RANGE IDENTIFIER EOF END_REPEAT_ZERO END_REPEAT_ONE END_OPTION END_GROUP BEGIN_REPEAT_ZERO BEGIN_REPEAT_ONE BEGIN_OPTION BEGIN_GROUP ALTERNATIVE ]
+##
+## The known suffix of the stack is as follows:
+## BEGIN_GROUP definition 
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 11, spurious reduction of production nonempty_list(single_definition) -> single_definition 
+## In state 16, spurious reduction of production sequence -> nonempty_list(single_definition) 
+## In state 13, spurious reduction of production range -> sequence 
+## In state 18, spurious reduction of production separated_nonempty_list(ALTERNATIVE,range) -> range 
+## In state 17, spurious reduction of production definition -> separated_nonempty_list(ALTERNATIVE,range) 
+##
+
+(OCamlETexEbnf 2)
+
+grammar: RULE BEGIN_OPTION RULE 
+##
+## Ends in an error in state: 9.
+##
+## single_definition -> BEGIN_OPTION . definition END_OPTION [ TERMINAL RULE RANGE IDENTIFIER EOF END_REPEAT_ZERO END_REPEAT_ONE END_OPTION END_GROUP BEGIN_REPEAT_ZERO BEGIN_REPEAT_ONE BEGIN_OPTION BEGIN_GROUP ALTERNATIVE ]
+##
+## The known suffix of the stack is as follows:
+## BEGIN_OPTION 
+##
+
+(OCamlETexEbnf 3)
+
+grammar: RULE BEGIN_OPTION TERMINAL RULE 
+##
+## Ends in an error in state: 23.
+##
+## single_definition -> BEGIN_OPTION definition . END_OPTION [ TERMINAL RULE RANGE IDENTIFIER EOF END_REPEAT_ZERO END_REPEAT_ONE END_OPTION END_GROUP BEGIN_REPEAT_ZERO BEGIN_REPEAT_ONE BEGIN_OPTION BEGIN_GROUP ALTERNATIVE ]
+##
+## The known suffix of the stack is as follows:
+## BEGIN_OPTION definition 
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 11, spurious reduction of production nonempty_list(single_definition) -> single_definition 
+## In state 16, spurious reduction of production sequence -> nonempty_list(single_definition) 
+## In state 13, spurious reduction of production range -> sequence 
+## In state 18, spurious reduction of production separated_nonempty_list(ALTERNATIVE,range) -> range 
+## In state 17, spurious reduction of production definition -> separated_nonempty_list(ALTERNATIVE,range) 
+##
+
+(OCamlETexEbnf 4)
+
+grammar: RULE BEGIN_REPEAT_ONE RULE 
+##
+## Ends in an error in state: 8.
+##
+## single_definition -> BEGIN_REPEAT_ONE . definition END_REPEAT_ONE [ TERMINAL RULE RANGE IDENTIFIER EOF END_REPEAT_ZERO END_REPEAT_ONE END_OPTION END_GROUP BEGIN_REPEAT_ZERO BEGIN_REPEAT_ONE BEGIN_OPTION BEGIN_GROUP ALTERNATIVE ]
+##
+## The known suffix of the stack is as follows:
+## BEGIN_REPEAT_ONE 
+##
+
+(OCamlETexEbnf 5)
+
+grammar: RULE BEGIN_REPEAT_ONE TERMINAL RULE 
+##
+## Ends in an error in state: 25.
+##
+## single_definition -> BEGIN_REPEAT_ONE definition . END_REPEAT_ONE [ TERMINAL RULE RANGE IDENTIFIER EOF END_REPEAT_ZERO END_REPEAT_ONE END_OPTION END_GROUP BEGIN_REPEAT_ZERO BEGIN_REPEAT_ONE BEGIN_OPTION BEGIN_GROUP ALTERNATIVE ]
+##
+## The known suffix of the stack is as follows:
+## BEGIN_REPEAT_ONE definition 
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 11, spurious reduction of production nonempty_list(single_definition) -> single_definition 
+## In state 16, spurious reduction of production sequence -> nonempty_list(single_definition) 
+## In state 13, spurious reduction of production range -> sequence 
+## In state 18, spurious reduction of production separated_nonempty_list(ALTERNATIVE,range) -> range 
+## In state 17, spurious reduction of production definition -> separated_nonempty_list(ALTERNATIVE,range) 
+##
+
+(OCamlETexEbnf 6)
+
+grammar: RULE BEGIN_REPEAT_ZERO RULE 
+##
+## Ends in an error in state: 7.
+##
+## single_definition -> BEGIN_REPEAT_ZERO . definition END_REPEAT_ZERO [ TERMINAL RULE RANGE IDENTIFIER EOF END_REPEAT_ZERO END_REPEAT_ONE END_OPTION END_GROUP BEGIN_REPEAT_ZERO BEGIN_REPEAT_ONE BEGIN_OPTION BEGIN_GROUP ALTERNATIVE ]
+##
+## The known suffix of the stack is as follows:
+## BEGIN_REPEAT_ZERO 
+##
+
+(OCamlETexEbnf 7)
+
+grammar: RULE BEGIN_REPEAT_ZERO TERMINAL RULE 
+##
+## Ends in an error in state: 27.
+##
+## single_definition -> BEGIN_REPEAT_ZERO definition . END_REPEAT_ZERO [ TERMINAL RULE RANGE IDENTIFIER EOF END_REPEAT_ZERO END_REPEAT_ONE END_OPTION END_GROUP BEGIN_REPEAT_ZERO BEGIN_REPEAT_ONE BEGIN_OPTION BEGIN_GROUP ALTERNATIVE ]
+##
+## The known suffix of the stack is as follows:
+## BEGIN_REPEAT_ZERO definition 
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 11, spurious reduction of production nonempty_list(single_definition) -> single_definition 
+## In state 16, spurious reduction of production sequence -> nonempty_list(single_definition) 
+## In state 13, spurious reduction of production range -> sequence 
+## In state 18, spurious reduction of production separated_nonempty_list(ALTERNATIVE,range) -> range 
+## In state 17, spurious reduction of production definition -> separated_nonempty_list(ALTERNATIVE,range) 
+##
+
+(OCamlETexEbnf 8)
+
+grammar: RULE IDENTIFIER END_REPEAT_ZERO 
+##
+## Ends in an error in state: 30.
+##
+## nonempty_list(rule) -> rule . [ EOF ]
+## nonempty_list(rule) -> rule . nonempty_list(rule) [ EOF ]
+##
+## The known suffix of the stack is as follows:
+## rule 
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 11, spurious reduction of production nonempty_list(single_definition) -> single_definition 
+## In state 16, spurious reduction of production sequence -> nonempty_list(single_definition) 
+## In state 13, spurious reduction of production range -> sequence 
+## In state 18, spurious reduction of production separated_nonempty_list(ALTERNATIVE,range) -> range 
+## In state 17, spurious reduction of production definition -> separated_nonempty_list(ALTERNATIVE,range) 
+## In state 29, spurious reduction of production rule -> RULE option(pair(RANGE,ALTERNATIVE)) definition 
+##
+
+(OCamlETexEbnf 9)
+
+grammar: RULE RANGE ALTERNATIVE ALTERNATIVE 
+##
+## Ends in an error in state: 4.
+##
+## rule -> RULE option(pair(RANGE,ALTERNATIVE)) . definition [ RULE EOF ]
+##
+## The known suffix of the stack is as follows:
+## RULE option(pair(RANGE,ALTERNATIVE)) 
+##
+
+(OCamlETexEbnf 10)
+
+grammar: RULE RANGE TERMINAL 
+##
+## Ends in an error in state: 2.
+##
+## option(pair(RANGE,ALTERNATIVE)) -> RANGE . ALTERNATIVE [ TERMINAL IDENTIFIER BEGIN_REPEAT_ZERO BEGIN_REPEAT_ONE BEGIN_OPTION BEGIN_GROUP ]
+##
+## The known suffix of the stack is as follows:
+## RANGE 
+##
+
+(OCamlETexEbnf 11)
+
+grammar: RULE RULE 
+##
+## Ends in an error in state: 1.
+##
+## rule -> RULE . option(pair(RANGE,ALTERNATIVE)) definition [ RULE EOF ]
+##
+## The known suffix of the stack is as follows:
+## RULE 
+##
+
+(OCamlETexEbnf 12)
+
+grammar: RULE TERMINAL ALTERNATIVE RULE 
+##
+## Ends in an error in state: 19.
+##
+## separated_nonempty_list(ALTERNATIVE,range) -> range ALTERNATIVE . separated_nonempty_list(ALTERNATIVE,range) [ RULE EOF END_REPEAT_ZERO END_REPEAT_ONE END_OPTION END_GROUP ]
+##
+## The known suffix of the stack is as follows:
+## range ALTERNATIVE 
+##
+
+(OCamlETexEbnf 13)
+
+grammar: RULE TERMINAL RANGE IDENTIFIER RANGE 
+##
+## Ends in an error in state: 18.
+##
+## separated_nonempty_list(ALTERNATIVE,range) -> range . [ RULE EOF END_REPEAT_ZERO END_REPEAT_ONE END_OPTION END_GROUP ]
+## separated_nonempty_list(ALTERNATIVE,range) -> range . ALTERNATIVE separated_nonempty_list(ALTERNATIVE,range) [ RULE EOF END_REPEAT_ZERO END_REPEAT_ONE END_OPTION END_GROUP ]
+##
+## The known suffix of the stack is as follows:
+## range 
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 11, spurious reduction of production nonempty_list(single_definition) -> single_definition 
+## In state 16, spurious reduction of production sequence -> nonempty_list(single_definition) 
+## In state 15, spurious reduction of production range -> sequence RANGE sequence 
+##
+
+(OCamlETexEbnf 14)
+
+grammar: RULE TERMINAL RANGE RULE 
+##
+## Ends in an error in state: 14.
+##
+## range -> sequence RANGE . sequence [ RULE EOF END_REPEAT_ZERO END_REPEAT_ONE END_OPTION END_GROUP ALTERNATIVE ]
+##
+## The known suffix of the stack is as follows:
+## sequence RANGE 
+##
+
+(OCamlETexEbnf 15)
+
+grammar: TERMINAL 
+##
+## Ends in an error in state: 0.
+##
+## grammar' -> . grammar [ # ]
+##
+## The known suffix of the stack is as follows:
+## 
+##
+
+(OCamlETexEbnf 16)

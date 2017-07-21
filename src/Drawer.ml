@@ -17,6 +17,7 @@ module DefaultSecondarySettings = struct
   let start_radius = Fl.sqrt 2.
   let stop_radius = 1.5 *. Fl.sqrt 2.
   let turn_radius = 4.
+  let ellipsis_size = 2.
 end
 
 module Make(C: JsOfOCairo.S)(PrimarySettings: sig
@@ -32,6 +33,7 @@ end)(SecondarySettings: sig
   val start_radius: float
   val stop_radius: float
   val turn_radius: float
+  val ellipsis_size: float
 end) = struct
   module S = struct
     include PrimarySettings
@@ -43,6 +45,7 @@ end) = struct
     let start_radius = line_width *. SecondarySettings.start_radius
     let stop_radius = line_width *. SecondarySettings.stop_radius
     let turn_radius = line_width *. SecondarySettings.turn_radius
+    let ellipsis_size = line_width *. SecondarySettings.ellipsis_size
 
     let half_line_width = line_width /. 2.
   end
@@ -284,6 +287,23 @@ end) = struct
           C.Path.close context;
           C.stroke context;
           (advance, 0.)
+        )
+    end
+
+    module VerticalEllipsis = struct
+      let measure =
+        make_measure (fun _context ->
+          (S.ellipsis_size, 2. *. S.ellipsis_size, 2. *. S.ellipsis_size)
+        )
+
+      let draw =
+        make_draw (fun context ->
+          let r = S.ellipsis_size /. 2. in
+          C.arc context ~x:0. ~y:0. ~r ~a1:0. ~a2:(2. *. Math.pi);
+          C.arc context ~x:0. ~y:(3. *. r) ~r ~a1:0. ~a2:(2. *. Math.pi);
+          C.arc context ~x:0. ~y:(-3. *. r) ~r ~a1:0. ~a2:(2. *. Math.pi);
+          C.fill context;
+          (0., 0.)
         )
     end
   end
@@ -555,6 +575,63 @@ end) = struct
       )
   end
 
+  and Range: sig
+    val measure: Grammar.Range.t -> context:C.context -> float * float * float
+    val draw: Grammar.Range.t -> is_forward:bool -> context:C.context -> unit
+  end = struct
+    let measure range =
+      make_measure (fun context ->
+        let (min_advance, min_ascent, min_descent) = Definition.measure (Grammar.Range.min range) ~context
+        and (max_advance, max_ascent, max_descent) = Definition.measure (Grammar.Range.max range) ~context
+        and (ell_advance, ell_ascent, ell_descent) = Bricks.VerticalEllipsis.measure ~context in
+        let elements_advance = Fl.max (Fl.max min_advance max_advance) ell_advance
+        and descent =
+          Fl.max
+            (min_descent +. ell_ascent +. ell_descent +. max_ascent +. 2. *. S.minimal_vertical_spacing)
+            (2. *. S.turn_radius)
+        in
+        let advance = 4. *. S.turn_radius +. elements_advance in
+        (advance, min_ascent, descent +. max_descent)
+      )
+
+    let draw range ~is_forward =
+      make_draw (fun context ->
+        let min = Grammar.Range.min range and max = Grammar.Range.max range in
+        let (turn_left, turn_right) = Bricks.Turns.get ~is_forward
+        and (min_advance, _min_ascent, min_descent) = Definition.measure min ~context
+        and (max_advance, max_ascent, _max_descent) = Definition.measure max ~context
+        and (ell_advance, ell_ascent, ell_descent) = Bricks.VerticalEllipsis.measure ~context in
+        let elements_advance = Fl.max (Fl.max min_advance max_advance) ell_advance in
+        let advance = 4. *. S.turn_radius +. elements_advance in
+
+        save_restore ~context (fun context ->
+          Bricks.Advance.draw (2. *. S.turn_radius) ~context;
+          draw_centered ~total_advance:elements_advance ~advance:min_advance ~is_forward ~context (Definition.draw min);
+          Bricks.Advance.draw (2. *. S.turn_radius) ~context;
+        );
+
+        save_restore ~context (fun context ->
+          let vertical_advance = Fl.max (min_descent +. S.minimal_vertical_spacing +. ell_ascent) S.turn_radius in
+          let y = if is_forward then vertical_advance else -. vertical_advance in
+          C.translate context ~x:(advance /. 2.) ~y;
+          Bricks.VerticalEllipsis.draw ~context;
+        );
+
+        let vertical_advance =
+          Fl.max 0. (min_descent +. ell_ascent +. ell_descent +. max_ascent +. 2. *. S.minimal_vertical_spacing -. 2. *. S.turn_radius)
+        in
+        turn_right ~context;
+        Bricks.Advance.draw vertical_advance ~context;
+        turn_left ~context;
+        draw_centered ~total_advance:elements_advance ~advance:max_advance ~is_forward ~context (Definition.draw max);
+        turn_left ~context;
+        Bricks.Advance.draw vertical_advance ~context;
+        turn_right ~context;
+
+        (advance, 0.)
+      )
+  end
+
   and Definition: sig
     val measure: Grammar.Definition.t -> context:C.context -> float * float * float
     val draw: Grammar.Definition.t -> is_forward:bool -> context:C.context -> unit
@@ -567,6 +644,7 @@ end) = struct
         | Grammar.Definition.NonTerminal x -> NonTerminal.measure x ~context
         | Grammar.Definition.Sequence x -> Sequence.measure x ~context
         | Grammar.Definition.Alternative x -> Alternative.measure x ~context
+        | Grammar.Definition.Range x -> Range.measure x ~context
         | Grammar.Definition.Repetition x -> Repetition.measure x ~context
         | Grammar.Definition.Special x -> Special.measure x ~context
         | Grammar.Definition.Except x -> Except.measure x ~context
@@ -579,6 +657,7 @@ end) = struct
         | Grammar.Definition.NonTerminal x -> NonTerminal.draw x ~is_forward ~context
         | Grammar.Definition.Sequence x -> Sequence.draw x ~is_forward ~context
         | Grammar.Definition.Alternative x -> Alternative.draw x ~is_forward ~context
+        | Grammar.Definition.Range x -> Range.draw x ~is_forward ~context
         | Grammar.Definition.Repetition x -> Repetition.draw x ~is_forward ~context
         | Grammar.Definition.Special x -> Special.draw x ~is_forward ~context
         | Grammar.Definition.Except x -> Except.draw x ~is_forward ~context
