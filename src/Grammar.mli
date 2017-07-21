@@ -30,6 +30,12 @@ and Alternative: sig
   val elements: t -> Definition.t list
 end
 
+and Range: sig
+  type t
+  val min: t -> Definition.t
+  val max: t -> Definition.t
+end
+
 and Repetition: sig
   type t
   val forward: t -> Definition.t
@@ -50,6 +56,7 @@ and Definition: sig
     | NonTerminal of NonTerminal.t
     | Sequence of Sequence.t
     | Alternative of Alternative.t
+    | Range of Range.t
     | Repetition of Repetition.t
     | Special of Special.t
     | Except of Except.t
@@ -74,6 +81,7 @@ val token: string -> Definition.t
 val special: string -> Definition.t
 val sequence: Definition.t list -> Definition.t
 val alternative: Definition.t list -> Definition.t
+val range: Definition.t -> Definition.t -> Definition.t
 val repetition: Definition.t -> Definition.t -> Definition.t
 val except: Definition.t -> Definition.t -> Definition.t
 val rule: string -> Definition.t -> Rule.t

@@ -50,6 +50,7 @@ class type secondary_settings = object
   method start_radius_: float Js.prop
   method stop_radius_: float Js.prop
   method turn_radius_: float Js.prop
+  method ellipsis_size_: float Js.prop
 end
 
 let default_secondary_settings = object%js (_)
@@ -60,6 +61,7 @@ let default_secondary_settings = object%js (_)
   val start_radius_ = Drawer.DefaultSecondarySettings.start_radius
   val stop_radius_ = Drawer.DefaultSecondarySettings.stop_radius
   val turn_radius_ = Drawer.DefaultSecondarySettings.turn_radius
+  val ellipsis_size_ = Drawer.DefaultSecondarySettings.ellipsis_size
 end
 
 let draw grammar (canvas: Dom_html.element Js.t) (primary_settings: primary_settings Js.t) (secondary_settings: secondary_settings Js.t) =
@@ -84,6 +86,7 @@ let draw grammar (canvas: Dom_html.element Js.t) (primary_settings: primary_sett
     let start_radius = secondary_settings##.start_radius_
     let stop_radius = secondary_settings##.stop_radius_
     let turn_radius = secondary_settings##.turn_radius_
+    let ellipsis_size = secondary_settings##.ellipsis_size_
   end) in
   let (w, h) = Drawer.measure grammar ~context in
   canvas##.width := 1 + Int.of_float w;
