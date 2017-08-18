@@ -1,0 +1,30 @@
+language: c
+dist: trusty
+sudo: false
+addons:
+  apt:
+    sources:
+    - avsm
+    packages:
+    - opam
+install:
+  - opam init --yes
+  - opam repo add jacquev6 https://github.com/jacquev6/opam-repository.git # @todo Remove once JsOfOCairo.1.0.0 and General.0.1.0 are in OPAM
+  - opam update --yes
+  - opam switch --yes $OCAML_VERSION
+  - eval `opam config env`
+  - opam switch
+  - opam install --yes ocamlfind ocamlbuild JsOfOCairo General cairo2 menhir
+  - opam upgrade --yes
+  - opam list
+script:
+  - cd src
+  - ocamlbuild -no-plugin -use-ocamlfind -menhir "menhir --table" -tag debug unit_tests.byte
+  - cd ..
+  - src/_build/unit_tests.byte
+env:
+  - OCAML_VERSION=4.02.2
+  - OCAML_VERSION=4.05.0
+cache:
+  directories:
+  - $HOME/.opam
