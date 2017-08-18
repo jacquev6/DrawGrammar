@@ -2,6 +2,7 @@ DrawGrammar is a tool to draw `railroad diagrams <https://en.wikipedia.org/wiki/
 It is available as an `interactive demo <http://jacquev6.github.io/DrawGrammar/>`_ and as a command-line tool.
 
 It's licensed under the `MIT license <http://choosealicense.com/licenses/mit/>`_.
+It's available on `OPAM <https://opam.ocaml.org/packages/DrawGrammar/>`_.
 Its `source code <https://github.com/jacquev6/DrawGrammar>`_ is on GitHub.
 
 Questions? Remarks? Bugs? Want to contribute? `Open an issue <https://github.com/jacquev6/DrawGrammar/issues>`_!
@@ -9,12 +10,28 @@ Questions? Remarks? Bugs? Want to contribute? `Open an issue <https://github.com
 Quick start
 ===========
 
-Just use the `interactive demo <http://jacquev6.github.io/DrawGrammar/>`_, load examples and play with the settings.
+The simplest way is to use the `interactive demo <http://jacquev6.github.io/DrawGrammar/>`_, load examples and play with the settings.
 
-Hacking and command-line version
-================================
+If you want to use it locally as a command-line tool, install it from OPAM::
 
-DrawGrammar uses a library of mine, General, which is not distributed yet.
-This means that you won't be able to build the project on your machine.
-Please bear with me until I publish General or I decide to remove it from DrawGrammar's dependencies.
-Or if you're in a hurry, feel free to contact me to get a development version of this library.
+    $ opam install DrawGrammar
+
+Then create a ``my_grammar.iso-ebnf`` file containing, for example::
+
+    expr = term, { ( '+' | '-' ) , term };
+
+    term = { factor, ( '*' | '/' ) }, factor;
+
+    factor = integer | '(', expr, ')';
+
+    integer = [ '-' ], digit, { digit };
+
+    digit = '0' | '1' | '...' | '9';
+
+And draw it::
+
+    $ draw_grammar my_grammar.iso-ebnf
+
+If you want to tweak settings, the help is accessible using::
+
+    $ draw_grammar --help
