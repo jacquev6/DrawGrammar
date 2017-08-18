@@ -2,14 +2,13 @@
   open General.Abbr
   module Array = OCamlStandard.Array
   module Lexing = OCamlStandard.Lexing
-  module Printf = OCamlStandard.Printf
 
   open IsoEbnf_Parser
 
   exception Error of string
 
   let error format =
-    Printf.ksprintf (fun message -> raise (Error message)) format
+    Frmt.with_result ~f:(fun message -> Exn.raise (Error message)) format
 }
 
 let white = [' ' '\t' '\n' '\r']

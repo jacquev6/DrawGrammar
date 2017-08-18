@@ -71,7 +71,7 @@ let draw grammar (canvas: Dom_html.element Js.t) (primary_settings: primary_sett
     else
       grammar
   in
-  let canvas = Js.Opt.get (Dom_html.CoerceTo.canvas canvas) (fun _ -> failwith "Not a canvas") in
+  let canvas = Js.Opt.get (Dom_html.CoerceTo.canvas canvas) (fun _ -> Exn.failure "Not a canvas") in
   let context = JsOfOCairo.create canvas in
   let module Drawer = Drawer.Make(JsOfOCairo)(struct
     let rule_label_font_size = primary_settings##.rule_label_font_size_

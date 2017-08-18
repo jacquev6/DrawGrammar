@@ -1,7 +1,6 @@
 open General.Abbr
 
 module Lexing = OCamlStandard.Lexing
-module Printf = OCamlStandard.Printf
 
 let set_file_name lexbuf = Lexing.(function
   | None -> ()
@@ -17,15 +16,15 @@ module Errors = struct
   let position_to_string {Lexing.pos_fname; pos_lnum; pos_bol; pos_cnum; _} =
     let file = match pos_fname with
       | "" -> ""
-      | _ -> Printf.sprintf "file %S, " pos_fname
+      | _ -> Frmt.apply "file %S, " pos_fname
     in
-    Printf.sprintf "%sline %n, character %n" file pos_lnum (pos_cnum - pos_bol + 1)
+    Frmt.apply "%sline %n, character %n" file pos_lnum (pos_cnum - pos_bol + 1)
 
   let lexing position message =
-    raise (Lexing (Printf.sprintf "%s: lexing error: %s" (position_to_string position) message))
+    Exn.raise (Lexing (Frmt.apply "%s: lexing error: %s" (position_to_string position) message))
 
   let parsing position message =
-    raise (Parsing (Printf.sprintf "%s: parsing error: %s" (position_to_string position) message))
+    Exn.raise (Parsing (Frmt.apply "%s: parsing error: %s" (position_to_string position) message))
 end
 
 module Make(Parser: sig
@@ -67,10 +66,7 @@ end) = struct
     |> parse_lexbuf ?file_name
 
   let parse_file file_name =
-    let chan = open_in file_name in
-    let g = parse_chan ~file_name chan in
-    close_in chan;
-    g
+    InFile.with_channel file_name ~f:(parse_chan ~file_name)
 
   let parse_string ?file_name code =
     code
@@ -117,7 +113,7 @@ module Syntax = struct
     | "iso-ebnf" -> IsoEbnf
     | "python-ebnf" -> PythonEbnf
     | "ocaml-etex-ebnf" -> OCamlETexEbnf
-    | syntax -> failwith (Printf.sprintf "Unknown grammar syntax %s" syntax)
+    | syntax -> Exn.failure "Unknown grammar syntax %s" syntax
 end
 
 let parse_string ~syntax s =
@@ -142,23 +138,32 @@ let parse_file ?syntax name =
     | Syntax.PythonEbnf -> PythonEbnf.parse_file name
     | Syntax.OCamlETexEbnf -> OCamlETexEbnf.parse_file name
 
+let check_grammar =
+  General.Testing.check_poly ~repr:Grammar.to_string
+
 module IsoEbnfUnitTests = struct
   open Tst
 
   let success s expected =
-    s >:: (fun _ ->
-      check_poly ~to_string:Grammar.to_string Grammar.(grammar [rule "r" expected]) (parse_string ~syntax:Syntax.IsoEbnf (Printf.sprintf "r = %s;" s))
-    )
+    s >: (lazy (
+      check_grammar
+        ~expected:Grammar.(grammar [rule "r" expected])
+        (parse_string ~syntax:Syntax.IsoEbnf (Frmt.apply "r = %s;" s))
+    ))
 
   let fail_lexing s message =
-    s >::(fun _ ->
-      expect_exception (Errors.Lexing message) (fun _ -> parse_string ~syntax:Syntax.IsoEbnf s)
-    )
+    s >: (lazy (
+      expect_exception
+        ~expected:(Errors.Lexing message)
+        (lazy (parse_string ~syntax:Syntax.IsoEbnf s))
+    ))
 
   let fail_parsing s message =
-    s >::(fun _ ->
-      expect_exception (Errors.Parsing message) (fun _ -> parse_string ~syntax:Syntax.IsoEbnf s)
-    )
+    s >: (lazy (
+      expect_exception
+        ~expected:(Errors.Parsing message)
+        (lazy (parse_string ~syntax:Syntax.IsoEbnf s))
+    ))
 
   let t = Grammar.terminal "t"
   let v1 = Grammar.non_terminal "v1"
@@ -172,7 +177,7 @@ module IsoEbnfUnitTests = struct
   let sp = Grammar.special
   let ex = Grammar.except
 
-  let test = "IsoEbnf" >::: [
+  let test = "IsoEbnf" >:: [
     success "'t'" t;
     success "'t' (* foobar *)" t;
     success "\"t\"" t;
@@ -204,19 +209,25 @@ module PythonEbnfUnitTests = struct
   open Tst
 
   let success s expected =
-    s >:: (fun _ ->
-      check_poly ~to_string:Grammar.to_string Grammar.(grammar [rule "r" expected]) (parse_string ~syntax:Syntax.PythonEbnf (Printf.sprintf "r: %s" s))
-    )
+    s >: (lazy (
+      check_grammar
+        ~expected:Grammar.(grammar [rule "r" expected])
+        (parse_string ~syntax:Syntax.PythonEbnf (Frmt.apply "r: %s" s))
+    ))
 
   let fail_lexing s message =
-    s >::(fun _ ->
-      expect_exception (Errors.Lexing message) (fun _ -> parse_string ~syntax:Syntax.PythonEbnf s)
-    )
+    s >: (lazy (
+      expect_exception
+        ~expected:(Errors.Lexing message)
+        (lazy (parse_string ~syntax:Syntax.PythonEbnf s))
+    ))
 
   let fail_parsing s message =
-    s >::(fun _ ->
-      expect_exception (Errors.Parsing message) (fun _ -> parse_string ~syntax:Syntax.PythonEbnf s)
-    )
+    s >: (lazy (
+      expect_exception
+        ~expected:(Errors.Parsing message)
+        (lazy (parse_string ~syntax:Syntax.PythonEbnf s))
+    ))
 
   let g = Grammar.grammar
   let nt = Grammar.non_terminal
@@ -229,7 +240,7 @@ module PythonEbnfUnitTests = struct
   let sp = Grammar.special
   let ex = Grammar.except
 
-  let test = "PythonEbnf" >::: [
+  let test = "PythonEbnf" >:: [
     success "FOO" (t "FOO");
     success "FOO # bar baz\n" (t "FOO");
     success "foo" (nt "foo");
@@ -240,11 +251,11 @@ module PythonEbnfUnitTests = struct
     success "[FOO]" (a [n; t "FOO"]);
     success "FOO*" (r n (t "FOO"));
     success "FOO+" (r (t "FOO") n);
-    "several rules" >:: (fun _ ->
-      check_poly ~to_string:Grammar.to_string
-        (g [ru "a" (t "FOO"); ru "b"(t "BAR")])
+    "several rules" >: (lazy (
+      check_grammar
+        ~expected:(g [ru "a" (t "FOO"); ru "b"(t "BAR")])
         (parse_string ~syntax:Syntax.PythonEbnf "a: FOO\nb: BAR\n")
-    );
+    ));
 
     fail_lexing "{" "line 1, character 1: lexing error: unexpected character '{'";
     fail_lexing "'" "line 1, character 1: lexing error: unexpected end of file in literal terminal";
@@ -257,20 +268,26 @@ module OCamlETexEbnfUnitTests = struct
   open Tst
 
   let success s expected =
-    s >:: (fun _ ->
-      let s = Printf.sprintf "{lkqjsd|\\begin{syntax}r: %s\\end{syntax}x{{xx\\begin{syntax}s: 't'\\end{syntax}flkdjf" s in
-      check_poly ~to_string:Grammar.to_string Grammar.(grammar [rule "r" expected; rule "s" (terminal "t")]) (parse_string ~syntax:Syntax.OCamlETexEbnf s)
-    )
+    s >: (lazy (
+      let s = Frmt.apply "{lkqjsd|\\begin{syntax}r: %s\\end{syntax}x{{xx\\begin{syntax}s: 't'\\end{syntax}flkdjf" s in
+      check_grammar
+        ~expected:Grammar.(grammar [rule "r" expected; rule "s" (terminal "t")])
+        (parse_string ~syntax:Syntax.OCamlETexEbnf s)
+    ))
 
   let fail_lexing s message =
-    s >::(fun _ ->
-      expect_exception (Errors.Lexing message) (fun _ -> parse_string ~syntax:Syntax.OCamlETexEbnf s)
-    )
+    s >: (lazy (
+      expect_exception
+        ~expected:(Errors.Lexing message)
+        (lazy (parse_string ~syntax:Syntax.OCamlETexEbnf s))
+    ))
 
   let fail_parsing s message =
-    s >::(fun _ ->
-      expect_exception (Errors.Parsing message) (fun _ -> parse_string ~syntax:Syntax.OCamlETexEbnf s)
-    )
+    s >: (lazy (
+      expect_exception
+        ~expected:(Errors.Parsing message)
+        (lazy (parse_string ~syntax:Syntax.OCamlETexEbnf s))
+    ))
 
   let g = Grammar.grammar
   let nt = Grammar.non_terminal
@@ -284,7 +301,7 @@ module OCamlETexEbnfUnitTests = struct
   let sp = Grammar.special
   let ex = Grammar.except
 
-  let test = "OCamlETexEbnf" >::: [
+  let test = "OCamlETexEbnf" >:: [
     success "foo" (nt "foo");
     success "\"bar\"" (t "bar");
     success "foo | bar" (a [nt "foo"; nt "bar"]);
@@ -296,7 +313,7 @@ end
 module UnitTests = struct
   open Tst
 
-  let test = "Parse" >::: [
+  let test = "Parse" >:: [
     IsoEbnfUnitTests.test;
     PythonEbnfUnitTests.test;
     OCamlETexEbnfUnitTests.test;

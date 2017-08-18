@@ -1,10 +1,12 @@
 open General.Abbr
 open Tst
 
-let () =
-  "DrawGrammar unit tests" >::: [
+let test =
+  "DrawGrammar unit tests" >:: [
     Grammar.UnitTests.test;
     Parse.UnitTests.test;
   ]
-  |> run
-  |> report_to_console
+
+let () =
+  let argv = Li.of_array OCamlStandard.Sys.argv in
+  Exit.exit (command_line_main ~argv test)

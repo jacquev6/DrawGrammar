@@ -1,9 +1,4 @@
 %{
-  open General.Abbr
-  module Lexing = OCamlStandard.Lexing
-  module Printf = OCamlStandard.Printf
-  module Pervasives = OCamlStandard.Pervasives
-
   open Grammar
 %}
 

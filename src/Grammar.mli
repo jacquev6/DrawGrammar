@@ -88,5 +88,5 @@ val rule: string -> Definition.t -> Rule.t
 val grammar: Rule.t list -> t
 
 module UnitTests: sig
-  val test: Tst.test
+  val test: Tst.Test.t
 end

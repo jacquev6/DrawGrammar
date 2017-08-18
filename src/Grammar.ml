@@ -1,7 +1,5 @@
 open General.Abbr
 
-let sprintf = OCamlStandard.Printf.sprintf
-
 (* @todo Parse and draw comments *)
 
 module Terminal = struct
@@ -12,7 +10,7 @@ module Terminal = struct
   let value {value} = value
 
   let to_string {value} =
-    sprintf "%S" value
+    Frmt.apply "%S" value
 end
 
 module Token = struct
@@ -45,7 +43,7 @@ module Special = struct
   let value {value} = value
 
   let to_string {value} =
-    sprintf "Special(%S)" value
+    Frmt.apply "Special(%S)" value
 end
 
 module rec Sequence: sig
@@ -64,8 +62,8 @@ end = struct
   let to_string {elements} =
     elements
     |> Li.map ~f:Definition.to_string
-    |> StrLi.concat ~sep:", "
-    |> sprintf "Sequence(%s)"
+    |> StrLi.join ~sep:", "
+    |> Frmt.apply "Sequence(%s)"
 end
 
 and Alternative: sig
@@ -84,8 +82,8 @@ end = struct
   let to_string {elements} =
     elements
     |> Li.map ~f:Definition.to_string
-    |> StrLi.concat ~sep:", "
-    |> sprintf "Alternative(%s)"
+    |> StrLi.join ~sep:", "
+    |> Frmt.apply "Alternative(%s)"
 end
 
 and Range: sig
@@ -107,7 +105,7 @@ end = struct
   let max {max; _} = max
 
   let to_string {min; max} =
-    sprintf "Range(%s, %s)" (Definition.to_string min) (Definition.to_string max)
+    Frmt.apply "Range(%s, %s)" (Definition.to_string min) (Definition.to_string max)
 end
 
 and Repetition: sig
@@ -130,7 +128,7 @@ end = struct
   let backward {backward; _} = backward
 
   let to_string {forward; backward} =
-    sprintf "Repetition(%s, %s)" (Definition.to_string forward) (Definition.to_string backward)
+    Frmt.apply "Repetition(%s, %s)" (Definition.to_string forward) (Definition.to_string backward)
 end
 
 and Except: sig
@@ -152,7 +150,7 @@ end = struct
   let except {except; _} = except
 
   let to_string {base; except} =
-    sprintf "Except(%s, %s)" (Definition.to_string base) (Definition.to_string except)
+    Frmt.apply "Except(%s, %s)" (Definition.to_string base) (Definition.to_string except)
 end
 
 and Definition: sig
@@ -206,7 +204,7 @@ module Rule = struct
   let definition {definition; _} = definition
 
   let to_string {name; definition} =
-    sprintf "%s = %s;\n" name (Definition.to_string definition)
+    Frmt.apply "%s = %s;\n" name (Definition.to_string definition)
 end
 
 type t = {
@@ -218,7 +216,7 @@ let rules {rules} = rules
 let to_string {rules} =
   rules
   |> Li.map ~f:Rule.to_string
-  |> StrLi.concat ~sep:"\n"
+  |> StrLi.join ~sep:"\n"
 
 module Constructors = struct
   let null = Definition.Null
@@ -235,7 +233,7 @@ module Constructors = struct
   let sequence elements =
     let elements =
       elements
-      |> Li.concat_map ~f:(function
+      |> Li.flat_map ~f:(function
         | Definition.Sequence {Sequence.elements} -> elements
         | element -> [element]
       )
@@ -249,7 +247,7 @@ module Constructors = struct
   let alternative elements =
     let elements =
       elements
-      |> Li.concat_map ~f:(function
+      |> Li.flat_map ~f:(function
         | Definition.Alternative {Alternative.elements} -> elements
         | element -> [element]
       )
@@ -258,7 +256,7 @@ module Constructors = struct
     and elements = Li.filter ~f:(fun x -> x <> Definition.Null) elements in
     let elements = if has_null then Definition.Null::elements else elements in
     match elements with
-      | [] -> failwith "Empty alternative"
+      | [] -> Exn.failure "Empty alternative"
       | [element] -> element
       | _ -> Definition.Alternative {Alternative.elements}
 
@@ -293,11 +291,11 @@ module ConstructorsUnitTests = struct
   open Tst
 
   let make expected actual =
-    (Definition.to_string actual) >:: (fun _ ->
-      check_poly ~to_string Raw.(g [r "r" expected]) Constructors.(grammar [rule "r" actual])
-    )
+    (Definition.to_string actual) >: (lazy (
+      check_poly ~repr:to_string ~expected:Raw.(g [r "r" expected]) Constructors.(grammar [rule "r" actual])
+    ))
 
-  let test = "constructors" >::: [
+  let test = "constructors" >:: [
     make Raw.n Constructors.null;
     make Raw.(t "t") Constructors.(terminal "t");
     make Raw.(nt "nt") Constructors.(non_terminal "nt");
@@ -323,7 +321,7 @@ end
 include Constructors
 
 let simplify =
-  (* @todo Factorize common pre/suffixes in alternatives? *)
+  (* @todo Factorize common pre/suffixes in alternatives? We have an example with the "=" in type-representation in OCaml's "Type definitions" *)
   (* More generaly common parts before railtracks join or after railtrack splits could be merged. *)
   let common_prefix =
     let rec aux rev_prefix xs ys =
@@ -414,11 +412,11 @@ module SimplifyUnitTests = struct
   let x9 = t "x9"
 
   let make expected definition =
-    (Definition.to_string definition) >:: (fun _ ->
-      check_poly ~to_string (g [r "r" expected]) (simplify (g [r "r" definition]))
-    )
+    (Definition.to_string definition) >: (lazy (
+      check_poly ~repr:to_string ~expected:(g [r "r" expected]) (simplify (g [r "r" definition]))
+    ))
 
-  let test = "simplify" >::: [
+  let test = "simplify" >:: [
     make
       (seq [x1; x2; x3; rep (seq [p1; p2; p3; f1; f2; f3; s1; s2; s3]) (seq [x4; x5; x6]); x7; x8; x9])
       (seq [x1; x2; x3; p1; p2; p3; rep (seq [f1; f2; f3]) (seq [s1; s2; s3; x4; x5; x6; p1; p2; p3]); s1; s2; s3; x7; x8; x9])
@@ -437,7 +435,7 @@ end
 module UnitTests = struct
   open Tst
 
-  let test = "Grammar" >::: [
+  let test = "Grammar" >:: [
     ConstructorsUnitTests.test;
     SimplifyUnitTests.test;
   ]

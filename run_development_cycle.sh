@@ -18,18 +18,26 @@ do
 done
 
 function build {
-  ocamlbuild -use-ocamlfind -menhir "menhir --table" -no-links -tag debug -plugin-tag "package(js_of_ocaml.ocamlbuild)" $@
+  cd src
+  ocamlbuild -use-ocamlfind -menhir "menhir --table" -no-links -plugin-tag "package(js_of_ocaml.ocamlbuild)" $@
+  cd ..
 }
 
-cd src
-build unit_tests.byte
-cd ..
-src/_build/unit_tests.byte
+function build_debug {
+  build -tag debug -build-dir _build_debug -X _build_release $@
+}
 
-cd src
-build draw_grammar.byte
-cd ..
-src/_build/draw_grammar.byte --help
+function build_release {
+  build -build-dir _build_release -X _build_debug $@
+}
+
+build_debug unit_tests.byte
+src/_build_debug/unit_tests.byte
+
+build_debug draw_grammar.byte
+echo
+src/_build_debug/draw_grammar.byte --help
+echo
 cd docs
 [ -e python2.7.python-ebnf ] || wget https://raw.githubusercontent.com/python/cpython/2.7/Grammar/Grammar --output-document python2.7.python-ebnf
 [ -e python3.6.python-ebnf ] || wget https://raw.githubusercontent.com/python/cpython/3.6/Grammar/Grammar --output-document python3.6.python-ebnf
@@ -45,19 +53,20 @@ cd docs
 [ -e modules.ocaml-etex-ebnf ] || wget https://raw.githubusercontent.com/ocaml/ocaml/trunk/manual/manual/refman/modules.etex --output-document modules.ocaml-etex-ebnf
 [ -e compunit.ocaml-etex-ebnf ] || wget https://raw.githubusercontent.com/ocaml/ocaml/trunk/manual/manual/refman/compunit.etex --output-document compunit.ocaml-etex-ebnf
 [ -e exten.ocaml-etex-ebnf ] || wget https://raw.githubusercontent.com/ocaml/ocaml/trunk/manual/manual/refman/exten.etex --output-document exten.ocaml-etex-ebnf
-../src/_build/draw_grammar.byte *.*-ebnf
+../src/_build_debug/draw_grammar.byte *.*-ebnf
 mv *.*-ebnf.png ..
 cd ..
 echo
 echo "Have a look at $(pwd)/*.png"
 echo
 
-cd src
-build draw_grammar_js.js drawing_tests.js
-cd ..
-cp src/_build/draw_grammar_js.js docs
+build_debug drawing_tests.js
 echo
 echo "Have a look at $(pwd)/drawing_tests.html"
+echo
+
+build_release draw_grammar_js.js
+cp src/_build_release/draw_grammar_js.js docs
 echo
 echo "Have a look at $(pwd)/docs/index.html"
 echo

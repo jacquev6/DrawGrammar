@@ -1,4 +1,4 @@
-/src/_build/
+/src/_build*/
 /*.png
 /src/*_Messages.ml
 /docs/*.python-ebnf
