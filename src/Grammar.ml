@@ -7,7 +7,8 @@ module Terminal = struct
     value: string;
   }
 
-  let value {value} = value
+  let value {value} =
+    value
 
   let to_string {value} =
     Frmt.apply "%S" value
@@ -18,7 +19,8 @@ module Token = struct
     name: string;
   }
 
-  let name {name} = name
+  let name {name} =
+    name
 
   let to_string {name} =
     name
@@ -29,7 +31,8 @@ module NonTerminal = struct
     name: string;
   }
 
-  let name {name} = name
+  let name {name} =
+    name
 
   let to_string {name} =
     name
@@ -40,7 +43,8 @@ module Special = struct
     value: string;
   }
 
-  let value {value} = value
+  let value {value} =
+    value
 
   let to_string {value} =
     Frmt.apply "Special(%S)" value
@@ -57,7 +61,8 @@ end = struct
     elements: Definition.t list;
   }
 
-  let elements {elements} = elements
+  let elements {elements} =
+    elements
 
   let to_string {elements} =
     elements
@@ -77,7 +82,8 @@ end = struct
     elements: Definition.t list;
   }
 
-  let elements {elements} = elements
+  let elements {elements} =
+    elements
 
   let to_string {elements} =
     elements
@@ -100,9 +106,11 @@ end = struct
     max: Definition.t;
   }
 
-  let min {min; _} = min
+  let min {min; _} =
+    min
 
-  let max {max; _} = max
+  let max {max; _} =
+    max
 
   let to_string {min; max} =
     Frmt.apply "Range(%s, %s)" (Definition.to_string min) (Definition.to_string max)
@@ -123,9 +131,11 @@ end = struct
     backward: Definition.t;
   }
 
-  let forward {forward; _} = forward
+  let forward {forward; _} =
+    forward
 
-  let backward {backward; _} = backward
+  let backward {backward; _} =
+    backward
 
   let to_string {forward; backward} =
     Frmt.apply "Repetition(%s, %s)" (Definition.to_string forward) (Definition.to_string backward)
@@ -145,7 +155,8 @@ end = struct
     except: Definition.t;
   }
 
-  let base {base; _} = base
+  let base {base; _} =
+    base
 
   let except {except; _} = except
 
@@ -199,9 +210,11 @@ module Rule = struct
     definition: Definition.t;
   }
 
-  let name {name; _} = name
+  let name {name; _} =
+    name
 
-  let definition {definition; _} = definition
+  let definition {definition; _} =
+    definition
 
   let to_string {name; definition} =
     Frmt.apply "%s = %s;\n" name (Definition.to_string definition)
@@ -211,7 +224,8 @@ type t = {
   rules: Rule.t list;
 }
 
-let rules {rules} = rules
+let rules {rules} =
+  rules
 
 let to_string {rules} =
   rules
@@ -221,14 +235,17 @@ let to_string {rules} =
 module Constructors = struct
   let null = Definition.Null
 
-  let non_terminal name = Definition.NonTerminal {NonTerminal.name}
+  let non_terminal name =
+    Definition.NonTerminal {NonTerminal.name}
 
-  let token name = Definition.Token {Token.name}
+  let token name =
+    Definition.Token {Token.name}
 
-  let terminal value = Definition.Terminal {Terminal.value}
+  let terminal value =
+    Definition.Terminal {Terminal.value}
 
-
-  let special value = Definition.Special {Special.value}
+  let special value =
+    Definition.Special {Special.value}
 
   let sequence elements =
     let elements =
@@ -260,15 +277,20 @@ module Constructors = struct
       | [element] -> element
       | _ -> Definition.Alternative {Alternative.elements}
 
-  let range min max = Definition.Range {Range.min; max}
+  let range min max =
+    Definition.Range {Range.min; max}
 
-  let repetition forward backward = Definition.Repetition {Repetition.forward; backward}
+  let repetition forward backward =
+    Definition.Repetition {Repetition.forward; backward}
 
-  let except base except = Definition.Except {Except.base; except}
+  let except base except =
+    Definition.Except {Except.base; except}
 
-  let rule name definition = {Rule.name; definition}
+  let rule name definition =
+    {Rule.name; definition}
 
-  let grammar rules = {rules}
+  let grammar rules =
+    {rules}
 end
 
 module Raw = struct
