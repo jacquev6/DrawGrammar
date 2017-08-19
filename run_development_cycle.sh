@@ -53,6 +53,8 @@ cd docs
 [ -e modules.ocaml-etex-ebnf ] || wget https://raw.githubusercontent.com/ocaml/ocaml/trunk/manual/manual/refman/modules.etex --output-document modules.ocaml-etex-ebnf
 [ -e compunit.ocaml-etex-ebnf ] || wget https://raw.githubusercontent.com/ocaml/ocaml/trunk/manual/manual/refman/compunit.etex --output-document compunit.ocaml-etex-ebnf
 [ -e exten.ocaml-etex-ebnf ] || wget https://raw.githubusercontent.com/ocaml/ocaml/trunk/manual/manual/refman/exten.etex --output-document exten.ocaml-etex-ebnf
+../src/_build_debug/draw_grammar.byte arithmetics.iso-ebnf --inline digit --inline factor
+mv arithmetics.iso-ebnf.png arithmetics-inlined.iso-ebnf.png
 ../src/_build_debug/draw_grammar.byte *.*-ebnf
 mv *.*-ebnf.png ..
 cd ..

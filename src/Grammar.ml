@@ -454,11 +454,22 @@ module SimplifyUnitTests = struct
   ]
 end
 
+let inline g _rule =
+  g
+
+module InlineUnitTests = struct
+  open Tst
+
+  let test = "Inline" >:: [
+  ]
+end
+
 module UnitTests = struct
   open Tst
 
   let test = "Grammar" >:: [
     ConstructorsUnitTests.test;
     SimplifyUnitTests.test;
+    InlineUnitTests.test;
   ]
 end

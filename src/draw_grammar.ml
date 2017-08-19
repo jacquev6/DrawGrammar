@@ -22,6 +22,11 @@ module Arguments = struct
   let syntax = ref None
   let files = ref []
 
+  let inlines = ref []
+
+  let inline rule_name =
+    inlines := rule_name::!inlines
+
   let spec = Arg.[
     (
       "--syntax",
@@ -37,6 +42,12 @@ module Arguments = struct
       )
     );
     ("--no-simplify", Clear simplify, " Don't merge common symbols before rails join or after they split");
+
+    ("--inline", String inline, "STRING  Inline this rule's definition where it's used");
+    (* @todo Ignore a rule *)
+    (* @todo Draw only some rules *)
+    (* @todo Draw each rule in a separate file *)
+    (* @todo Choose output name *)
 
     ("--rule-label-font-size", Set_float rule_label_font_size, (Frmt.apply "FLOAT  Set rule label font size (default: %.02f)" !rule_label_font_size));
     ("--space-between-rules", Set_float space_between_rules, (Frmt.apply "FLOAT  Set space between rules (default: %.02f)" !space_between_rules));
@@ -126,6 +137,10 @@ let () =
             Grammar.simplify grammar
           else
             grammar
+        in
+        let grammar =
+          !Arguments.inlines
+          |> Li.fold ~init:grammar ~f:Grammar.inline
         in
         let context = Cairo.create (Cairo.Image.create Cairo.Image.RGB24 ~width:1 ~height:1) in
         let (w, h) = Drawer.measure grammar ~context in
