@@ -9,7 +9,6 @@ addons:
     - opam
 install:
   - opam init --yes
-  - opam repo add jacquev6 https://github.com/jacquev6/opam-repository.git | true # @todo Remove once JsOfOCairo.1.0.0 and General.0.1.0 are in OPAM
   - opam update --yes
   - opam switch --yes $OCAML_VERSION
   - eval `opam config env`
