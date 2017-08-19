@@ -454,13 +454,78 @@ module SimplifyUnitTests = struct
   ]
 end
 
-let inline g _rule =
-  g
+let inline {rules} inlined_name =
+  let inlined_definition =
+    rules
+    |> Li.find_map ~f:(fun {Rule.name; definition} ->
+      Opt.some_if' (name = inlined_name) definition
+    )
+  in
+  let rec aux = Definition.(function
+    | NonTerminal {NonTerminal.name} when name = inlined_name ->
+      inlined_definition
+    | (Null | NonTerminal _ | Terminal _ | Token _ | Special _) as definition ->
+      definition
+    | Sequence {Sequence.elements} ->
+      elements
+      |> Li.map ~f:aux
+      |> sequence
+    | Alternative {Alternative.elements} ->
+      elements
+      |> Li.map ~f:aux
+      |> alternative
+    | Repetition {Repetition.forward; backward} ->
+      let forward = aux forward
+      and backward = aux backward in
+      repetition forward backward
+    | Except {Except.base; except} ->
+      let base = aux base
+      and except = aux except in
+      Constructors.except base except
+    | Range {Range.min; max} ->
+      let min = aux min
+      and max = aux max in
+      range min max
+  ) in
+  let rules =
+    rules
+    |> Li.map ~f:(fun {Rule.name; definition} ->
+      rule name (aux definition)
+    )
+  in
+  grammar rules
 
 module InlineUnitTests = struct
   open Tst
 
+  let inlined = rule "inlined" (range (terminal "0") (terminal "9"))
+
+  let inlined_definition = Rule.definition inlined
+
+  let make name definition expected =
+    name >: (lazy (
+      check_poly ~repr:to_string ~expected:(grammar [inlined; rule "rule" expected]) (inline (grammar [inlined; rule "rule" definition]) "inlined")
+    ))
+
   let test = "Inline" >:: [
+    "Not a rule" >: (lazy (expect_exception ~expected:Exn.NotFound (lazy (inline (grammar [rule "rule" (terminal "terminal")]) "not_a_rule"))));
+
+    make "terminal" (terminal "ter") (terminal "ter");
+    make "token" (token "tok") (token "tok");
+    make "special" (special "spec") (special "spec");
+    make "non_terminal not inlined" (non_terminal "not inlined") (non_terminal "not inlined");
+    make "null" null null;
+
+    make "non_terminal inlined" (non_terminal "inlined") inlined_definition;
+
+    make "sequence" (sequence [terminal "ter"; non_terminal "inlined"; token "tok"]) (sequence [terminal "ter"; inlined_definition; token "tok"]);
+    make "alternative" (alternative [terminal "ter"; non_terminal "inlined"; token "tok"]) (alternative [terminal "ter"; inlined_definition; token "tok"]);
+    make "repetition 1" (repetition (terminal "ter") (non_terminal "inlined")) (repetition (terminal "ter") inlined_definition);
+    make "repetition 2" (repetition (non_terminal "inlined") (terminal "ter")) (repetition inlined_definition (terminal "ter"));
+    make "except 1" (except (terminal "ter") (non_terminal "inlined")) (except (terminal "ter") inlined_definition);
+    make "except 2" (except (non_terminal "inlined") (terminal "ter")) (except inlined_definition (terminal "ter"));
+    make "range 1" (range (terminal "ter") (non_terminal "inlined")) (range (terminal "ter") inlined_definition);
+    make "range 2" (range (non_terminal "inlined") (terminal "ter")) (range inlined_definition (terminal "ter"));
   ]
 end
 
