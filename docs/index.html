@@ -49,10 +49,14 @@
             </form>
           </div>
           <div class="tab-pane" id="settings_tab" role="tabpanel">
-            <h2>Primary settings</h2>
+            <h2>Transformations</h2>
+            <form id="transformation_settings">
+            </form>
+            <h2>Drawing</h2>
+            <h3>Absolute sizes</h3>
             <form id="primary_settings">
             </form>
-            <h2>Secondary settings</h2>
+            <h3>Relative sizes</h3>
             <form id="secondary_settings">
             </form>
           </div>
@@ -119,7 +123,6 @@
       $("#output").hide();
       $("#waiting").show();
       if(timeout == undefined) {
-        console.log("FOO");
         timeout = updateDuration;
       }
       timeoutBeforeNextUpdate = setTimeout(function() {
@@ -138,15 +141,19 @@
 
       $("#syntax_online_reference").attr("href", $("#syntax option:selected").data("online-reference"));
 
-      var primary_settings = get_settings("#primary_settings");
-      var secondary_settings = get_settings("#secondary_settings");
-
       try {
+        update_rules_list(DrawGrammar.list_rules($("#syntax").val(), $("#grammar").val()));
+
+        var transformation_settings = get_settings("#transformation_settings");
+        var primary_settings = get_settings("#primary_settings");
+        var secondary_settings = get_settings("#secondary_settings");
+
         var output = $("#output");
-        DrawGrammar.on_canvas(
+        DrawGrammar.draw_on_canvas(
           $("#syntax").val(),
           $("#grammar").val(),
           output.get(0),
+          transformation_settings,
           primary_settings,
           secondary_settings,
         );
@@ -167,11 +174,11 @@
       $("#syntax").val(button.data("syntax"));
       $.ajax({
         url: button.data("src"),
-        mimeType: 'text/plain; charset=utf-8',
+        mimeType: "text/plain; charset=utf-8",
         dataType: "text",
         success: function(data) {
           $("#grammar").val(data);
-          $('a[href="#grammar_tab"]').tab('show');
+          $('a[href="#grammar_tab"]').tab("show");
           updateSoon();
         },
       });
@@ -183,8 +190,9 @@
         var syntax = DrawGrammar.syntaxes[i];
         $("#syntax").append('<option value="{0}" data-online-reference="{2}">{1}</option>'.format(syntax.value, syntax.description, syntax.online_reference));
       };
-      make_settings("#primary_settings", DrawGrammar.default_primary_settings);
-      make_settings("#secondary_settings", DrawGrammar.default_secondary_settings);
+      make_settings("#transformation_settings", DrawGrammar.transformation_settings_description);
+      make_settings("#primary_settings", DrawGrammar.primary_settings_description);
+      make_settings("#secondary_settings", DrawGrammar.secondary_settings_description);
       if($("#grammar").val() == "") {
         load_example({target: $("button").get(0)});
       } else {
