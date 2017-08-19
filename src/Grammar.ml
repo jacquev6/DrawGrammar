@@ -322,7 +322,7 @@ include Constructors
 
 let simplify =
   (* @todo Factorize common pre/suffixes in alternatives? We have an example with the "=" in type-representation in OCaml's "Type definitions" *)
-  (* More generaly common parts before railtracks join or after railtrack splits could be merged. *)
+  (* More generally common parts before railtrack joins or after railtrack splits could be merged. *)
   let common_prefix =
     let rec aux rev_prefix xs ys =
       match (xs, ys) with
