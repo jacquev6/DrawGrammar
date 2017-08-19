@@ -80,7 +80,7 @@ module PythonEbnf = Make(PythonEbnf_Parser)(PythonEbnf_Messages)(PythonEbnf_Lexe
 
 module OCamlETexEbnf = Make(OCamlETexEbnf_Parser)(OCamlETexEbnf_Messages)(OCamlETexEbnf_Lexer)
 
-(* @todo Parse Mehnir/ocamlyacc's .mly files *)
+(* @todo Parse Menhir/ocamlyacc's .mly files *)
 
 module Syntax = struct
   type t =
