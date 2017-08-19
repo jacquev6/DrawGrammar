@@ -7,6 +7,18 @@ Its `source code <https://github.com/jacquev6/DrawGrammar>`_ is on GitHub.
 
 Questions? Remarks? Bugs? Want to contribute? `Open an issue <https://github.com/jacquev6/DrawGrammar/issues>`_!
 
+.. image:: https://img.shields.io/travis/jacquev6/DrawGrammar/master.svg
+    :target: https://travis-ci.org/jacquev6/DrawGrammar
+
+.. image:: https://img.shields.io/github/issues/jacquev6/DrawGrammar.svg
+    :target: https://github.com/jacquev6/DrawGrammar/issues
+
+.. image:: https://img.shields.io/github/forks/jacquev6/DrawGrammar.svg
+    :target: https://github.com/jacquev6/DrawGrammar/network
+
+.. image:: https://img.shields.io/github/stars/jacquev6/DrawGrammar.svg
+    :target: https://github.com/jacquev6/DrawGrammar/stargazers
+
 Quick start
 ===========
 
