@@ -103,7 +103,7 @@
       </div>
       <div class="col-lg-8">
         <p id="waiting">Computing, please wait...<!-- No animated dancing cow gif because the rendering thread is busy running Javascript :-/ --></p>
-        <p id="error"></p>
+        <div id="error"></div>
         <canvas class="img-fluid" id="output"></canvas>
       </div>
     </div>
@@ -160,7 +160,7 @@
         output.show();
       } catch(err) {
         var error = $("#error");
-        error.text(err.toString());
+        error.html("<p><b>There is an error in the grammar you're trying to draw:</b></p><p>" + err.toString() + "</p><p>(We're working on better error messages)</p>");
         error.show();
       }
 
