@@ -23,20 +23,20 @@ let message =
     | 31 ->
         "We are working on better error messages. (ocaml-etex-ebnf 9)\n"
     | 28 ->
-        "We are working on better error messages. (ocaml-etex-ebnf 8)\n"
+        "'{' not closed. (ocaml-etex-ebnf 8)\n"
     | 7 ->
-        "We are working on better error messages. (ocaml-etex-ebnf 7)\n"
+        "A definition is expected after '{'. (ocaml-etex-ebnf 7)\n"
     | 26 ->
-        "We are working on better error messages. (ocaml-etex-ebnf 6)\n"
+        "'{{' not closed. (ocaml-etex-ebnf 6)\n"
     | 8 ->
-        "We are working on better error messages. (ocaml-etex-ebnf 5)\n"
+        "A definition is expected after '{{'. (ocaml-etex-ebnf 5)\n"
     | 24 ->
-        "We are working on better error messages. (ocaml-etex-ebnf 4)\n"
+        "']' not closed. (ocaml-etex-ebnf 4)\n"
     | 9 ->
-        "We are working on better error messages. (ocaml-etex-ebnf 3)\n"
+        "A definition is expected after '['. (ocaml-etex-ebnf 3)\n"
     | 22 ->
-        "We are working on better error messages. (ocaml-etex-ebnf 2)\n"
+        "'(' not closed. (ocaml-etex-ebnf 2)\n"
     | 10 ->
-        "We are working on better error messages. (ocaml-etex-ebnf 1)\n"
+        "A definition is expected after '('. (ocaml-etex-ebnf 1)\n"
     | _ ->
         raise Not_found

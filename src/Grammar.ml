@@ -281,6 +281,7 @@ module Constructors = struct
     Definition.Range {Range.min; max}
 
   let repetition forward backward =
+    (* @todo If forward (resp. backward) is a Repetition and backward (resp. forward) is null, simplify to a single repetition *)
     Definition.Repetition {Repetition.forward; backward}
 
   let except base except =

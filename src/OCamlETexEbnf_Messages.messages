@@ -8,7 +8,7 @@ grammar: RULE BEGIN_GROUP RULE
 ## BEGIN_GROUP 
 ##
 
-We are working on better error messages. (ocaml-etex-ebnf 1)
+A definition is expected after '('. (ocaml-etex-ebnf 1)
 
 grammar: RULE BEGIN_GROUP TERMINAL RULE 
 ##
@@ -30,7 +30,7 @@ grammar: RULE BEGIN_GROUP TERMINAL RULE
 ## In state 17, spurious reduction of production definition -> separated_nonempty_list(ALTERNATIVE,range) 
 ##
 
-We are working on better error messages. (ocaml-etex-ebnf 2)
+'(' not closed. (ocaml-etex-ebnf 2)
 
 grammar: RULE BEGIN_OPTION RULE 
 ##
@@ -42,7 +42,7 @@ grammar: RULE BEGIN_OPTION RULE
 ## BEGIN_OPTION 
 ##
 
-We are working on better error messages. (ocaml-etex-ebnf 3)
+A definition is expected after '['. (ocaml-etex-ebnf 3)
 
 grammar: RULE BEGIN_OPTION TERMINAL RULE 
 ##
@@ -64,7 +64,7 @@ grammar: RULE BEGIN_OPTION TERMINAL RULE
 ## In state 17, spurious reduction of production definition -> separated_nonempty_list(ALTERNATIVE,range) 
 ##
 
-We are working on better error messages. (ocaml-etex-ebnf 4)
+']' not closed. (ocaml-etex-ebnf 4)
 
 grammar: RULE BEGIN_REPEAT_ONE RULE 
 ##
@@ -76,7 +76,7 @@ grammar: RULE BEGIN_REPEAT_ONE RULE
 ## BEGIN_REPEAT_ONE 
 ##
 
-We are working on better error messages. (ocaml-etex-ebnf 5)
+A definition is expected after '{{'. (ocaml-etex-ebnf 5)
 
 grammar: RULE BEGIN_REPEAT_ONE TERMINAL RULE 
 ##
@@ -98,7 +98,7 @@ grammar: RULE BEGIN_REPEAT_ONE TERMINAL RULE
 ## In state 17, spurious reduction of production definition -> separated_nonempty_list(ALTERNATIVE,range) 
 ##
 
-We are working on better error messages. (ocaml-etex-ebnf 6)
+'{{' not closed. (ocaml-etex-ebnf 6)
 
 grammar: RULE BEGIN_REPEAT_ZERO RULE 
 ##
@@ -110,7 +110,7 @@ grammar: RULE BEGIN_REPEAT_ZERO RULE
 ## BEGIN_REPEAT_ZERO 
 ##
 
-We are working on better error messages. (ocaml-etex-ebnf 7)
+A definition is expected after '{'. (ocaml-etex-ebnf 7)
 
 grammar: RULE BEGIN_REPEAT_ZERO TERMINAL RULE 
 ##
@@ -132,7 +132,7 @@ grammar: RULE BEGIN_REPEAT_ZERO TERMINAL RULE
 ## In state 17, spurious reduction of production definition -> separated_nonempty_list(ALTERNATIVE,range) 
 ##
 
-We are working on better error messages. (ocaml-etex-ebnf 8)
+'{' not closed. (ocaml-etex-ebnf 8)
 
 grammar: RULE IDENTIFIER END_REPEAT_ZERO 
 ##
