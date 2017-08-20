@@ -7,40 +7,40 @@ let message =
   fun s ->
     match s with
     | 0 ->
-        "(IsoEbnf 18)\n"
+        "We are working on better error messages. (iso-ebnf 18)\n"
     | 1 ->
-        "(IsoEbnf 17)\n"
+        "We are working on better error messages. (iso-ebnf 17)\n"
     | 38 ->
-        "(IsoEbnf 16)\n"
+        "We are working on better error messages. (iso-ebnf 16)\n"
     | 7 ->
-        "(IsoEbnf 15)\n"
+        "We are working on better error messages. (iso-ebnf 15)\n"
     | 36 ->
-        "(IsoEbnf 14)\n"
+        "We are working on better error messages. (iso-ebnf 14)\n"
     | 13 ->
-        "(IsoEbnf 13)\n"
+        "We are working on better error messages. (iso-ebnf 13)\n"
     | 19 ->
-        "(IsoEbnf 12)\n"
+        "We are working on better error messages. (iso-ebnf 12)\n"
     | 21 ->
-        "(IsoEbnf 11)\n"
+        "We are working on better error messages. (iso-ebnf 11)\n"
     | 22 ->
-        "(IsoEbnf 10)\n"
+        "We are working on better error messages. (iso-ebnf 10)\n"
     | 24 ->
-        "(IsoEbnf 9)\n"
+        "We are working on better error messages. (iso-ebnf 9)\n"
     | 25 ->
-        "(IsoEbnf 8)\n"
+        "We are working on better error messages. (iso-ebnf 8)\n"
     | 2 ->
-        "(IsoEbnf 7)\n"
+        "We are working on better error messages. (iso-ebnf 7)\n"
     | 3 ->
-        "(IsoEbnf 6)\n"
+        "We are working on better error messages. (iso-ebnf 6)\n"
     | 11 ->
-        "(IsoEbnf 5)\n"
+        "We are working on better error messages. (iso-ebnf 5)\n"
     | 8 ->
-        "(IsoEbnf 4)\n"
+        "We are working on better error messages. (iso-ebnf 4)\n"
     | 5 ->
-        "(IsoEbnf 3)\n"
+        "We are working on better error messages. (iso-ebnf 3)\n"
     | 15 ->
-        "(IsoEbnf 2)\n"
+        "We are working on better error messages. (iso-ebnf 2)\n"
     | 6 ->
-        "(IsoEbnf 1)\n"
+        "We are working on better error messages. (iso-ebnf 1)\n"
     | _ ->
         raise Not_found

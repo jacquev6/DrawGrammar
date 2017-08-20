@@ -8,7 +8,7 @@ grammar: RULE BEGIN_GROUP RULE
 ## BEGIN_GROUP 
 ##
 
-(OCamlETexEbnf 1)
+We are working on better error messages. (ocaml-etex-ebnf 1)
 
 grammar: RULE BEGIN_GROUP TERMINAL RULE 
 ##
@@ -30,7 +30,7 @@ grammar: RULE BEGIN_GROUP TERMINAL RULE
 ## In state 17, spurious reduction of production definition -> separated_nonempty_list(ALTERNATIVE,range) 
 ##
 
-(OCamlETexEbnf 2)
+We are working on better error messages. (ocaml-etex-ebnf 2)
 
 grammar: RULE BEGIN_OPTION RULE 
 ##
@@ -42,7 +42,7 @@ grammar: RULE BEGIN_OPTION RULE
 ## BEGIN_OPTION 
 ##
 
-(OCamlETexEbnf 3)
+We are working on better error messages. (ocaml-etex-ebnf 3)
 
 grammar: RULE BEGIN_OPTION TERMINAL RULE 
 ##
@@ -64,7 +64,7 @@ grammar: RULE BEGIN_OPTION TERMINAL RULE
 ## In state 17, spurious reduction of production definition -> separated_nonempty_list(ALTERNATIVE,range) 
 ##
 
-(OCamlETexEbnf 4)
+We are working on better error messages. (ocaml-etex-ebnf 4)
 
 grammar: RULE BEGIN_REPEAT_ONE RULE 
 ##
@@ -76,7 +76,7 @@ grammar: RULE BEGIN_REPEAT_ONE RULE
 ## BEGIN_REPEAT_ONE 
 ##
 
-(OCamlETexEbnf 5)
+We are working on better error messages. (ocaml-etex-ebnf 5)
 
 grammar: RULE BEGIN_REPEAT_ONE TERMINAL RULE 
 ##
@@ -98,7 +98,7 @@ grammar: RULE BEGIN_REPEAT_ONE TERMINAL RULE
 ## In state 17, spurious reduction of production definition -> separated_nonempty_list(ALTERNATIVE,range) 
 ##
 
-(OCamlETexEbnf 6)
+We are working on better error messages. (ocaml-etex-ebnf 6)
 
 grammar: RULE BEGIN_REPEAT_ZERO RULE 
 ##
@@ -110,7 +110,7 @@ grammar: RULE BEGIN_REPEAT_ZERO RULE
 ## BEGIN_REPEAT_ZERO 
 ##
 
-(OCamlETexEbnf 7)
+We are working on better error messages. (ocaml-etex-ebnf 7)
 
 grammar: RULE BEGIN_REPEAT_ZERO TERMINAL RULE 
 ##
@@ -132,7 +132,7 @@ grammar: RULE BEGIN_REPEAT_ZERO TERMINAL RULE
 ## In state 17, spurious reduction of production definition -> separated_nonempty_list(ALTERNATIVE,range) 
 ##
 
-(OCamlETexEbnf 8)
+We are working on better error messages. (ocaml-etex-ebnf 8)
 
 grammar: RULE IDENTIFIER END_REPEAT_ZERO 
 ##
@@ -156,7 +156,7 @@ grammar: RULE IDENTIFIER END_REPEAT_ZERO
 ## In state 29, spurious reduction of production rule -> RULE option(pair(RANGE,ALTERNATIVE)) definition 
 ##
 
-(OCamlETexEbnf 9)
+We are working on better error messages. (ocaml-etex-ebnf 9)
 
 grammar: RULE RANGE ALTERNATIVE ALTERNATIVE 
 ##
@@ -168,7 +168,7 @@ grammar: RULE RANGE ALTERNATIVE ALTERNATIVE
 ## RULE option(pair(RANGE,ALTERNATIVE)) 
 ##
 
-(OCamlETexEbnf 10)
+We are working on better error messages. (ocaml-etex-ebnf 10)
 
 grammar: RULE RANGE TERMINAL 
 ##
@@ -180,7 +180,7 @@ grammar: RULE RANGE TERMINAL
 ## RANGE 
 ##
 
-(OCamlETexEbnf 11)
+We are working on better error messages. (ocaml-etex-ebnf 11)
 
 grammar: RULE RULE 
 ##
@@ -192,7 +192,7 @@ grammar: RULE RULE
 ## RULE 
 ##
 
-(OCamlETexEbnf 12)
+We are working on better error messages. (ocaml-etex-ebnf 12)
 
 grammar: RULE TERMINAL ALTERNATIVE RULE 
 ##
@@ -204,7 +204,7 @@ grammar: RULE TERMINAL ALTERNATIVE RULE
 ## range ALTERNATIVE 
 ##
 
-(OCamlETexEbnf 13)
+We are working on better error messages. (ocaml-etex-ebnf 13)
 
 grammar: RULE TERMINAL RANGE IDENTIFIER RANGE 
 ##
@@ -225,7 +225,7 @@ grammar: RULE TERMINAL RANGE IDENTIFIER RANGE
 ## In state 15, spurious reduction of production range -> sequence RANGE sequence 
 ##
 
-(OCamlETexEbnf 14)
+We are working on better error messages. (ocaml-etex-ebnf 14)
 
 grammar: RULE TERMINAL RANGE RULE 
 ##
@@ -237,7 +237,7 @@ grammar: RULE TERMINAL RANGE RULE
 ## sequence RANGE 
 ##
 
-(OCamlETexEbnf 15)
+We are working on better error messages. (ocaml-etex-ebnf 15)
 
 grammar: TERMINAL 
 ##
@@ -249,4 +249,4 @@ grammar: TERMINAL
 ## 
 ##
 
-(OCamlETexEbnf 16)
+We are working on better error messages. (ocaml-etex-ebnf 16)

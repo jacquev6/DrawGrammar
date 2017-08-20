@@ -201,7 +201,7 @@ module IsoEbnfUnitTests = struct
     fail_lexing "\"" "line 1, character 1: lexing error: unexpected end of file in string";
     fail_lexing "?" "line 1, character 1: lexing error: unexpected end of file in special sequence";
 
-    fail_parsing "a = (;" "line 1, character 6: parsing error: (IsoEbnf 9)";
+    fail_parsing "a = (;" "line 1, character 6: parsing error: We are working on better error messages. (iso-ebnf 9)";
   ]
 end
 
@@ -260,7 +260,7 @@ module PythonEbnfUnitTests = struct
     fail_lexing "{" "line 1, character 1: lexing error: unexpected character '{'";
     fail_lexing "'" "line 1, character 1: lexing error: unexpected end of file in literal terminal";
 
-    fail_parsing "a: )" "line 1, character 4: parsing error: (PythonEbnf 1)";
+    fail_parsing "a: )" "line 1, character 4: parsing error: We are working on better error messages. (python-ebnf 1)";
   ]
 end
 

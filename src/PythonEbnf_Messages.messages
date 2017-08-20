@@ -8,7 +8,7 @@ grammar: RULE RULE
 ## RULE 
 ##
 
-(PythonEbnf 1)
+We are working on better error messages. (python-ebnf 1)
 
 grammar: RULE START_GROUP RULE 
 ##
@@ -20,7 +20,7 @@ grammar: RULE START_GROUP RULE
 ## START_GROUP 
 ##
 
-(PythonEbnf 2)
+We are working on better error messages. (python-ebnf 2)
 
 grammar: RULE START_GROUP TOKEN RULE 
 ##
@@ -43,7 +43,7 @@ grammar: RULE START_GROUP TOKEN RULE
 ## In state 19, spurious reduction of production definition -> alternative 
 ##
 
-(PythonEbnf 3)
+We are working on better error messages. (python-ebnf 3)
 
 grammar: RULE START_OPTION RULE 
 ##
@@ -55,7 +55,7 @@ grammar: RULE START_OPTION RULE
 ## START_OPTION 
 ##
 
-(PythonEbnf 4)
+We are working on better error messages. (python-ebnf 4)
 
 grammar: RULE START_OPTION TOKEN RULE 
 ##
@@ -78,7 +78,7 @@ grammar: RULE START_OPTION TOKEN RULE
 ## In state 19, spurious reduction of production definition -> alternative 
 ##
 
-(PythonEbnf 5)
+We are working on better error messages. (python-ebnf 5)
 
 grammar: RULE TOKEN ALTERNATIVE RULE 
 ##
@@ -90,7 +90,7 @@ grammar: RULE TOKEN ALTERNATIVE RULE
 ## sequence ALTERNATIVE 
 ##
 
-(PythonEbnf 6)
+We are working on better error messages. (python-ebnf 6)
 
 grammar: RULE TOKEN END_OPTION 
 ##
@@ -115,7 +115,7 @@ grammar: RULE TOKEN END_OPTION
 ## In state 22, spurious reduction of production rule -> RULE definition 
 ##
 
-(PythonEbnf 7)
+We are working on better error messages. (python-ebnf 7)
 
 grammar: RULE TOKEN REPEAT_ZERO REPEAT_ZERO 
 ##
@@ -128,7 +128,7 @@ grammar: RULE TOKEN REPEAT_ZERO REPEAT_ZERO
 ## repetition 
 ##
 
-(PythonEbnf 8)
+We are working on better error messages. (python-ebnf 8)
 
 grammar: TOKEN 
 ##
@@ -140,4 +140,4 @@ grammar: TOKEN
 ## 
 ##
 
-(PythonEbnf 9)
+We are working on better error messages. (python-ebnf 9)
