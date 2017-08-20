@@ -73,6 +73,7 @@ val rules: t -> Rule.t list
 val to_string: t -> string
 
 val simplify: t -> t
+val inline: t -> string -> t
 
 val null: Definition.t
 val non_terminal: string -> Definition.t

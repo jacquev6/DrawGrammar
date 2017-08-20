@@ -26,20 +26,42 @@ let parse_grammar syntax grammar =
         method toString = Js.string message
       end)
 
-class type primary_settings = object
+let bool_setting default = object%js (_)
+  val control_type_ = Js.string "select"
+  val setting_type_ = Js.string "bool"
+  val default_value_ = Js.bool default
+end
+
+let float_setting default = object%js (_)
+  val control_type_ = Js.string "select"
+  val setting_type_ = Js.string "float"
+  val default_value_ = default
+end
+
+class type transformation_settings = object
   method simplify: bool Js.t Js.prop
+  method inline: Js.js_string Js.t Js.js_array Js.t Js.prop
+end
+
+let transformation_settings_description = object%js (_)
+  val simplify = bool_setting true
+  val inline = object%js (_)
+    val control_type_ = Js.string "rules_list"
+  end
+end
+
+class type primary_settings = object
   method rule_label_font_size_: float Js.prop
   method space_between_rules_: float Js.prop
   method definitions_font_size_: float Js.prop
   method line_width_: float Js.prop
 end
 
-let default_primary_settings = object%js (_)
-  val simplify = Js.bool true
-  val rule_label_font_size_ = Drawer.DefaultPrimarySettings.rule_label_font_size
-  val space_between_rules_ = Drawer.DefaultPrimarySettings.space_between_rules
-  val definitions_font_size_ = Drawer.DefaultPrimarySettings.definitions_font_size
-  val line_width_ = Drawer.DefaultPrimarySettings.line_width
+let primary_settings_description = object%js (_)
+  val rule_label_font_size_ = float_setting Drawer.DefaultPrimarySettings.rule_label_font_size
+  val space_between_rules_ = float_setting Drawer.DefaultPrimarySettings.space_between_rules
+  val definitions_font_size_ = float_setting Drawer.DefaultPrimarySettings.definitions_font_size
+  val line_width_ = float_setting Drawer.DefaultPrimarySettings.line_width
 end
 
 class type secondary_settings = object
@@ -53,20 +75,35 @@ class type secondary_settings = object
   method ellipsis_size_: float Js.prop
 end
 
-let default_secondary_settings = object%js (_)
-  val arrow_size_ = Drawer.DefaultSecondarySettings.arrow_size
-  val dead_end_size_ = Drawer.DefaultSecondarySettings.dead_end_size
-  val minimal_vertical_spacing_ = Drawer.DefaultSecondarySettings.minimal_vertical_spacing
-  val minimal_horizontal_spacing_ = Drawer.DefaultSecondarySettings.minimal_horizontal_spacing
-  val start_radius_ = Drawer.DefaultSecondarySettings.start_radius
-  val stop_radius_ = Drawer.DefaultSecondarySettings.stop_radius
-  val turn_radius_ = Drawer.DefaultSecondarySettings.turn_radius
-  val ellipsis_size_ = Drawer.DefaultSecondarySettings.ellipsis_size
+let secondary_settings_description = object%js (_)
+  val arrow_size_ = float_setting Drawer.DefaultSecondarySettings.arrow_size
+  val dead_end_size_ = float_setting Drawer.DefaultSecondarySettings.dead_end_size
+  val minimal_vertical_spacing_ = float_setting Drawer.DefaultSecondarySettings.minimal_vertical_spacing
+  val minimal_horizontal_spacing_ = float_setting Drawer.DefaultSecondarySettings.minimal_horizontal_spacing
+  val start_radius_ = float_setting Drawer.DefaultSecondarySettings.start_radius
+  val stop_radius_ = float_setting Drawer.DefaultSecondarySettings.stop_radius
+  val turn_radius_ = float_setting Drawer.DefaultSecondarySettings.turn_radius
+  val ellipsis_size_ = float_setting Drawer.DefaultSecondarySettings.ellipsis_size
 end
 
-let draw grammar (canvas: Dom_html.element Js.t) (primary_settings: primary_settings Js.t) (secondary_settings: secondary_settings Js.t) =
+let draw grammar (canvas: Dom_html.element Js.t) (transformation_settings: transformation_settings Js.t) (primary_settings: primary_settings Js.t) (secondary_settings: secondary_settings Js.t) =
   let grammar =
-    if Js.to_bool primary_settings##.simplify then
+    let inline =
+      transformation_settings##.inline
+      |> Js.to_array
+      |> Li.of_array
+      |> Li.map ~f:Js.to_string
+    in
+    inline
+    |> Li.fold ~init:grammar ~f:Grammar.inline
+    |> Grammar.rules
+    |> Li.filter ~f:(fun rule ->
+      not (StrLi.contains inline (Grammar.Rule.name rule))
+    )
+    |> Grammar.grammar
+  in
+  let grammar =
+    if Js.to_bool transformation_settings##.simplify then
       Grammar.simplify grammar
     else
       grammar
@@ -95,9 +132,11 @@ let draw grammar (canvas: Dom_html.element Js.t) (primary_settings: primary_sett
 
 let draw_grammar =
   object%js (_)
-    val default_primary_settings_ = default_primary_settings
+    val transformation_settings_description_ = transformation_settings_description
 
-    val default_secondary_settings_ = default_secondary_settings
+    val primary_settings_description_ = primary_settings_description
+
+    val secondary_settings_description_ = secondary_settings_description
 
     val syntaxes =
       Parse.Syntax.all
@@ -112,9 +151,20 @@ let draw_grammar =
       )
       |> Li.to_array
 
-    method on_canvas_ syntax grammar canvas settings =
+    method draw_on_canvas_ syntax grammar canvas settings =
       let grammar = parse_grammar syntax grammar in
       draw grammar canvas settings
+
+    method list_rules_ syntax grammar =
+      parse_grammar syntax grammar
+      |> Grammar.rules
+      |> Li.map ~f:(fun rule ->
+        rule
+        |> Grammar.Rule.name
+        |> Js.string
+      )
+      |> Li.to_array
+      |> Js.array
   end
 
 let () = Js.export "DrawGrammar" draw_grammar

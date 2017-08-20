@@ -22,6 +22,7 @@
   <div class="container-fluid">
     <div class="row">
       <div class="col-sm-3">
+        <form id="transformation_settings" style="display: none"></form>
         <h1>Primary settings</h1>
         <form id="primary_settings">
         </form>
@@ -43,6 +44,7 @@
     function update() {
       $("#drawing_tests").html("");
 
+      var transformation_settings = get_settings("#transformation_settings");
       var primary_settings = get_settings("#primary_settings");
       var secondary_settings = get_settings("#secondary_settings");
 
@@ -54,7 +56,7 @@
         var div = $(document.getElementById(test.name));
 
         try {
-          test.draw_on_canvas(div.find("canvas").get(0), primary_settings, secondary_settings);
+          test.draw_on_canvas(div.find("canvas").get(0), transformation_settings, primary_settings, secondary_settings);
         } catch(err) {
           div.append('<p class="failure">Exception: {0}</p>'.format(err))
         }
@@ -62,8 +64,9 @@
     }
 
     $(document).ready(function() {
-      make_settings("#primary_settings", DrawGrammar.default_primary_settings);
-      make_settings("#secondary_settings", DrawGrammar.default_secondary_settings);
+      make_settings("#transformation_settings", DrawGrammar.transformation_settings_description);
+      make_settings("#primary_settings", DrawGrammar.primary_settings_description);
+      make_settings("#secondary_settings", DrawGrammar.secondary_settings_description);
       update();
       $("select").change(update);
     })

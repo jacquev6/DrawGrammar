@@ -22,6 +22,19 @@ module Arguments = struct
   let syntax = ref None
   let files = ref []
 
+  let inlined = ref []
+  let ignored = ref []
+
+  let inline_keep rule_name =
+    inlined := rule_name::!inlined
+
+  let ignore rule_name =
+    ignored := rule_name::!ignored
+
+  let inline rule_name =
+    inline_keep rule_name;
+    ignore rule_name
+
   let spec = Arg.[
     (
       "--syntax",
@@ -37,6 +50,13 @@ module Arguments = struct
       )
     );
     ("--no-simplify", Clear simplify, " Don't merge common symbols before rails join or after they split");
+
+    ("--ignore", String ignore, "STRING  Don't draw this rule");
+    ("--inline", String inline, "STRING  Inline this rule's definition where it's used, and --ignore it");
+    ("--inline-keep", String inline_keep, "STRING  Inline this rule's definition where it's used, but draw it anyway it");
+    (* @todo Draw only some rules *)
+    (* @todo Draw each rule in a separate file *)
+    (* @todo Choose output name *)
 
     ("--rule-label-font-size", Set_float rule_label_font_size, (Frmt.apply "FLOAT  Set rule label font size (default: %.02f)" !rule_label_font_size));
     ("--space-between-rules", Set_float space_between_rules, (Frmt.apply "FLOAT  Set space between rules (default: %.02f)" !space_between_rules));
@@ -121,6 +141,26 @@ let () =
         ;
         StdOut.flush ();
         let grammar = Parse.parse_file ?syntax input_name in
+        let grammar =
+          !Arguments.inlined
+          |> Li.fold ~init:grammar ~f:(fun grammar inlined ->
+            try
+              Grammar.inline grammar inlined
+            with
+              | Exn.NotFound ->
+                (* @todo Inline rules defined in other grammar files? If yes, warn only if inlined is not found in any file *)
+                StdErr.print "WARNING: Rule %s (inlined) not found in %s\n" inlined input_name;
+                grammar
+          )
+        in
+        let grammar =
+          grammar
+          |> Grammar.rules
+          |> Li.filter ~f:(fun rule ->
+            not (StrLi.contains !Arguments.ignored (Grammar.Rule.name rule))
+          )
+          |> Grammar.grammar
+        in
         let grammar =
           if !Arguments.simplify then
             Grammar.simplify grammar
