@@ -7,21 +7,21 @@ let message =
   fun s ->
     match s with
     | 0 ->
-        "We are working on better error messages. (ocaml-etex-ebnf 16)\n"
+        "A rule (of form 'name:') is expected. (ocaml-etex-ebnf 16)\n"
     | 15 ->
-        "We are working on better error messages. (ocaml-etex-ebnf 15)\n"
+        "A definition is expected after '...'. (ocaml-etex-ebnf 15)\n"
     | 19 ->
-        "We are working on better error messages. (ocaml-etex-ebnf 14)\n"
+        "Something else (e.g. another rule, '|', etc.) is expected after a range. (ocaml-etex-ebnf 14)\n"
     | 20 ->
-        "We are working on better error messages. (ocaml-etex-ebnf 13)\n"
+        "A definition is expected after '|'. (ocaml-etex-ebnf 13)\n"
     | 1 ->
-        "We are working on better error messages. (ocaml-etex-ebnf 12)\n"
+        "A definition is expected. (ocaml-etex-ebnf 12)\n"
     | 2 ->
-        "We are working on better error messages. (ocaml-etex-ebnf 11)\n"
+        "'|' is expected after '...'. (ocaml-etex-ebnf 11)\n"
     | 4 ->
-        "We are working on better error messages. (ocaml-etex-ebnf 10)\n"
+        "A definition is expected after '... |'. (ocaml-etex-ebnf 10)\n"
     | 31 ->
-        "We are working on better error messages. (ocaml-etex-ebnf 9)\n"
+        "A rule (or end of file) is expected. (ocaml-etex-ebnf 9)\n"
     | 28 ->
         "'{' not closed. (ocaml-etex-ebnf 8)\n"
     | 7 ->

@@ -156,7 +156,7 @@ grammar: RULE IDENTIFIER END_REPEAT_ZERO
 ## In state 29, spurious reduction of production rule -> RULE option(pair(RANGE,ALTERNATIVE)) definition 
 ##
 
-We are working on better error messages. (ocaml-etex-ebnf 9)
+A rule (or end of file) is expected. (ocaml-etex-ebnf 9)
 
 grammar: RULE RANGE ALTERNATIVE ALTERNATIVE 
 ##
@@ -168,7 +168,7 @@ grammar: RULE RANGE ALTERNATIVE ALTERNATIVE
 ## RULE option(pair(RANGE,ALTERNATIVE)) 
 ##
 
-We are working on better error messages. (ocaml-etex-ebnf 10)
+A definition is expected after '... |'. (ocaml-etex-ebnf 10)
 
 grammar: RULE RANGE TERMINAL 
 ##
@@ -180,7 +180,7 @@ grammar: RULE RANGE TERMINAL
 ## RANGE 
 ##
 
-We are working on better error messages. (ocaml-etex-ebnf 11)
+'|' is expected after '...'. (ocaml-etex-ebnf 11)
 
 grammar: RULE RULE 
 ##
@@ -192,7 +192,7 @@ grammar: RULE RULE
 ## RULE 
 ##
 
-We are working on better error messages. (ocaml-etex-ebnf 12)
+A definition is expected. (ocaml-etex-ebnf 12)
 
 grammar: RULE TERMINAL ALTERNATIVE RULE 
 ##
@@ -204,7 +204,7 @@ grammar: RULE TERMINAL ALTERNATIVE RULE
 ## range ALTERNATIVE 
 ##
 
-We are working on better error messages. (ocaml-etex-ebnf 13)
+A definition is expected after '|'. (ocaml-etex-ebnf 13)
 
 grammar: RULE TERMINAL RANGE IDENTIFIER RANGE 
 ##
@@ -225,7 +225,7 @@ grammar: RULE TERMINAL RANGE IDENTIFIER RANGE
 ## In state 15, spurious reduction of production range -> sequence RANGE sequence 
 ##
 
-We are working on better error messages. (ocaml-etex-ebnf 14)
+Something else (e.g. another rule, '|', etc.) is expected after a range. (ocaml-etex-ebnf 14)
 
 grammar: RULE TERMINAL RANGE RULE 
 ##
@@ -237,7 +237,7 @@ grammar: RULE TERMINAL RANGE RULE
 ## sequence RANGE 
 ##
 
-We are working on better error messages. (ocaml-etex-ebnf 15)
+A definition is expected after '...'. (ocaml-etex-ebnf 15)
 
 grammar: TERMINAL 
 ##
@@ -249,4 +249,4 @@ grammar: TERMINAL
 ## 
 ##
 
-We are working on better error messages. (ocaml-etex-ebnf 16)
+A rule (of form 'name:') is expected. (ocaml-etex-ebnf 16)

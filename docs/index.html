@@ -103,7 +103,14 @@
       </div>
       <div class="col-lg-8">
         <p id="waiting">Computing, please wait...<!-- No animated dancing cow gif because the rendering thread is busy running Javascript :-/ --></p>
-        <div id="error"></div>
+        <div id="error">
+          <p><b>There is an error in the grammar you're trying to draw:</b></p>
+          <p id="error_message"></p>
+          <p>Is the appropriate syntax selected for your grammar?
+          Don't hesitate to <a href="https://github.com/jacquev6/DrawGrammar/issues">open an issue</a> if this message is not helpful.
+          Please include the part of your grammar that produces the error and explain how you finally understood what's wrong.
+          We'll try to improve the message based on your feedback.</p>
+        </div>
         <canvas class="img-fluid" id="output"></canvas>
       </div>
     </div>
@@ -159,9 +166,8 @@
         );
         output.show();
       } catch(err) {
-        var error = $("#error");
-        error.html("<p><b>There is an error in the grammar you're trying to draw:</b></p><p>" + err.toString() + "</p>");
-        error.show();
+        $("#error_message").text(err.toString());
+        $("#error").show();
       }
 
       $("#waiting").hide();

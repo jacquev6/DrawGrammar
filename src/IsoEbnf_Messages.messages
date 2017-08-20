@@ -8,7 +8,7 @@ grammar: META_IDENTIFIER DEFINING_SYMBOL CONCATENATE_SYMBOL REPETITION_SYMBOL
 ## syntactic_term CONCATENATE_SYMBOL 
 ##
 
-We are working on better error messages. (iso-ebnf 1)
+A definition is expected after ','. (iso-ebnf 1)
 
 grammar: META_IDENTIFIER DEFINING_SYMBOL DEFINITION_SEPARATOR_SYMBOL REPETITION_SYMBOL 
 ##
@@ -20,7 +20,7 @@ grammar: META_IDENTIFIER DEFINING_SYMBOL DEFINITION_SEPARATOR_SYMBOL REPETITION_
 ## single_definition DEFINITION_SEPARATOR_SYMBOL 
 ##
 
-We are working on better error messages. (iso-ebnf 2)
+A definition is expected after '|'. (iso-ebnf 2)
 
 grammar: META_IDENTIFIER DEFINING_SYMBOL EXCEPT_SYMBOL META_IDENTIFIER TERMINAL_STRING 
 ##
@@ -33,7 +33,7 @@ grammar: META_IDENTIFIER DEFINING_SYMBOL EXCEPT_SYMBOL META_IDENTIFIER TERMINAL_
 ## syntactic_term 
 ##
 
-We are working on better error messages. (iso-ebnf 3)
+A ';' or a ',' is expected after a definition. (iso-ebnf 3)
 
 grammar: META_IDENTIFIER DEFINING_SYMBOL EXCEPT_SYMBOL REPETITION_SYMBOL 
 ##
@@ -45,7 +45,7 @@ grammar: META_IDENTIFIER DEFINING_SYMBOL EXCEPT_SYMBOL REPETITION_SYMBOL
 ## EXCEPT_SYMBOL 
 ##
 
-We are working on better error messages. (iso-ebnf 4)
+A definition is expected after '-'. (iso-ebnf 4)
 
 grammar: META_IDENTIFIER DEFINING_SYMBOL INTEGER REPETITION_SYMBOL DEFINING_SYMBOL 
 ##
@@ -57,7 +57,7 @@ grammar: META_IDENTIFIER DEFINING_SYMBOL INTEGER REPETITION_SYMBOL DEFINING_SYMB
 ## boption(terminated(INTEGER,REPETITION_SYMBOL)) 
 ##
 
-We are working on better error messages. (iso-ebnf 5)
+A definition is expected after '*'. (iso-ebnf 5)
 
 grammar: META_IDENTIFIER DEFINING_SYMBOL INTEGER TERMINATOR_SYMBOL 
 ##
@@ -69,7 +69,7 @@ grammar: META_IDENTIFIER DEFINING_SYMBOL INTEGER TERMINATOR_SYMBOL
 ## INTEGER 
 ##
 
-We are working on better error messages. (iso-ebnf 6)
+A '*' is expected after an integer. (iso-ebnf 6)
 
 grammar: META_IDENTIFIER DEFINING_SYMBOL REPETITION_SYMBOL 
 ##
@@ -81,7 +81,7 @@ grammar: META_IDENTIFIER DEFINING_SYMBOL REPETITION_SYMBOL
 ## META_IDENTIFIER DEFINING_SYMBOL 
 ##
 
-We are working on better error messages. (iso-ebnf 7)
+A definition is expected after '='. (iso-ebnf 7)
 
 grammar: META_IDENTIFIER DEFINING_SYMBOL START_GROUP_SYMBOL TERMINAL_STRING TERMINATOR_SYMBOL 
 ##
@@ -104,7 +104,7 @@ grammar: META_IDENTIFIER DEFINING_SYMBOL START_GROUP_SYMBOL TERMINAL_STRING TERM
 ## In state 18, spurious reduction of production definitions_list -> separated_nonempty_list(DEFINITION_SEPARATOR_SYMBOL,single_definition) 
 ##
 
-We are working on better error messages. (iso-ebnf 8)
+'(' not closed. (iso-ebnf 8)
 
 grammar: META_IDENTIFIER DEFINING_SYMBOL START_GROUP_SYMBOL TERMINATOR_SYMBOL 
 ##
@@ -116,7 +116,7 @@ grammar: META_IDENTIFIER DEFINING_SYMBOL START_GROUP_SYMBOL TERMINATOR_SYMBOL
 ## START_GROUP_SYMBOL 
 ##
 
-We are working on better error messages. (iso-ebnf 9)
+A definition is expected after '('. (iso-ebnf 9)
 
 grammar: META_IDENTIFIER DEFINING_SYMBOL START_OPTION_SYMBOL TERMINAL_STRING TERMINATOR_SYMBOL 
 ##
@@ -139,7 +139,7 @@ grammar: META_IDENTIFIER DEFINING_SYMBOL START_OPTION_SYMBOL TERMINAL_STRING TER
 ## In state 18, spurious reduction of production definitions_list -> separated_nonempty_list(DEFINITION_SEPARATOR_SYMBOL,single_definition) 
 ##
 
-We are working on better error messages. (iso-ebnf 10)
+'[' not closed. (iso-ebnf 10)
 
 grammar: META_IDENTIFIER DEFINING_SYMBOL START_OPTION_SYMBOL TERMINATOR_SYMBOL 
 ##
@@ -151,7 +151,7 @@ grammar: META_IDENTIFIER DEFINING_SYMBOL START_OPTION_SYMBOL TERMINATOR_SYMBOL
 ## START_OPTION_SYMBOL 
 ##
 
-We are working on better error messages. (iso-ebnf 11)
+A definition is expected after '['. (iso-ebnf 11)
 
 grammar: META_IDENTIFIER DEFINING_SYMBOL START_REPEAT_SYMBOL TERMINAL_STRING TERMINATOR_SYMBOL 
 ##
@@ -174,7 +174,7 @@ grammar: META_IDENTIFIER DEFINING_SYMBOL START_REPEAT_SYMBOL TERMINAL_STRING TER
 ## In state 18, spurious reduction of production definitions_list -> separated_nonempty_list(DEFINITION_SEPARATOR_SYMBOL,single_definition) 
 ##
 
-We are working on better error messages. (iso-ebnf 12)
+'{' not closed. (iso-ebnf 12)
 
 grammar: META_IDENTIFIER DEFINING_SYMBOL START_REPEAT_SYMBOL TERMINATOR_SYMBOL 
 ##
@@ -186,7 +186,7 @@ grammar: META_IDENTIFIER DEFINING_SYMBOL START_REPEAT_SYMBOL TERMINATOR_SYMBOL
 ## START_REPEAT_SYMBOL 
 ##
 
-We are working on better error messages. (iso-ebnf 13)
+A definition is expected after '{'. (iso-ebnf 13)
 
 grammar: META_IDENTIFIER DEFINING_SYMBOL TERMINAL_STRING END_REPEAT_SYMBOL 
 ##
@@ -209,7 +209,7 @@ grammar: META_IDENTIFIER DEFINING_SYMBOL TERMINAL_STRING END_REPEAT_SYMBOL
 ## In state 18, spurious reduction of production definitions_list -> separated_nonempty_list(DEFINITION_SEPARATOR_SYMBOL,single_definition) 
 ##
 
-We are working on better error messages. (iso-ebnf 14)
+';' is expected after a definition. (iso-ebnf 14)
 
 grammar: META_IDENTIFIER DEFINING_SYMBOL TERMINAL_STRING TERMINAL_STRING 
 ##
@@ -221,7 +221,7 @@ grammar: META_IDENTIFIER DEFINING_SYMBOL TERMINAL_STRING TERMINAL_STRING
 ## syntactic_factor 
 ##
 
-We are working on better error messages. (iso-ebnf 15)
+';' or '-' is expected after a definition. (iso-ebnf 15)
 
 grammar: META_IDENTIFIER DEFINING_SYMBOL TERMINATOR_SYMBOL TERMINATOR_SYMBOL 
 ##
@@ -234,7 +234,7 @@ grammar: META_IDENTIFIER DEFINING_SYMBOL TERMINATOR_SYMBOL TERMINATOR_SYMBOL
 ## syntax_rule 
 ##
 
-We are working on better error messages. (iso-ebnf 16)
+Another rule (or end of file) is expected after a rule. (iso-ebnf 16)
 
 grammar: META_IDENTIFIER TERMINATOR_SYMBOL 
 ##
@@ -246,7 +246,7 @@ grammar: META_IDENTIFIER TERMINATOR_SYMBOL
 ## META_IDENTIFIER 
 ##
 
-We are working on better error messages. (iso-ebnf 17)
+'=' is expected after rule name. (iso-ebnf 17)
 
 grammar: TERMINATOR_SYMBOL 
 ##
@@ -258,4 +258,4 @@ grammar: TERMINATOR_SYMBOL
 ## 
 ##
 
-We are working on better error messages. (iso-ebnf 18)
+A rule name is expected. (iso-ebnf 18)

@@ -7,40 +7,40 @@ let message =
   fun s ->
     match s with
     | 0 ->
-        "We are working on better error messages. (iso-ebnf 18)\n"
+        "A rule name is expected. (iso-ebnf 18)\n"
     | 1 ->
-        "We are working on better error messages. (iso-ebnf 17)\n"
+        "'=' is expected after rule name. (iso-ebnf 17)\n"
     | 38 ->
-        "We are working on better error messages. (iso-ebnf 16)\n"
+        "Another rule (or end of file) is expected after a rule. (iso-ebnf 16)\n"
     | 7 ->
-        "We are working on better error messages. (iso-ebnf 15)\n"
+        "';' or '-' is expected after a definition. (iso-ebnf 15)\n"
     | 36 ->
-        "We are working on better error messages. (iso-ebnf 14)\n"
+        "';' is expected after a definition. (iso-ebnf 14)\n"
     | 13 ->
-        "We are working on better error messages. (iso-ebnf 13)\n"
+        "A definition is expected after '{'. (iso-ebnf 13)\n"
     | 19 ->
-        "We are working on better error messages. (iso-ebnf 12)\n"
+        "'{' not closed. (iso-ebnf 12)\n"
     | 21 ->
-        "We are working on better error messages. (iso-ebnf 11)\n"
+        "A definition is expected after '['. (iso-ebnf 11)\n"
     | 22 ->
-        "We are working on better error messages. (iso-ebnf 10)\n"
+        "'[' not closed. (iso-ebnf 10)\n"
     | 24 ->
-        "We are working on better error messages. (iso-ebnf 9)\n"
+        "A definition is expected after '('. (iso-ebnf 9)\n"
     | 25 ->
-        "We are working on better error messages. (iso-ebnf 8)\n"
+        "'(' not closed. (iso-ebnf 8)\n"
     | 2 ->
-        "We are working on better error messages. (iso-ebnf 7)\n"
+        "A definition is expected after '='. (iso-ebnf 7)\n"
     | 3 ->
-        "We are working on better error messages. (iso-ebnf 6)\n"
+        "A '*' is expected after an integer. (iso-ebnf 6)\n"
     | 11 ->
-        "We are working on better error messages. (iso-ebnf 5)\n"
+        "A definition is expected after '*'. (iso-ebnf 5)\n"
     | 8 ->
-        "We are working on better error messages. (iso-ebnf 4)\n"
+        "A definition is expected after '-'. (iso-ebnf 4)\n"
     | 5 ->
-        "We are working on better error messages. (iso-ebnf 3)\n"
+        "A ';' or a ',' is expected after a definition. (iso-ebnf 3)\n"
     | 15 ->
-        "We are working on better error messages. (iso-ebnf 2)\n"
+        "A definition is expected after '|'. (iso-ebnf 2)\n"
     | 6 ->
-        "We are working on better error messages. (iso-ebnf 1)\n"
+        "A definition is expected after ','. (iso-ebnf 1)\n"
     | _ ->
         raise Not_found

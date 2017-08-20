@@ -201,7 +201,25 @@ module IsoEbnfUnitTests = struct
     fail_lexing "\"" "line 1, character 1: lexing error: unexpected end of file in string";
     fail_lexing "?" "line 1, character 1: lexing error: unexpected end of file in special sequence";
 
-    fail_parsing "a = (;" "line 1, character 6: parsing error: We are working on better error messages. (iso-ebnf 9)";
+    fail_parsing "a = , *" "line 1, character 7: parsing error: A definition is expected after ','. (iso-ebnf 1)";
+    fail_parsing "a = | *" "line 1, character 7: parsing error: A definition is expected after '|'. (iso-ebnf 2)";
+    fail_parsing "a = - b c" "line 1, character 9: parsing error: A ';' or a ',' is expected after a definition. (iso-ebnf 3)";
+    fail_parsing "a = -" "line 1, character 6: parsing error: A definition is expected after '-'. (iso-ebnf 4)";
+    fail_parsing "a = - *" "line 1, character 7: parsing error: A definition is expected after '-'. (iso-ebnf 4)";
+    fail_parsing "a = 1 * =" "line 1, character 9: parsing error: A definition is expected after '*'. (iso-ebnf 5)";
+    fail_parsing "a = 1;" "line 1, character 6: parsing error: A '*' is expected after an integer. (iso-ebnf 6)";
+    fail_parsing "a = *" "line 1, character 5: parsing error: A definition is expected after '='. (iso-ebnf 7)";
+    fail_parsing "a = ( b ;" "line 1, character 9: parsing error: '(' not closed. (iso-ebnf 8)";
+    fail_parsing "a = ( ;" "line 1, character 7: parsing error: A definition is expected after '('. (iso-ebnf 9)";
+    fail_parsing "a = [ b ;" "line 1, character 9: parsing error: '[' not closed. (iso-ebnf 10)";
+    fail_parsing "a = [ ;" "line 1, character 7: parsing error: A definition is expected after '['. (iso-ebnf 11)";
+    fail_parsing "a = { b ;" "line 1, character 9: parsing error: '{' not closed. (iso-ebnf 12)";
+    fail_parsing "a = { ;" "line 1, character 7: parsing error: A definition is expected after '{'. (iso-ebnf 13)";
+    fail_parsing "a = b } ;" "line 1, character 7: parsing error: ';' is expected after a definition. (iso-ebnf 14)";
+    fail_parsing "a = b c" "line 1, character 7: parsing error: ';' or '-' is expected after a definition. (iso-ebnf 15)";
+    fail_parsing "a = ; ;" "line 1, character 7: parsing error: Another rule (or end of file) is expected after a rule. (iso-ebnf 16)";
+    fail_parsing "a ;" "line 1, character 3: parsing error: '=' is expected after rule name. (iso-ebnf 17)";
+    fail_parsing ";" "line 1, character 1: parsing error: A rule name is expected. (iso-ebnf 18)";
   ]
 end
 
@@ -275,15 +293,9 @@ module OCamlETexEbnfUnitTests = struct
         (parse_string ~syntax:Syntax.OCamlETexEbnf s)
     ))
 
-  let fail_lexing s message =
-    s >: (lazy (
-      expect_exception
-        ~expected:(Errors.Lexing message)
-        (lazy (parse_string ~syntax:Syntax.OCamlETexEbnf s))
-    ))
-
   let fail_parsing s message =
     s >: (lazy (
+      let s = Frmt.apply "{lkqjsd|\\begin{syntax}%s\\end{syntax}" s in
       expect_exception
         ~expected:(Errors.Parsing message)
         (lazy (parse_string ~syntax:Syntax.OCamlETexEbnf s))
@@ -307,6 +319,25 @@ module OCamlETexEbnfUnitTests = struct
     success "foo | bar" (a [nt "foo"; nt "bar"]);
     success "foo || bar" (a [nt "foo"; nt "bar"]);
     success "foo \\ldots bar" (ra (nt "foo") (nt "bar"));
+
+    fail_parsing "a: (;" "line 1, character 40: parsing error: A definition is expected after '('. (ocaml-etex-ebnf 1)";
+    fail_parsing "a: (b;" "line 1, character 41: parsing error: '(' not closed. (ocaml-etex-ebnf 2)";
+    fail_parsing "a: [;" "line 1, character 40: parsing error: A definition is expected after '['. (ocaml-etex-ebnf 3)";
+    fail_parsing "a: [b;" "line 1, character 41: parsing error: ']' not closed. (ocaml-etex-ebnf 4)";
+    fail_parsing "a: {{;" "line 1, character 41: parsing error: A definition is expected after '{{'. (ocaml-etex-ebnf 5)";
+    fail_parsing "a: {{b;" "line 1, character 42: parsing error: '{{' not closed. (ocaml-etex-ebnf 6)";
+    fail_parsing "a: {;" "line 1, character 40: parsing error: A definition is expected after '{'. (ocaml-etex-ebnf 7)";
+    fail_parsing "a: {b;" "line 1, character 41: parsing error: '{' not closed. (ocaml-etex-ebnf 8)";
+    fail_parsing "a: b}" "line 1, character 27: parsing error: A rule (or end of file) is expected. (ocaml-etex-ebnf 9)";
+    fail_parsing "a: b)" "line 1, character 27: parsing error: A rule (or end of file) is expected. (ocaml-etex-ebnf 9)";
+    fail_parsing "a: \"b\")" "line 1, character 29: parsing error: A rule (or end of file) is expected. (ocaml-etex-ebnf 9)";
+    fail_parsing "a: ... |;" "line 1, character 44: parsing error: A definition is expected after '... |'. (ocaml-etex-ebnf 10)";
+    fail_parsing "a: ...;" "line 1, character 42: parsing error: '|' is expected after '...'. (ocaml-etex-ebnf 11)";
+    fail_parsing "a:" "line 1, character 37: parsing error: A definition is expected. (ocaml-etex-ebnf 12)";
+    fail_parsing "a: b |;" "line 1, character 42: parsing error: A definition is expected after '|'. (ocaml-etex-ebnf 13)";
+    fail_parsing "a: b ... c ..." "line 1, character 34: parsing error: Something else (e.g. another rule, '|', etc.) is expected after a range. (ocaml-etex-ebnf 14)";
+    fail_parsing "a: b ...;" "line 1, character 44: parsing error: A definition is expected after '...'. (ocaml-etex-ebnf 15)";
+    fail_parsing "a" "line 1, character 23: parsing error: A rule (of form 'name:') is expected. (ocaml-etex-ebnf 16)";
   ]
 end
 
