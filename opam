@@ -1,6 +1,6 @@
 opam-version: "1.2"
 name: "DrawGrammar"
-version: "0.1.0"
+version: "0.2.0"
 maintainer: "Vincent Jacques <vincent@vincent-jacques.net>"
 authors: "Vincent Jacques <vincent@vincent-jacques.net>"
 homepage: "https://jacquev6.github.io/DrawGrammar/"
@@ -22,5 +22,5 @@ depends: [
   "menhir"
   "JsOfOCairo"
   "cairo2"
-  "General"
+  "General" {>= "0.2"}
 ]
