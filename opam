@@ -6,12 +6,12 @@ authors: "Vincent Jacques <vincent@vincent-jacques.net>"
 homepage: "https://jacquev6.github.io/DrawGrammar/"
 dev-repo: "https://github.com/jacquev6/DrawGrammar.git"
 bug-reports: "http://github.com/jacquev6/DrawGrammar/issues/"
-available: [ocaml-version >= "4.02.2" & ocaml-version < "5"]
+available: [ocaml-version >= "4.02.3" & ocaml-version < "5"]
 build: [
-  ["sh" "-c" "cd src; ocamlbuild -use-ocamlfind -no-plugin -menhir \"menhir --table\" draw_grammar.byte"]
+  ["sh" "-c" "cd src; ocamlbuild -use-ocamlfind -no-plugin -menhir \"menhir --table\" draw_grammar.native"]
 ]
 install: [
-  ["cp" "src/_build/draw_grammar.byte" "%{prefix}%/bin/draw_grammar"]
+  ["cp" "src/_build/draw_grammar.native" "%{prefix}%/bin/draw_grammar"]
 ]
 remove: [
   ["rm" "-f" "%{prefix}%/bin/draw_grammar"]

@@ -2,6 +2,10 @@
 
 set -o errexit
 
+eval `opam config env`
+opam install --yes JsOfOCairo cairo2 General menhir ocamlfind ocamlbuild js_of_ocaml-ocamlbuild
+clear
+
 for p in src/*_Parser.mly
 do
   m=${p%_Parser.mly}_Messages.messages
@@ -74,4 +78,6 @@ build_release draw_grammar_js.js
 cp src/_build_release/draw_grammar_js.js docs
 echo
 echo "Have a look at $(pwd)/docs/index.html"
+
 echo
+echo "Development cycle OK"

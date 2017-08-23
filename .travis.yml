@@ -20,12 +20,13 @@ install:
   - opam list
 script:
   - cd src
-  - ocamlbuild -no-plugin -use-ocamlfind -menhir "menhir --table" -tag debug unit_tests.byte draw_grammar.byte
+  - ocamlbuild -no-plugin -use-ocamlfind -menhir "menhir --table" -tag debug unit_tests.byte draw_grammar.native
   - cd ..
   - src/_build/unit_tests.byte
 env:
-  - OCAML_VERSION=4.02.2
+  - OCAML_VERSION=4.02.3
   - OCAML_VERSION=4.05.0
+  - OCAML_VERSION=4.05.0+flambda
 cache:
   directories:
   - $HOME/.opam
