@@ -203,18 +203,14 @@ module IsoEbnfUnitTests = struct
     base_success "_0123456789 = foo;" Grammar.(grammar [rule "_0123456789" (non_terminal "foo")]);
     success "_0123456789" Grammar.(non_terminal "_0123456789");
 
-    base_success "with_underscore = foo;" Grammar.(grammar [rule "with_underscore" (non_terminal "foo")]);
-    success "with_underscore" Grammar.(non_terminal "with_underscore");
+    base_success "_with_underscores_ = foo;" Grammar.(grammar [rule "_with_underscores_" (non_terminal "foo")]);
+    success "_with_underscores_" Grammar.(non_terminal "_with_underscores_");
 
-    (* No dashes in a meta-identifiers because '-' is used for syntactic exceptions. *)
-    (* base_success "with-dash = foo;" Grammar.(grammar [rule "with-dash" (non_terminal "foo")]); *)
-    (* success "with-dash" Grammar.(non_terminal "with-dash"); *)
-    (* @todo Should we allow \- to represent a dash in a meta-identifier? *)
+    base_success "\\-with\\-dashes\\- = foo;" Grammar.(grammar [rule "-with-dashes-" (non_terminal "foo")]);
+    success "\\-with\\-dashes\\-" Grammar.(non_terminal "-with-dashes-");
 
-    (* No space in meta-identifiers to stay consistent with other syntaxes *)
-    (* base_success "with space = foo;" Grammar.(grammar [rule "with space" (non_terminal "foo")]); *)
-    (* success "with space" Grammar.(non_terminal "with space"); *)
-    (* @todo Allow "\ " to represent a space in meta-identifiers in all syntaxes *)
+    base_success "\\ with\\ spaces\\  = foo;" Grammar.(grammar [rule " with spaces " (non_terminal "foo")]);
+    success "\\ with\\ spaces\\ " Grammar.(non_terminal " with spaces ");
 
     fail_lexing "#" "line 1, character 1: lexing error: unexpected character '#'";
     fail_lexing "(*" "line 1, character 3: lexing error: unexpected end of file in comment";
@@ -297,7 +293,7 @@ module PythonEbnfUnitTests = struct
         (parse_string ~syntax:Syntax.PythonEbnf "a: FOO\nb: BAR\n")
     ));
 
-    (* No capital letters in non-terminals because they are used for tokens *)
+    (* No upper-case letters in non-terminals because they are used for tokens *)
     (* base_success "ABCDEFGHIJKLMNOPQRSTUVWXYZ: foo" Grammar.(grammar [rule "ABCDEFGHIJKLMNOPQRSTUVWXYZ" (non_terminal "foo")]); *)
     (* success "ABCDEFGHIJKLMNOPQRSTUVWXYZ" Grammar.(non_terminal "ABCDEFGHIJKLMNOPQRSTUVWXYZ"); *)
 
@@ -307,15 +303,17 @@ module PythonEbnfUnitTests = struct
     base_success "_0123456789: foo" Grammar.(grammar [rule "_0123456789" (non_terminal "foo")]);
     success "_0123456789" Grammar.(non_terminal "_0123456789");
 
-    base_success "with_underscore: foo" Grammar.(grammar [rule "with_underscore" (non_terminal "foo")]);
-    success "with_underscore" Grammar.(non_terminal "with_underscore");
+    base_success "_with_underscores_: foo" Grammar.(grammar [rule "_with_underscores_" (non_terminal "foo")]);
+    success "_with_underscores_" Grammar.(non_terminal "_with_underscores_");
 
-    base_success "with-dash: foo" Grammar.(grammar [rule "with-dash" (non_terminal "foo")]);
-    success "with-dash" Grammar.(non_terminal "with-dash");
+    base_success "-with-dashes-: foo" Grammar.(grammar [rule "-with-dashes-" (non_terminal "foo")]);
+    success "-with-dashes-" Grammar.(non_terminal "-with-dashes-");
 
-    (* No spaces in non-terminals because juxtaposition represents sequence *)
-    (* base_success "with space: foo" Grammar.(grammar [rule "with space" (non_terminal "foo")]); *)
-    (* success "with space" Grammar.(non_terminal "with space"); *)
+    base_success "\\-with\\-dashes\\-: foo" Grammar.(grammar [rule "-with-dashes-" (non_terminal "foo")]);
+    success "\\-with\\-dashes\\-" Grammar.(non_terminal "-with-dashes-");
+
+    base_success "\\ with\\ spaces\\ : foo" Grammar.(grammar [rule " with spaces " (non_terminal "foo")]);
+    success "\\ with\\ spaces\\ " Grammar.(non_terminal " with spaces ");
 
     fail_lexing "{" "line 1, character 1: lexing error: unexpected character '{'";
     fail_lexing "'" "line 1, character 1: lexing error: unexpected end of file in literal terminal";
@@ -372,15 +370,18 @@ module OCamlETexEbnfUnitTests = struct
     base_success "\\begin{syntax}_0123456789: foo\\end{syntax}" Grammar.(grammar [rule "_0123456789" (non_terminal "foo")]);
     success "_0123456789" Grammar.(non_terminal "_0123456789");
 
-    base_success "\\begin{syntax}with_underscore: foo\\end{syntax}" Grammar.(grammar [rule "with_underscore" (non_terminal "foo")]);
-    success "with_underscore" Grammar.(non_terminal "with_underscore");
+    base_success "\\begin{syntax}_with_underscores_: foo\\end{syntax}" Grammar.(grammar [rule "_with_underscores_" (non_terminal "foo")]);
+    success "_with_underscores_" Grammar.(non_terminal "_with_underscores_");
 
-    base_success "\\begin{syntax}with-dash: foo\\end{syntax}" Grammar.(grammar [rule "with-dash" (non_terminal "foo")]);
-    success "with-dash" Grammar.(non_terminal "with-dash");
+    base_success "\\begin{syntax}-with-dashes-: foo\\end{syntax}" Grammar.(grammar [rule "-with-dashes-" (non_terminal "foo")]);
+    success "-with-dashes-" Grammar.(non_terminal "-with-dashes-");
 
-    (* No spaces in non-terminals because juxtaposition represents sequence. *)
-    (* base_success "\\begin{syntax}with space: foo\\end{syntax}" Grammar.(grammar [rule "with space" (non_terminal "foo")]); *)
-    (* success "with space" Grammar.(non_terminal "with space"); *)
+    (* This is probably not be LaTeX-compliant. We add it anyway, and we'll add the actual LaTeX syntax when it's identified. *)
+    base_success "\\begin{syntax}\\-with\\-dashes\\-: foo\\end{syntax}" Grammar.(grammar [rule "-with-dashes-" (non_terminal "foo")]);
+    success "\\-with\\-dashes\\-" Grammar.(non_terminal "-with-dashes-");
+
+    base_success "\\begin{syntax}\\ with\\ spaces\\ : foo\\end{syntax}" Grammar.(grammar [rule " with spaces " (non_terminal "foo")]);
+    success "\\ with\\ spaces\\ " Grammar.(non_terminal " with spaces ");
 
     fail_parsing "a: (;" "line 1, character 40: parsing error: A definition is expected after '('. (ocaml-etex-ebnf 1)";
     fail_parsing "a: (b;" "line 1, character 41: parsing error: '(' not closed. (ocaml-etex-ebnf 2)";

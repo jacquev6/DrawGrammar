@@ -11,7 +11,9 @@
     Frmt.with_result ~f:(fun message -> Exn.raise (Error message)) format
 }
 
-let identifier = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_' '-']*
+let identifier_first_char = ['a'-'z' 'A'-'Z' '_' '-'] | "\\ " | "\\-"
+
+let identifier = identifier_first_char (identifier_first_char | ['0'-'9'])*
 
 rule token = parse
   | '\n' { Lexing.new_line lexbuf; token lexbuf }
@@ -21,8 +23,8 @@ rule token = parse
 
   | '%' [^'\n']* '\n' { Lexing.new_line lexbuf; token lexbuf }
   | '%' [^'\n']* eof { error "unexpected end of file in LaTeX comment" }
-  | (identifier as name) ':' { RULE name }
-  | identifier as name { IDENTIFIER name }
+  | (identifier as name) ':' { RULE (Lex.unescape name) }
+  | identifier as name { IDENTIFIER (Lex.unescape name) }
   | '"' ([^'"']+ as value) '"' { TERMINAL value }
   | '"' [^'"']* eof { error "unexpected end of file in literal terminal" }
   | '\'' ([^'\'']+ as value) '\'' { TERMINAL value }
