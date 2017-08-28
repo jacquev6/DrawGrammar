@@ -47,3 +47,13 @@ And draw it::
 If you want to tweak settings, the help is accessible using::
 
     $ draw_grammar --help
+
+Development version
+===================
+
+If you want to use the development version on the command line, you can::
+
+    $ opam pin add General https://github.com/jacquev6/General.git
+    $ opam pin add DrawGrammar https://github.com/jacquev6/DrawGrammar.git
+
+This always matches the version used in the interactive demo.
