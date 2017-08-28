@@ -78,7 +78,7 @@ module Arguments = struct
       \n\
       %s [options] input_files\n\
       \n\
-      Without the -syntax option, the syntax used is based on the file extension:\n\
+      Without the --syntax option, the syntax used is based on the file extension:\n\
       %s\
       \n\
       Options:\n\
