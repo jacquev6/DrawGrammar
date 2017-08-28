@@ -26,15 +26,12 @@ module Arguments = struct
   let inlined = ref []
   let ignored = ref []
 
-  let inline_keep rule_name =
-    inlined := rule_name::!inlined
-
-  let ignore rule_name =
-    ignored := rule_name::!ignored
-
-  let inline rule_name =
-    inline_keep rule_name;
-    ignore rule_name
+  let split_and_add_to targets = function rules ->
+    let rules = Str.split ~sep:"," rules in
+    targets
+    |> Li.iter ~f:(fun target ->
+      target := rules @ !target
+    )
 
   let spec = Arg.[
     (
@@ -52,9 +49,9 @@ module Arguments = struct
     );
     ("--no-simplify", Clear simplify, " Don't merge common symbols before rails join or after they split");
 
-    ("--ignore", String ignore, "STRING  Don't draw this rule");
-    ("--inline", String inline, "STRING  Inline this rule's definition where it's used, and --ignore it");
-    ("--inline-keep", String inline_keep, "STRING  Inline this rule's definition where it's used, but draw it anyway it");
+    ("--ignore", String (split_and_add_to [ignored]), "STRING[,STRING,...]  Don't draw these rules");
+    ("--inline", String (split_and_add_to [ignored; inlined]), "STRING[,STRING,...]  Inline these rules' definitions where they are used, and --ignore them");
+    ("--inline-keep", String (split_and_add_to [inlined]), "STRING[,STRING,...]  Inline these rules' definitions where they are used, but draw them anyway");
     (* @todo Draw only some rules *)
     (* @todo Draw each rule in a separate file *)
     (* @todo Choose output name *)

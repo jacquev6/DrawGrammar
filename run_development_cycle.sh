@@ -60,7 +60,7 @@ cd docs
 [ -e exten.ocaml-etex-ebnf ] || wget https://raw.githubusercontent.com/ocaml/ocaml/trunk/manual/manual/refman/exten.etex --output-document exten.ocaml-etex-ebnf
 ../src/_build_debug/draw_grammar.byte arithmetics.iso-ebnf --inline digit --inline factor --inline not_a_rule
 mv arithmetics.iso-ebnf.png arithmetics-inlined-digit-factor.iso-ebnf.png
-../src/_build_debug/draw_grammar.byte arithmetics.iso-ebnf --inline digit --inline factor --inline term --inline-keep integer
+../src/_build_debug/draw_grammar.byte arithmetics.iso-ebnf --inline digit,factor,term --inline-keep integer
 mv arithmetics.iso-ebnf.png arithmetics-inlined-all.iso-ebnf.png
 ../src/_build_debug/draw_grammar.byte *.*-ebnf
 mv *.*-ebnf.png ..
