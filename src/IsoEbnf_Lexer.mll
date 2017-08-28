@@ -11,6 +11,8 @@
     Frmt.with_result ~f:(fun message -> Exn.raise (Error message)) format
 }
 
+let identifier = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*
+
 let white = [' ' '\t' '\n' '\r']
 
 rule token = parse
@@ -19,7 +21,7 @@ rule token = parse
   | eof { EOF }
 
   | ['0'-'9']+ as value { INTEGER (Int.of_string value) }
-  | ['a'-'z' 'A'-'Z' '0'-'9' '_']+ as name { META_IDENTIFIER name }
+  | identifier as name { META_IDENTIFIER name }
   | '\'' ([^'\'']+ as value) '\'' { TERMINAL_STRING value }
   | '\'' [^'\'']* eof { error "unexpected end of file in string" }
   | '"' ([^'"']+ as value) '"' { TERMINAL_STRING value }

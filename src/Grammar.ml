@@ -11,7 +11,7 @@ module Terminal = struct
     value
 
   let to_string {value} =
-    Frmt.apply "%S" value
+    Frmt.apply "Terminal(%S)" value
 end
 
 module Token = struct
@@ -23,7 +23,7 @@ module Token = struct
     name
 
   let to_string {name} =
-    name
+    Frmt.apply "Token(%S)" name
 end
 
 module NonTerminal = struct
@@ -35,7 +35,7 @@ module NonTerminal = struct
     name
 
   let to_string {name} =
-    name
+    Frmt.apply "NonTerminal(%S)" name
 end
 
 module Special = struct

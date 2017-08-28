@@ -11,7 +11,7 @@
     Frmt.with_result ~f:(fun message -> Exn.raise (Error message)) format
 }
 
-let identifier = ['a'-'z'] ['a'-'z' '_' '0'-'9']*
+let identifier = ['a'-'z' '_'] ['a'-'z' '0'-'9' '_' '-']*
 
 rule token = parse
   | '\n' { Lexing.new_line lexbuf; token lexbuf }

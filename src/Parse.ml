@@ -144,12 +144,11 @@ let check_grammar =
 module IsoEbnfUnitTests = struct
   open Tst
 
+  let base_success s expected =
+    s >: (lazy (check_grammar ~expected (parse_string ~syntax:Syntax.IsoEbnf s)))
+
   let success s expected =
-    s >: (lazy (
-      check_grammar
-        ~expected:Grammar.(grammar [rule "r" expected])
-        (parse_string ~syntax:Syntax.IsoEbnf (Frmt.apply "r = %s;" s))
-    ))
+    base_success (Frmt.apply "r = %s;" s) Grammar.(grammar [rule "r" expected])
 
   let fail_lexing s message =
     s >: (lazy (
@@ -195,6 +194,28 @@ module IsoEbnfUnitTests = struct
     success "v1 - v2" (ex v1 v2);
     success "? foo bar baz ?" (sp "foo bar baz");
 
+    base_success "ABCDEFGHIJKLMNOPQRSTUVWXYZ = foo;" Grammar.(grammar [rule "ABCDEFGHIJKLMNOPQRSTUVWXYZ" (non_terminal "foo")]);
+    success "ABCDEFGHIJKLMNOPQRSTUVWXYZ" Grammar.(non_terminal "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+
+    base_success "abcdefghijklmnopqrstuvwxyz = foo;" Grammar.(grammar [rule "abcdefghijklmnopqrstuvwxyz" (non_terminal "foo")]);
+    success "abcdefghijklmnopqrstuvwxyz" Grammar.(non_terminal "abcdefghijklmnopqrstuvwxyz");
+
+    base_success "_0123456789 = foo;" Grammar.(grammar [rule "_0123456789" (non_terminal "foo")]);
+    success "_0123456789" Grammar.(non_terminal "_0123456789");
+
+    base_success "with_underscore = foo;" Grammar.(grammar [rule "with_underscore" (non_terminal "foo")]);
+    success "with_underscore" Grammar.(non_terminal "with_underscore");
+
+    (* No dashes in a meta-identifiers because '-' is used for syntactic exceptions. *)
+    (* base_success "with-dash = foo;" Grammar.(grammar [rule "with-dash" (non_terminal "foo")]); *)
+    (* success "with-dash" Grammar.(non_terminal "with-dash"); *)
+    (* @todo Should we allow \- to represent a dash in a meta-identifier? *)
+
+    (* No space in meta-identifiers to stay consistent with other syntaxes *)
+    (* base_success "with space = foo;" Grammar.(grammar [rule "with space" (non_terminal "foo")]); *)
+    (* success "with space" Grammar.(non_terminal "with space"); *)
+    (* @todo Allow "\ " to represent a space in meta-identifiers in all syntaxes *)
+
     fail_lexing "#" "line 1, character 1: lexing error: unexpected character '#'";
     fail_lexing "(*" "line 1, character 3: lexing error: unexpected end of file in comment";
     fail_lexing "'" "line 1, character 1: lexing error: unexpected end of file in string";
@@ -203,7 +224,7 @@ module IsoEbnfUnitTests = struct
 
     fail_parsing "a = , *" "line 1, character 7: parsing error: A definition is expected after ','. (iso-ebnf 1)";
     fail_parsing "a = | *" "line 1, character 7: parsing error: A definition is expected after '|'. (iso-ebnf 2)";
-    fail_parsing "a = - b c" "line 1, character 9: parsing error: A ';' or a ',' is expected after a definition. (iso-ebnf 3)";
+    fail_parsing "a = - b *" "line 1, character 9: parsing error: A ';' or a ',' is expected after a definition. (iso-ebnf 3)";
     fail_parsing "a = -" "line 1, character 6: parsing error: A definition is expected after '-'. (iso-ebnf 4)";
     fail_parsing "a = - *" "line 1, character 7: parsing error: A definition is expected after '-'. (iso-ebnf 4)";
     fail_parsing "a = 1 * =" "line 1, character 9: parsing error: A definition is expected after '*'. (iso-ebnf 5)";
@@ -216,7 +237,7 @@ module IsoEbnfUnitTests = struct
     fail_parsing "a = { b ;" "line 1, character 9: parsing error: '{' not closed. (iso-ebnf 12)";
     fail_parsing "a = { ;" "line 1, character 7: parsing error: A definition is expected after '{'. (iso-ebnf 13)";
     fail_parsing "a = b } ;" "line 1, character 7: parsing error: ';' is expected after a definition. (iso-ebnf 14)";
-    fail_parsing "a = b c" "line 1, character 7: parsing error: ';' or '-' is expected after a definition. (iso-ebnf 15)";
+    fail_parsing "a = b *" "line 1, character 7: parsing error: ';' or '-' is expected after a definition. (iso-ebnf 15)";
     fail_parsing "a = ; ;" "line 1, character 7: parsing error: Another rule (or end of file) is expected after a rule. (iso-ebnf 16)";
     fail_parsing "a ;" "line 1, character 3: parsing error: '=' is expected after rule name. (iso-ebnf 17)";
     fail_parsing ";" "line 1, character 1: parsing error: A rule name is expected. (iso-ebnf 18)";
@@ -226,12 +247,13 @@ end
 module PythonEbnfUnitTests = struct
   open Tst
 
+  let base_success s expected =
+    s >: (lazy (check_grammar ~expected (parse_string ~syntax:Syntax.PythonEbnf s)))
+
   let success s expected =
-    s >: (lazy (
-      check_grammar
-        ~expected:Grammar.(grammar [rule "r" expected])
-        (parse_string ~syntax:Syntax.PythonEbnf (Frmt.apply "r: %s" s))
-    ))
+    base_success
+      (Frmt.apply "r: %s" s)
+      Grammar.(grammar [rule "r" expected])
 
   let fail_lexing s message =
     s >: (lazy (
@@ -275,6 +297,26 @@ module PythonEbnfUnitTests = struct
         (parse_string ~syntax:Syntax.PythonEbnf "a: FOO\nb: BAR\n")
     ));
 
+    (* No capital letters in non-terminals because they are used for tokens *)
+    (* base_success "ABCDEFGHIJKLMNOPQRSTUVWXYZ: foo" Grammar.(grammar [rule "ABCDEFGHIJKLMNOPQRSTUVWXYZ" (non_terminal "foo")]); *)
+    (* success "ABCDEFGHIJKLMNOPQRSTUVWXYZ" Grammar.(non_terminal "ABCDEFGHIJKLMNOPQRSTUVWXYZ"); *)
+
+    base_success "abcdefghijklmnopqrstuvwxyz: foo" Grammar.(grammar [rule "abcdefghijklmnopqrstuvwxyz" (non_terminal "foo")]);
+    success "abcdefghijklmnopqrstuvwxyz" Grammar.(non_terminal "abcdefghijklmnopqrstuvwxyz");
+
+    base_success "_0123456789: foo" Grammar.(grammar [rule "_0123456789" (non_terminal "foo")]);
+    success "_0123456789" Grammar.(non_terminal "_0123456789");
+
+    base_success "with_underscore: foo" Grammar.(grammar [rule "with_underscore" (non_terminal "foo")]);
+    success "with_underscore" Grammar.(non_terminal "with_underscore");
+
+    base_success "with-dash: foo" Grammar.(grammar [rule "with-dash" (non_terminal "foo")]);
+    success "with-dash" Grammar.(non_terminal "with-dash");
+
+    (* No spaces in non-terminals because juxtaposition represents sequence *)
+    (* base_success "with space: foo" Grammar.(grammar [rule "with space" (non_terminal "foo")]); *)
+    (* success "with space" Grammar.(non_terminal "with space"); *)
+
     fail_lexing "{" "line 1, character 1: lexing error: unexpected character '{'";
     fail_lexing "'" "line 1, character 1: lexing error: unexpected end of file in literal terminal";
 
@@ -285,13 +327,13 @@ end
 module OCamlETexEbnfUnitTests = struct
   open Tst
 
+  let base_success s expected =
+    s >: (lazy (check_grammar ~expected (parse_string ~syntax:Syntax.OCamlETexEbnf s)))
+
   let success s expected =
-    s >: (lazy (
-      let s = Frmt.apply "{lkqjsd|\\begin{syntax}r: %s\\end{syntax}x{{xx\\begin{syntax}s: 't'\\end{syntax}flkdjf" s in
-      check_grammar
-        ~expected:Grammar.(grammar [rule "r" expected; rule "s" (terminal "t")])
-        (parse_string ~syntax:Syntax.OCamlETexEbnf s)
-    ))
+    base_success
+      (Frmt.apply "{lkqjsd|\\begin{syntax}r: %s\\end{syntax}x{{xx\\begin{syntax}s: 't'\\end{syntax}flkdjf" s)
+      Grammar.(grammar [rule "r" expected; rule "s" (terminal "t")])
 
   let fail_parsing s message =
     s >: (lazy (
@@ -319,6 +361,26 @@ module OCamlETexEbnfUnitTests = struct
     success "foo | bar" (a [nt "foo"; nt "bar"]);
     success "foo || bar" (a [nt "foo"; nt "bar"]);
     success "foo \\ldots bar" (ra (nt "foo") (nt "bar"));
+    success "foo bar" (s [nt "foo"; nt "bar"]);
+
+    base_success "\\begin{syntax}ABCDEFGHIJKLMNOPQRSTUVWXYZ: foo\\end{syntax}" Grammar.(grammar [rule "ABCDEFGHIJKLMNOPQRSTUVWXYZ" (non_terminal "foo")]);
+    success "ABCDEFGHIJKLMNOPQRSTUVWXYZ" Grammar.(non_terminal "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+
+    base_success "\\begin{syntax}abcdefghijklmnopqrstuvwxyz: foo\\end{syntax}" Grammar.(grammar [rule "abcdefghijklmnopqrstuvwxyz" (non_terminal "foo")]);
+    success "abcdefghijklmnopqrstuvwxyz" Grammar.(non_terminal "abcdefghijklmnopqrstuvwxyz");
+
+    base_success "\\begin{syntax}_0123456789: foo\\end{syntax}" Grammar.(grammar [rule "_0123456789" (non_terminal "foo")]);
+    success "_0123456789" Grammar.(non_terminal "_0123456789");
+
+    base_success "\\begin{syntax}with_underscore: foo\\end{syntax}" Grammar.(grammar [rule "with_underscore" (non_terminal "foo")]);
+    success "with_underscore" Grammar.(non_terminal "with_underscore");
+
+    base_success "\\begin{syntax}with-dash: foo\\end{syntax}" Grammar.(grammar [rule "with-dash" (non_terminal "foo")]);
+    success "with-dash" Grammar.(non_terminal "with-dash");
+
+    (* No spaces in non-terminals because juxtaposition represents sequence. *)
+    (* base_success "\\begin{syntax}with space: foo\\end{syntax}" Grammar.(grammar [rule "with space" (non_terminal "foo")]); *)
+    (* success "with space" Grammar.(non_terminal "with space"); *)
 
     fail_parsing "a: (;" "line 1, character 40: parsing error: A definition is expected after '('. (ocaml-etex-ebnf 1)";
     fail_parsing "a: (b;" "line 1, character 41: parsing error: '(' not closed. (ocaml-etex-ebnf 2)";
