@@ -18,6 +18,7 @@ module Arguments = struct
   let stop_radius = ref Drawer.DefaultSecondarySettings.stop_radius
   let turn_radius = ref Drawer.DefaultSecondarySettings.turn_radius
   let ellipsis_size = ref Drawer.DefaultSecondarySettings.ellipsis_size
+  let margin_size = ref Drawer.DefaultSecondarySettings.margin_size
 
   let syntax = ref None
   let files = ref []
@@ -71,6 +72,7 @@ module Arguments = struct
     ("--stop-radius", Set_float stop_radius, (Frmt.apply "FLOAT  Set stop radius (default: %.02f)" !stop_radius));
     ("--turn-radius", Set_float turn_radius, (Frmt.apply "FLOAT  Set turn radius (default: %.02f)" !turn_radius));
     ("--ellipsis-size", Set_float ellipsis_size, (Frmt.apply "FLOAT  Set ellipsis size (default: %.02f)" !ellipsis_size));
+    ("--margin-size", Set_float margin_size, (Frmt.apply "FLOAT  Set margin size (default: %.02f)" !margin_size));
   ]
 
   let usage =
@@ -120,6 +122,7 @@ end)(struct
   let stop_radius = !Arguments.stop_radius
   let turn_radius = !Arguments.turn_radius
   let ellipsis_size = !Arguments.ellipsis_size
+  let margin_size = !Arguments.margin_size
 end)
 
 let () =

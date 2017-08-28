@@ -16,6 +16,7 @@ module DefaultSecondarySettings = struct
   let stop_radius = 1.5 *. Fl.sqrt 2.
   let turn_radius = 4.
   let ellipsis_size = 2.
+  let margin_size = 2.
 end
 
 module Make(C: JsOfOCairo.S)(PrimarySettings: sig
@@ -32,6 +33,7 @@ end)(SecondarySettings: sig
   val stop_radius: float
   val turn_radius: float
   val ellipsis_size: float
+  val margin_size: float
 end) = struct
   module S = struct
     include PrimarySettings
@@ -44,6 +46,7 @@ end) = struct
     let stop_radius = line_width *. SecondarySettings.stop_radius
     let turn_radius = line_width *. SecondarySettings.turn_radius
     let ellipsis_size = line_width *. SecondarySettings.ellipsis_size
+    let margin_size = line_width *. SecondarySettings.margin_size
 
     let half_line_width = line_width /. 2.
   end
@@ -724,19 +727,23 @@ end) = struct
 
   let measure grammar =
     make_measure (fun context ->
-      let rules = Grammar.rules grammar in
-      rules
-      |> Li.map ~f:(Rule.measure ~context)
-      |> Li.fold ~init:(0., -.S.space_between_rules) ~f:(fun (width, height) (w, h) ->
-        (Fl.max width w, height +. S.space_between_rules +. h)
-      )
+      let (width, height) =
+        grammar
+        |> Grammar.rules
+        |> Li.map ~f:(Rule.measure ~context)
+        |> Li.fold ~init:(0., -.S.space_between_rules) ~f:(fun (width, height) (w, h) ->
+          (Fl.max width w, height +. S.space_between_rules +. h)
+        )
+      in
+      (width +. 2. *. S.margin_size, height +. 2. *. S.margin_size)
     )
 
   let draw grammar =
     make_draw (fun context ->
-      let rules = Grammar.rules grammar in
       let (_, height) = measure grammar ~context in
-      rules
+      C.translate context ~x:S.margin_size ~y:S.margin_size;
+      grammar
+      |> Grammar.rules
       |> Li.iter ~f:(fun rule ->
         Rule.draw rule ~context;
         C.translate context ~x:0. ~y:S.space_between_rules
