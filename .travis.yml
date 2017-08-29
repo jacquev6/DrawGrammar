@@ -14,7 +14,7 @@ install:
   - opam switch --yes $OCAML_VERSION
   - eval `opam config env`
   - opam switch
-  - opam pin add --yes General https://github.com/jacquev6/General.git
+  - opam pin add --yes General --dev-repo
   - opam install --yes ocamlfind ocamlbuild JsOfOCairo General cairo2 menhir
   - opam upgrade --yes
   - opam list
