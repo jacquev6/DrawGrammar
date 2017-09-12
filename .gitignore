@@ -1,4 +1,6 @@
-/src/_build*/
+/_build
+/_builds/
 /*.png
 /docs/*.python-ebnf
 /docs/*.ocaml-etex-ebnf
+.merlin

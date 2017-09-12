@@ -1,26 +1,23 @@
 opam-version: "1.2"
-name: "DrawGrammar"
-version: "0.2.0"
+version: "0.2.1"
 maintainer: "Vincent Jacques <vincent@vincent-jacques.net>"
 authors: "Vincent Jacques <vincent@vincent-jacques.net>"
 homepage: "https://jacquev6.github.io/DrawGrammar/"
+doc: "https://jacquev6.github.io/DrawGrammar/"
 dev-repo: "https://github.com/jacquev6/DrawGrammar.git"
 bug-reports: "http://github.com/jacquev6/DrawGrammar/issues/"
+license: "MIT"
 available: [ocaml-version >= "4.02.3" & ocaml-version < "4.06.0"]
 build: [
-  ["sh" "-c" "cd src; ocamlbuild -use-ocamlfind -no-plugin -menhir \"menhir --table\" draw_grammar.native"]
+  ["jbuilder" "build" "-p" name "-j" jobs]
 ]
-install: [
-  ["cp" "src/_build/draw_grammar.native" "%{prefix}%/bin/draw_grammar"]
-]
-remove: [
-  ["rm" "-f" "%{prefix}%/bin/draw_grammar"]
+build-test: [
+  ["jbuilder" "runtest" "-p" name]
 ]
 depends: [
-  "ocamlbuild" {build}
-  "ocamlfind" {build}
+  "jbuilder" {build}
   "menhir"
-  "JsOfOCairo"
+  "JsOfOCairo" {>= "1.0.1"}
   "cairo2"
-  "General" {>= "0.2"}
+  "General" {>= "0.4.0"}
 ]

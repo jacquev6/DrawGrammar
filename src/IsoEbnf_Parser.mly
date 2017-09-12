@@ -1,5 +1,6 @@
 %{
   open Grammar
+  [@@@ocaml.warning "-9"]
 %}
 
 (* http://www.cl.cam.ac.uk/~mgk25/iso-14977.pdf *)

@@ -1,0 +1,49 @@
+(jbuild_version 1)
+
+(ocamllex (IsoEbnf_Lexer OCamlETexEbnf_Lexer PythonEbnf_Lexer))
+
+(menhir (
+  (modules (IsoEbnf_Parser OCamlETexEbnf_Parser PythonEbnf_Parser))
+  (flags (--table))
+))
+
+(library (
+  (name DrawGrammar)
+  (modules (:standard \ unit_tests draw_grammar draw_grammar_js DrawingTests))
+  (libraries (General JsOfOCairo menhirLib))
+;  (preprocess (pps (bisect_ppx)))
+))
+
+(executable (
+  (name unit_tests)
+  (modules (unit_tests))
+  (libraries (DrawGrammar))
+;  (preprocess (pps (bisect_ppx)))
+  (js_of_ocaml ((flags (+nat.js))))
+))
+
+(alias (
+  (name runtest)
+  (deps (unit_tests.bc unit_tests.bc.js))
+  (action (progn
+    (run ${exe:unit_tests.bc})
+    (run ${bin:node} unit_tests.bc.js)
+  ))
+))
+
+(executable (
+  (name draw_grammar)
+  (public_name draw_grammar)
+  (modules (draw_grammar))
+  (libraries (DrawGrammar cairo2))
+))
+
+(executable (
+  (name draw_grammar_js)
+  (modules (draw_grammar_js DrawingTests))
+  (libraries (DrawGrammar))
+  (preprocess (pps (js_of_ocaml-ppx)))
+  (js_of_ocaml (
+    (flags (+nat.js))
+  ))
+))

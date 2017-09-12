@@ -1,4 +1,5 @@
 open General.Abbr
+open DrawGrammar
 
 let parse_grammar syntax grammar =
   let syntax =
@@ -171,3 +172,16 @@ let draw_grammar =
   end
 
 let () = Js.export "DrawGrammar" draw_grammar
+
+let drawing_tests =
+  DrawingTests.tests
+  |> Li.map ~f:(fun (name, grammar) ->
+    object%js (_)
+      val name = Js.string name
+      method draw_on_canvas_ canvas transformation_settings primary_settings secondary_settings =
+        draw grammar canvas transformation_settings primary_settings secondary_settings
+    end
+  )
+  |> Li.to_array
+
+let () = Js.export "drawing_tests" drawing_tests

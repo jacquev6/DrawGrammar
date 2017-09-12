@@ -3,7 +3,7 @@
 set -o errexit
 
 eval `opam config env`
-opam install --yes JsOfOCairo cairo2 General menhir ocamlfind ocamlbuild js_of_ocaml-ocamlbuild
+opam install --yes JsOfOCairo General menhir jbuilder bisect_ppx bisect-summary
 clear
 
 for p in src/*_Parser.mly
@@ -21,27 +21,37 @@ do
   menhir --compile-errors $m $p > $c
 done
 
-function build {
-  cd src
-  ocamlbuild -use-ocamlfind -menhir "menhir --table" -no-links -plugin-tag "package(js_of_ocaml.ocamlbuild)" $@
-  cd ..
+function switch_flavor {
+  mkdir -p _builds/$1
+  rm -rf _build
+  ln -sf _builds/$1 _build
 }
 
-function build_debug {
-  build -tag debug -build-dir _build_debug -X _build_release $@
-}
+switch_flavor coverage
 
-function build_release {
-  build -build-dir _build_release -X _build_debug $@
-}
+# https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#Jbuilder suggests
+# modifying the jbuild file for release. Let's modify it for tests instead.
+sed -i "s/^;\(.*bisect_ppx.*\)$/\1/" src/jbuild
+jbuilder runtest --dev
+sed -i "s/^\(.*bisect_ppx.*\)$/;\1/" src/jbuild
+if [ -f _builds/coverage/default/src/bisect????.out ]
+then
+  echo
+  bisect-summary _builds/coverage/default/src/bisect????.out
+  echo
+  bisect-ppx-report -I _builds/coverage/default -html _builds/coverage/bisect _builds/coverage/default/src/bisect????.out
+  echo "See coverage report in $(pwd)/_builds/coverage/bisect/index.html"
+else
+  echo "Coverage report from previous test run: $(pwd)/_builds/coverage/bisect/index.html"
+fi
 
-build_debug unit_tests.byte
-# @todo Measure coverage
-src/_build_debug/unit_tests.byte
-
-build_debug draw_grammar.byte
 echo
-src/_build_debug/draw_grammar.byte --help
+switch_flavor debug
+jbuilder build --dev src/draw_grammar.bc src/draw_grammar_js.bc.js
+
+echo
+_builds/debug/default/src/draw_grammar.bc --help
+
 echo
 cd docs
 [ -e python2.7.python-ebnf ] || wget https://raw.githubusercontent.com/python/cpython/2.7/Grammar/Grammar --output-document python2.7.python-ebnf
@@ -58,26 +68,28 @@ cd docs
 [ -e modules.ocaml-etex-ebnf ] || wget https://raw.githubusercontent.com/ocaml/ocaml/trunk/manual/manual/refman/modules.etex --output-document modules.ocaml-etex-ebnf
 [ -e compunit.ocaml-etex-ebnf ] || wget https://raw.githubusercontent.com/ocaml/ocaml/trunk/manual/manual/refman/compunit.etex --output-document compunit.ocaml-etex-ebnf
 [ -e exten.ocaml-etex-ebnf ] || wget https://raw.githubusercontent.com/ocaml/ocaml/trunk/manual/manual/refman/exten.etex --output-document exten.ocaml-etex-ebnf
-../src/_build_debug/draw_grammar.byte arithmetics.iso-ebnf --inline digit --inline factor --inline not_a_rule
+../_builds/debug/default/src/draw_grammar.bc arithmetics.iso-ebnf --inline digit --inline factor --inline not_a_rule
 mv arithmetics.iso-ebnf.png arithmetics-inlined-digit-factor.iso-ebnf.png
-../src/_build_debug/draw_grammar.byte arithmetics.iso-ebnf --inline digit,factor,term --inline-keep integer
+../_builds/debug/default/src/draw_grammar.bc arithmetics.iso-ebnf --inline digit,factor,term --inline-keep integer
 mv arithmetics.iso-ebnf.png arithmetics-inlined-all.iso-ebnf.png
-../src/_build_debug/draw_grammar.byte *.*-ebnf
+../_builds/debug/default/src/draw_grammar.bc *.*-ebnf
 mv *.*-ebnf.png ..
 cd ..
 echo
 echo "Have a look at $(pwd)/*.png"
 echo
 
-build_debug drawing_tests.js
 echo
 echo "Have a look at $(pwd)/drawing_tests.html"
 echo
 
-build_release draw_grammar_js.js
-cp src/_build_release/draw_grammar_js.js docs
+switch_flavor release
+jbuilder build src/draw_grammar_js.bc.js
+cp _builds/release/default/src/draw_grammar_js.bc.js docs
 echo
 echo "Have a look at $(pwd)/docs/index.html"
+
+switch_flavor none
 
 echo
 echo "Development cycle OK"

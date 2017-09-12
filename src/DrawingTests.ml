@@ -1,6 +1,7 @@
 (* Copyright 2017 Vincent Jacques <vincent@vincent-jacques.net> *)
 
 open General.Abbr
+open DrawGrammar
 
 let single_rule_grammars =
   Grammar.[

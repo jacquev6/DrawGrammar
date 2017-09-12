@@ -1,5 +1,6 @@
 %{
   open Grammar
+  [@@@ocaml.warning "-9"]
 %}
 
 %token <string> IDENTIFIER

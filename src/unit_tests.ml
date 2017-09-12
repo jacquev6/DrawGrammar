@@ -1,5 +1,6 @@
 open General.Abbr
 open Tst
+open DrawGrammar
 
 let test =
   "DrawGrammar unit tests" >:: [

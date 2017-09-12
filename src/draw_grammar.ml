@@ -1,6 +1,7 @@
 open General.Abbr
 module Arg = OCamlStandard.Arg
 module Sys = OCamlStandard.Sys
+open DrawGrammar
 
 module Arguments = struct
   let simplify = ref true
