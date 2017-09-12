@@ -51,4 +51,5 @@ and skip_comment i = parse
   | "(*" { skip_comment (i + 1) lexbuf }
   | "*)" { if i > 0 then skip_comment (i - 1) lexbuf }
   | eof { error "unexpected end of file in comment" }
+  | '\n' { Lexing.new_line lexbuf; skip_comment i lexbuf }
   | _ { skip_comment i lexbuf}
