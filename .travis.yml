@@ -15,6 +15,7 @@ install:
   - eval `opam config env`
   - opam switch
   - opam pin add --yes General --dev-repo
+  - opam pin add --yes JsOfOCairo --dev-repo
   - opam install --yes JsOfOCairo General cairo2 jbuilder menhir
   - opam upgrade --yes
   - opam list
