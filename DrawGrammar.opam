@@ -7,7 +7,7 @@ doc: "https://jacquev6.github.io/DrawGrammar/"
 dev-repo: "https://github.com/jacquev6/DrawGrammar.git"
 bug-reports: "http://github.com/jacquev6/DrawGrammar/issues/"
 license: "MIT"
-available: [ocaml-version >= "4.02.3" & ocaml-version < "4.06.0"]
+available: [ocaml-version >= "4.02.3" & ocaml-version < "4.07.0"]
 build: [
   ["jbuilder" "build" "-p" name "-j" jobs]
 ]
