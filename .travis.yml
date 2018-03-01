@@ -14,8 +14,9 @@ install:
   - opam switch --yes $OCAML_VERSION
   - eval `opam config env`
   - opam switch
-  - opam pin add --yes General --dev-repo
-  - opam pin add --yes JsOfOCairo --dev-repo
+  - opam pin add --yes --no-action General --dev-repo
+  - opam pin add --yes --no-action JsOfOCairo --dev-repo
+  - opam pin add --yes --no-action CairoMock https://github.com/jacquev6/JsOfOCairo.git
   - opam install --yes JsOfOCairo General cairo2 jbuilder menhir
   - opam upgrade --yes
   - opam list
