@@ -11,7 +11,7 @@ addons:
 install:
   - opam init --yes
   - opam update --yes
-  - opam switch --yes $OCAML_VERSION
+  - travis_wait 30 opam switch --yes $OCAML_VERSION
   - eval `opam config env`
   - opam switch
   - opam pin add --yes --no-action General --dev-repo
