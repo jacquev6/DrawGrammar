@@ -1,4 +1,4 @@
-DrawGrammar is a tool to draw `railroad diagrams <https://en.wikipedia.org/wiki/Syntax_diagram>`_ of an `EBNF <https://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_form>`_ grammar.
+*DrawGrammar* is a tool to draw `railroad diagrams <https://en.wikipedia.org/wiki/Syntax_diagram>`_ of an `EBNF <https://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_form>`_ grammar.
 It is available as an `interactive demo <http://jacquev6.github.io/DrawGrammar/>`_ and as a command-line tool.
 
 It's licensed under the `MIT license <http://choosealicense.com/licenses/mit/>`_.
