@@ -1,23 +1,24 @@
-opam-version: "1.2"
-version: "0.2.1"
+opam-version: "2.0"
+version: "0.2.2"
 maintainer: "Vincent Jacques <vincent@vincent-jacques.net>"
 authors: "Vincent Jacques <vincent@vincent-jacques.net>"
+dev-repo: "git+https://github.com/jacquev6/DrawGrammar.git"
+license: "MIT"
 homepage: "https://jacquev6.github.io/DrawGrammar/"
 doc: "https://jacquev6.github.io/DrawGrammar/"
-dev-repo: "https://github.com/jacquev6/DrawGrammar.git"
 bug-reports: "http://github.com/jacquev6/DrawGrammar/issues/"
-license: "MIT"
-available: [ocaml-version >= "4.02.3"]
 build: [
-  ["jbuilder" "build" "-p" name "-j" jobs]
-]
-build-test: [
-  ["jbuilder" "runtest" "-p" name]
+  ["dune" "build" "-p" name "-j" jobs]
+  ["dune" "runtest" "-p" name] {with-test}
 ]
 depends: [
-  "jbuilder" {build}
+  "ocaml" {>= "4.02.3"}
+  "dune" {build}
   "menhir"
   "JsOfOCairo" {>= "1.0.1" & < "2"}
   "cairo2" {>= "0.5" & < "0.6"}
   "General" {>= "0.4.0"}
 ]
+synopsis: "Draw railroad diagrams of EBNF grammars"
+description:
+  "An [interactive demo](http://jacquev6.github.io/DrawGrammar/) is available."

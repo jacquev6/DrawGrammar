@@ -3,7 +3,7 @@
 set -o errexit
 
 eval `opam config env`
-opam install --yes JsOfOCairo General menhir jbuilder bisect_ppx bisect-summary
+opam install --yes JsOfOCairo General menhir dune bisect_ppx bisect-summary
 clear
 
 for p in src/*_Parser.mly
@@ -29,11 +29,11 @@ function switch_flavor {
 
 switch_flavor coverage
 
-# https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#Jbuilder suggests
-# modifying the jbuild file for release. Let's modify it for tests instead.
-sed -i "s/^;\(.*bisect_ppx.*\)$/\1/" src/jbuild
-jbuilder runtest --dev
-sed -i "s/^\(.*bisect_ppx.*\)$/;\1/" src/jbuild
+# https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#Dune suggests
+# modifying the dune file for release. Let's modify it for tests instead.
+sed -i "s/^;\(.*bisect_ppx.*\)$/\1/" src/dune
+dune runtest
+sed -i "s/^\(.*bisect_ppx.*\)$/;\1/" src/dune
 if [ -f _builds/coverage/default/src/bisect????.out ]
 then
   echo
@@ -47,7 +47,7 @@ fi
 
 echo
 switch_flavor debug
-jbuilder build --dev src/draw_grammar.bc src/draw_grammar_js.bc.js
+dune build src/draw_grammar.bc src/draw_grammar_js.bc.js
 
 echo
 _builds/debug/default/src/draw_grammar.bc --help
@@ -67,7 +67,7 @@ cd docs
 [ -e modtypes.ocaml-etex-ebnf ] || wget https://raw.githubusercontent.com/ocaml/ocaml/trunk/manual/manual/refman/modtypes.etex --output-document modtypes.ocaml-etex-ebnf
 [ -e modules.ocaml-etex-ebnf ] || wget https://raw.githubusercontent.com/ocaml/ocaml/trunk/manual/manual/refman/modules.etex --output-document modules.ocaml-etex-ebnf
 [ -e compunit.ocaml-etex-ebnf ] || wget https://raw.githubusercontent.com/ocaml/ocaml/trunk/manual/manual/refman/compunit.etex --output-document compunit.ocaml-etex-ebnf
-[ -e exten.ocaml-etex-ebnf ] || wget https://raw.githubusercontent.com/ocaml/ocaml/trunk/manual/manual/refman/exten.etex --output-document exten.ocaml-etex-ebnf
+# [ -e exten.ocaml-etex-ebnf ] || wget https://raw.githubusercontent.com/ocaml/ocaml/trunk/manual/manual/refman/exten.etex --output-document exten.ocaml-etex-ebnf
 ../_builds/debug/default/src/draw_grammar.bc arithmetics.iso-ebnf --inline digit --inline factor --inline not_a_rule
 mv arithmetics.iso-ebnf.png arithmetics-inlined-digit-factor.iso-ebnf.png
 ../_builds/debug/default/src/draw_grammar.bc arithmetics.iso-ebnf --inline digit,factor,term --inline-keep integer
@@ -84,7 +84,7 @@ echo "Have a look at $(pwd)/drawing_tests.html"
 echo
 
 switch_flavor release
-jbuilder build src/draw_grammar_js.bc.js
+dune build --profile release src/draw_grammar_js.bc.js
 cp _builds/release/default/src/draw_grammar_js.bc.js docs
 echo
 echo "Have a look at $(pwd)/docs/index.html"
