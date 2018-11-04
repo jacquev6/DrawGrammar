@@ -17,7 +17,7 @@ depends: [
   "menhir"
   "JsOfOCairo" {>= "2.0.0" & < "3"}
   "cairo2" {>= "0.6" & < "0.7"}
-  "General" {>= "0.4.0"}
+  "General" {>= "0.6.0"}
 ]
 synopsis: "Draw railroad diagrams of EBNF grammars"
 description:
