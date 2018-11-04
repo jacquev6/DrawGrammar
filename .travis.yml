@@ -14,10 +14,9 @@ install:
   - eval `$HOME/opam2 config env`
   - $HOME/opam2 switch list
   - $HOME/opam2 pin add --yes --no-action General --dev-repo
-# - $HOME/opam2 pin add --yes --no-action JsOfOCairo --dev-repo
+  - $HOME/opam2 pin add --yes --no-action JsOfOCairo --dev-repo
   - $HOME/opam2 install --yes JsOfOCairo General cairo2 dune menhir
   - $HOME/opam2 upgrade --yes
-  - $HOME/opam2 install --yes cairo2=0.5
   - $HOME/opam2 list
 script:
   - dune runtest

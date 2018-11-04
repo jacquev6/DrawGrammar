@@ -168,13 +168,13 @@ let () =
           else
             grammar
         in
-        let context = Cairo.create (Cairo.Image.create Cairo.Image.RGB24 ~width:1 ~height:1) in
+        let context = Cairo.create (Cairo.Image.create Cairo.Image.RGB24 ~w:1 ~h:1) in
         let (w, h) = Drawer.measure grammar ~context in
-        let image = Cairo.Image.create Cairo.Image.RGB24 ~width:(Int.of_float w) ~height:(Int.of_float h) in
+        let image = Cairo.Image.create Cairo.Image.RGB24 ~w:(Int.of_float w) ~h:(Int.of_float h) in
         let context = Cairo.create image in
-        Cairo.set_source_rgb context ~r:1. ~g:1. ~b:1.;
+        Cairo.set_source_rgb context 1. 1. 1.;
         Cairo.paint context;
-        Cairo.set_source_rgb context ~r:0. ~g:0. ~b:0.;
+        Cairo.set_source_rgb context 0. 0. 0.;
         Drawer.draw grammar ~context;
         Cairo.PNG.write image output_name
       )

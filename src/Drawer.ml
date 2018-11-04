@@ -66,7 +66,7 @@ end) = struct
   let make_draw ~context f =
     let (x, y) = save_restore ~context f in
     C.Path.clear context;
-    C.translate context ~x ~y
+    C.translate context x y
 
   let measure_sequence measures =
     measures
@@ -88,12 +88,12 @@ end) = struct
         make_draw (fun context ->
           let {C.ascent; descent; _} = C.font_extents context in
           if is_forward then begin
-            C.move_to context ~x:0. ~y:((ascent -. descent) /. 2.);
+            C.move_to context 0. ((ascent -. descent) /. 2.);
           end else begin
             let (advance, _, _) = measure t ~context in
-            C.translate context ~x:advance ~y:((descent -. ascent) /. 2.);
-            C.rotate context ~angle:Fl.pi;
-            C.move_to context ~x:0. ~y:0.;
+            C.translate context advance ((descent -. ascent) /. 2.);
+            C.rotate context Fl.pi;
+            C.move_to context 0. 0.;
           end;
           C.show_text context t;
           (0., 0.)
@@ -109,10 +109,10 @@ end) = struct
 
       let draw =
         make_draw (fun context ->
-          C.arc context ~x:S.start_radius ~y:0. ~r:S.start_radius ~a1:0. ~a2:(2. *. Fl.pi);
+          C.arc context S.start_radius 0. ~r:S.start_radius ~a1:0. ~a2:(2. *. Fl.pi);
           C.fill context;
-          C.move_to context ~x:S.start_radius ~y:0.;
-          C.line_to context ~x:(3. *. S.start_radius) ~y:0.;
+          C.move_to context S.start_radius 0.;
+          C.line_to context (3. *. S.start_radius) 0.;
           C.stroke context;
           (3. *. S.start_radius, 0.)
         )
@@ -126,17 +126,17 @@ end) = struct
 
       let draw =
         make_draw (fun context ->
-          C.move_to context ~x:0. ~y:0.;
-          C.line_to context ~x:S.stop_radius ~y:0.;
+          C.move_to context 0. 0.;
+          C.line_to context S.stop_radius 0.;
           C.stroke context;
-          C.arc context ~x:S.stop_radius ~y:0. ~r:S.stop_radius ~a1:0. ~a2:(2. *. Fl.pi);
+          C.arc context S.stop_radius 0. ~r:S.stop_radius ~a1:0. ~a2:(2. *. Fl.pi);
           C.fill context;
-          C.arc context ~x:S.stop_radius ~y:0. ~r:(0.6 *. S.stop_radius) ~a1:0. ~a2:(2. *. Fl.pi);
+          C.arc context S.stop_radius 0. ~r:(0.6 *. S.stop_radius) ~a1:0. ~a2:(2. *. Fl.pi);
           save_restore ~context (fun _ ->
-            C.set_source_rgb context ~r:1. ~g:1. ~b:1.;
+            C.set_source_rgb context 1. 1. 1.;
             C.fill context;
           );
-          C.arc context ~x:S.stop_radius ~y:0. ~r:(0.3 *. S.stop_radius) ~a1:0. ~a2:(2. *. Fl.pi);
+          C.arc context S.stop_radius 0. ~r:(0.3 *. S.stop_radius) ~a1:0. ~a2:(2. *. Fl.pi);
           C.fill context;
           (2. *. S.stop_radius, 0.)
         )
@@ -153,12 +153,12 @@ end) = struct
 
       let draw =
         make_draw (fun context ->
-          C.move_to context ~x:0. ~y:0.;
-          C.line_to context ~x:half_size ~y:0.;
-          C.move_to context ~x:0. ~y:half_size;
-          C.line_to context ~x:S.dead_end_size ~y:(-.half_size);
-          C.move_to context ~x:0. ~y:(-.half_size);
-          C.line_to context ~x:S.dead_end_size ~y:half_size;
+          C.move_to context 0. 0.;
+          C.line_to context half_size 0.;
+          C.move_to context 0. half_size;
+          C.line_to context S.dead_end_size (-.half_size);
+          C.move_to context 0. (-.half_size);
+          C.line_to context S.dead_end_size half_size;
           C.stroke context;
           (half_size, 0.)
         )
@@ -172,9 +172,9 @@ end) = struct
 
       let draw =
         make_draw (fun context ->
-          C.move_to context ~x:0. ~y:(-.S.arrow_size);
-          C.line_to context ~x:S.arrow_size ~y:0.;
-          C.line_to context ~x:0. ~y:S.arrow_size;
+          C.move_to context 0. (-.S.arrow_size);
+          C.line_to context S.arrow_size 0.;
+          C.line_to context 0. S.arrow_size;
           C.fill context;
           (S.arrow_size, 0.)
         )
@@ -188,8 +188,8 @@ end) = struct
 
       let draw length =
         make_draw (fun context ->
-          C.move_to context ~x:0. ~y:0.;
-          C.line_to context ~x:length ~y:0.;
+          C.move_to context 0. 0.;
+          C.line_to context length 0.;
           C.stroke context;
           (length, 0.)
         )
@@ -197,18 +197,18 @@ end) = struct
 
     module Turns = struct
       let left ~context =
-        C.translate context ~x:S.turn_radius ~y:0.;
-        C.arc_negative context ~x:(-.S.turn_radius) ~y:(-.S.turn_radius) ~r:S.turn_radius ~a1:(Fl.pi /. 2.) ~a2:0.;
+        C.translate context S.turn_radius 0.;
+        C.arc_negative context (-.S.turn_radius) (-.S.turn_radius) ~r:S.turn_radius ~a1:(Fl.pi /. 2.) ~a2:0.;
         C.stroke context;
-        C.rotate context ~angle:(-.Fl.pi /. 2.);
-        C.translate context ~x:S.turn_radius ~y:0.
+        C.rotate context (-.Fl.pi /. 2.);
+        C.translate context S.turn_radius 0.
 
       let right ~context =
-        C.translate context ~x:S.turn_radius ~y:0.;
-        C.arc context ~x:(-.S.turn_radius) ~y:S.turn_radius ~r:S.turn_radius ~a1:(3. *. Fl.pi /. 2.) ~a2:0.;
+        C.translate context S.turn_radius 0.;
+        C.arc context (-.S.turn_radius) S.turn_radius ~r:S.turn_radius ~a1:(3. *. Fl.pi /. 2.) ~a2:0.;
         C.stroke context;
-        C.rotate context ~angle:(Fl.pi /. 2.);
-        C.translate context ~x:S.turn_radius ~y:0.
+        C.rotate context (Fl.pi /. 2.);
+        C.translate context S.turn_radius 0.
 
       let get ~is_forward =
         if is_forward then
@@ -231,7 +231,7 @@ end) = struct
           let (advance, _, _) = measure text ~context in
           C.set_font_size context S.definitions_font_size;
           let (text_advance, _, _) = Text.measure text ~context in
-          C.translate context ~x:((advance -. text_advance) /. 2.) ~y:0.;
+          C.translate context ((advance -. text_advance) /. 2.) 0.;
           Text.draw text ~is_forward ~context;
           (0., 0.)
         )
@@ -245,11 +245,11 @@ end) = struct
           draw_text text ~is_forward ~context;
           let (advance, ascent, _) = measure text ~context in
           let radius = ascent -. S.half_line_width in
-          C.arc context ~x:ascent ~y:0. ~r:radius ~a1:(Fl.pi /. 2.) ~a2:(-.Fl.pi /. 2.);
-          C.arc context ~x:(advance -. ascent) ~y:0. ~r:radius ~a1:(-.Fl.pi /. 2.) ~a2:(Fl.pi /. 2.);
+          C.arc context ascent 0. ~r:radius ~a1:(Fl.pi /. 2.) ~a2:(-.Fl.pi /. 2.);
+          C.arc context (advance -. ascent) 0. ~r:radius ~a1:(-.Fl.pi /. 2.) ~a2:(Fl.pi /. 2.);
           C.Path.close context;
-          C.move_to context ~x:(advance -. S.half_line_width) ~y:0.;
-          C.line_to context ~x:advance ~y:0.;
+          C.move_to context (advance -. S.half_line_width) 0.;
+          C.line_to context advance 0.;
           C.stroke context;
           (advance, 0.)
         )
@@ -263,7 +263,7 @@ end) = struct
           draw_text text ~is_forward ~context;
           let (advance, h, _) = measure text ~context in
           let radius = h -. S.half_line_width in
-          C.rectangle context ~x:S.half_line_width ~y:(-.radius) ~w:(advance -. S.line_width) ~h:(2. *. radius);
+          C.rectangle context S.half_line_width (-.radius) ~w:(advance -. S.line_width) ~h:(2. *. radius);
           C.stroke context;
           (advance, 0.)
         )
@@ -277,14 +277,14 @@ end) = struct
           draw_text text ~is_forward ~context;
           let (advance, h, _) = measure text ~context in
           let radius = h -. S.half_line_width in
-          C.move_to context ~x:radius ~y:(-.radius);
-          C.line_to context ~x:S.half_line_width ~y:(-.h /. 2.);
-          C.line_to context ~x:S.half_line_width ~y:(h /. 2.);
-          C.line_to context ~x:radius ~y:radius;
-          C.line_to context ~x:(advance -. radius) ~y:radius;
-          C.line_to context ~x:(advance -. S.half_line_width) ~y:(h /. 2.);
-          C.line_to context ~x:(advance -. S.half_line_width) ~y:(-.h /. 2.);
-          C.line_to context ~x:(advance -. radius) ~y:(-.radius);
+          C.move_to context radius (-.radius);
+          C.line_to context S.half_line_width (-.h /. 2.);
+          C.line_to context S.half_line_width (h /. 2.);
+          C.line_to context radius radius;
+          C.line_to context (advance -. radius) radius;
+          C.line_to context (advance -. S.half_line_width) (h /. 2.);
+          C.line_to context (advance -. S.half_line_width) (-.h /. 2.);
+          C.line_to context (advance -. radius) (-.radius);
           C.Path.close context;
           C.stroke context;
           (advance, 0.)
@@ -300,9 +300,9 @@ end) = struct
       let draw =
         make_draw (fun context ->
           let r = S.ellipsis_size /. 2. in
-          C.arc context ~x:0. ~y:0. ~r ~a1:0. ~a2:(2. *. Fl.pi);
-          C.arc context ~x:0. ~y:(3. *. r) ~r ~a1:0. ~a2:(2. *. Fl.pi);
-          C.arc context ~x:0. ~y:(-3. *. r) ~r ~a1:0. ~a2:(2. *. Fl.pi);
+          C.arc context 0. 0. ~r ~a1:0. ~a2:(2. *. Fl.pi);
+          C.arc context 0. (3. *. r) ~r ~a1:0. ~a2:(2. *. Fl.pi);
+          C.arc context 0. (-3. *. r) ~r ~a1:0. ~a2:(2. *. Fl.pi);
           C.fill context;
           (0., 0.)
         )
@@ -614,7 +614,7 @@ end) = struct
         save_restore ~context (fun context ->
           let vertical_advance = Fl.max (min_descent +. S.minimal_vertical_spacing +. ell_ascent) S.turn_radius in
           let y = if is_forward then vertical_advance else -. vertical_advance in
-          C.translate context ~x:(advance /. 2.) ~y;
+          C.translate context (advance /. 2.) y;
           Bricks.VerticalEllipsis.draw ~context;
         );
 
@@ -677,7 +677,7 @@ end) = struct
         let name = Grammar.Rule.name rule in
         let (_, label_ascent, label_descent) = measure_label rule ~context in
         C.set_font_size context S.rule_label_font_size;
-        C.translate context ~x:0. ~y:label_ascent;
+        C.translate context 0. label_ascent;
         Bricks.Text.draw (Frmt.apply "%s:" name) ~is_forward:true ~context;
         (0., label_ascent +. label_descent)
       )
@@ -700,7 +700,7 @@ end) = struct
         C.set_line_cap context C.ROUND;
         let definition = Grammar.Rule.definition rule in
         let (_, definition_ascent, definition_descent) = measure_definition rule ~context in
-        C.translate context ~x:0. ~y:definition_ascent;
+        C.translate context 0. definition_ascent;
         Bricks.Start.draw ~context;
         Definition.draw definition ~is_forward:true ~context;
         Bricks.Stop.draw ~context;
@@ -741,12 +741,12 @@ end) = struct
   let draw grammar =
     make_draw (fun context ->
       let (_, height) = measure grammar ~context in
-      C.translate context ~x:S.margin_size ~y:S.margin_size;
+      C.translate context S.margin_size S.margin_size;
       grammar
       |> Grammar.rules
       |> Li.iter ~f:(fun rule ->
         Rule.draw rule ~context;
-        C.translate context ~x:0. ~y:S.space_between_rules
+        C.translate context 0. S.space_between_rules
       );
       (0., height)
     )
