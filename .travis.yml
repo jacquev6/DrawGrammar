@@ -8,9 +8,8 @@ addons:
 install:
   - wget --output-document=$HOME/opam2 https://github.com/ocaml/opam/releases/download/2.0.1/opam-2.0.1-x86_64-linux
   - chmod +x $HOME/opam2
-  - test -d $HOME/.opam/repo || $HOME/opam2 init --yes --disable-sandboxing
+  - test -d $HOME/.opam/$OCAML_VERSION || $HOME/opam2 init --yes --disable-sandboxing --compiler=$OCAML_VERSION
   - $HOME/opam2 update --yes
-  - test -d $HOME/.opam/$OCAML_VERSION || $HOME/opam2 switch create --yes $OCAML_VERSION
   - eval `$HOME/opam2 config env`
   - $HOME/opam2 switch list
   - $HOME/opam2 pin add --yes --no-action General --dev-repo
