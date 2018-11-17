@@ -5,6 +5,7 @@ addons:
   apt:
     packages:
     - aspcud
+    - libcairo2-dev
 install:
   - wget --output-document=$HOME/opam2 https://github.com/ocaml/opam/releases/download/2.0.1/opam-2.0.1-x86_64-linux
   - chmod +x $HOME/opam2
@@ -12,17 +13,15 @@ install:
   - $HOME/opam2 update --yes
   - eval `$HOME/opam2 config env`
   - $HOME/opam2 switch list
-  - $HOME/opam2 pin add --yes --no-action General --dev-repo
-  - $HOME/opam2 pin add --yes --no-action JsOfOCairo --dev-repo
-  - $HOME/opam2 install --yes JsOfOCairo General cairo2 dune menhir
-  - $HOME/opam2 upgrade --yes
+  - $HOME/opam2 install --yes General$GENERAL_VERSION JsOfOCairo$JSOFOCAIRO_VERSION cairo2$CAIRO2_VERSION dune$DUNE_VERSION menhir$MENHIR_VERSION
+  - if $UPGRADE_OPAM; then $HOME/opam2 upgrade --yes; fi
   - $HOME/opam2 list
 script:
   - dune runtest
 env:
-  - OCAML_VERSION=4.02.3
-  - OCAML_VERSION=4.07.1
-  - OCAML_VERSION=4.07.1+flambda
+  - OCAML_VERSION=4.02.3 GENERAL_VERSION=.0.6.0 JSOFOCAIRO_VERSION=.2.0.0 CAIRO2_VERSION=.0.6 DUNE_VERSION=.1.4.0 MENHIR_VERSION=.20171222 UPGRADE_OPAM=false
+  - OCAML_VERSION=4.07.1 UPGRADE_OPAM=true
+  - OCAML_VERSION=4.07.1+flambda UPGRADE_OPAM=true
 cache:
   directories:
   - $HOME/.opam

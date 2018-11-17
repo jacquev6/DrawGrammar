@@ -1,0 +1,28 @@
+format: 1
+project:
+  name: DrawGrammar
+  version: 0.2.2
+  short_descriptions:
+    github: Draw railroad diagrams of EBNF grammars. In browser and on command line
+    readme:
+      - "*DrawGrammar* is a tool to draw `railroad diagrams <https://en.wikipedia.org/wiki/Syntax_diagram>`_ of an `EBNF <https://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_form>`_ grammar."
+      - It is available as an `interactive demo <http://jacquev6.github.io/DrawGrammar/>`_ and as a command-line tool.
+    opam: Draw railroad diagrams of EBNF grammars
+ocaml:
+  versions:
+    at_least: 4.02.3
+  dependencies:
+    build:
+      - dune:
+          at_least: 1.4.0
+    run:
+      - JsOfOCairo:
+          at_least: 2.0.0
+          less_than: 3
+      - menhir:
+          at_least: 20171222
+      - General:
+          at_least: 0.6.0
+      - cairo2:
+          at_least: 0.6
+          less_than: 0.7

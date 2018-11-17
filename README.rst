@@ -1,9 +1,22 @@
+.. GENI: intro
+.. GENERATED SECTION, MANUAL EDITS WILL BE LOST
+
 *DrawGrammar* is a tool to draw `railroad diagrams <https://en.wikipedia.org/wiki/Syntax_diagram>`_ of an `EBNF <https://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_form>`_ grammar.
 It is available as an `interactive demo <http://jacquev6.github.io/DrawGrammar/>`_ and as a command-line tool.
 
+.. END OF GENERATED SECTION
+
+.. GENI: info
+.. GENERATED SECTION, MANUAL EDITS WILL BE LOST
+
 It's licensed under the `MIT license <http://choosealicense.com/licenses/mit/>`_.
-It's available on `OPAM <https://opam.ocaml.org/packages/DrawGrammar/>`_.
+It's available on `OPAM <https://opam.ocaml.org/packages/DrawGrammar>`_.
 Its `source code <https://github.com/jacquev6/DrawGrammar>`_ is on GitHub.
+
+.. END OF GENERATED SECTION
+
+.. GENI: badges
+.. GENERATED SECTION, MANUAL EDITS WILL BE LOST
 
 Questions? Remarks? Bugs? Want to contribute? `Open an issue <https://github.com/jacquev6/DrawGrammar/issues>`_!
 
@@ -18,6 +31,8 @@ Questions? Remarks? Bugs? Want to contribute? `Open an issue <https://github.com
 
 .. image:: https://img.shields.io/github/stars/jacquev6/DrawGrammar.svg
     :target: https://github.com/jacquev6/DrawGrammar/stargazers
+
+.. END OF GENERATED SECTION
 
 Quick start
 ===========
