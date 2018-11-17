@@ -1,0 +1,23 @@
+# https://probot.github.io/apps/settings/
+repository:
+  name: DrawGrammar
+  description: Draw railroad diagrams of EBNF grammars. In browser and on command line
+  homepage: http://jacquev6.github.io/DrawGrammar
+  private: false
+  has_issues: true
+  has_projects: false
+  has_wiki: false
+  default_branch: master
+  allow_squash_merge: true
+  allow_merge_commit: true
+  allow_rebase_merge: true
+branches:
+  - name: master
+    protection:
+      required_status_checks:
+        strict: true
+        contexts:
+          - continuous-integration/travis-ci
+      enforce_admins: true
+      required_pull_request_reviews: null
+      restrictions: null
